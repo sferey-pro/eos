@@ -70,6 +70,10 @@ export function startProject(projectId: string) {
 				} else if (exitCode === 0) {
 					// Container is created and running, now we can safely attach logs
 					ensureLogStream(projectId);
+					if (p.healthcheck?.type === "none") {
+						p.status = "running";
+						updateProject(p);
+					}
 				}
 			}
 			processes.delete(projectId);
@@ -107,12 +111,6 @@ export function startProject(projectId: string) {
 
 	// For Docker projects, we wait for 'up -d' to exit with 0 before spawning logs.
 	// This ensures that we don't start tailing logs while images are still downloading.
-
-	if (project.healthcheck?.type === "none") {
-		// If no healthcheck is configured, we assume it's immediately running
-		project.status = "running";
-		updateProject(project);
-	}
 }
 
 export function stopProject(projectId: string) {
@@ -333,6 +331,10 @@ export function startProjectGroup(groupPath: string) {
 				if (currentP) {
 					if (exitCode === 0) {
 						ensureLogStream(p.id);
+						if (currentP.healthcheck?.type === "none") {
+							currentP.status = "running";
+							updateProject(currentP);
+						}
 					} else {
 						currentP.status = "error";
 						updateProject(currentP);
