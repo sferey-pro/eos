@@ -258,6 +258,15 @@ export function HomePage() {
 		return path;
 	};
 
+	const groupedProjects = useMemo(() => {
+		return projects.reduce((acc, project) => {
+			const projectName = project.path.split('/').pop() || project.path;
+			if (!acc[projectName]) acc[projectName] = [];
+			acc[projectName].push(project);
+			return acc;
+		}, {} as Record<string, Project[]>);
+	}, [projects]);
+
 	if (projects.length === 0) {
 		return (
 			<div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-950 retro:bg-background transition-all duration-500 overflow-hidden w-full flex items-center justify-center p-6">
@@ -302,15 +311,6 @@ export function HomePage() {
 	}
 
 	const selectedProject = projects.find(p => p.id === selectedProjectId) || projects[0];
-
-	const groupedProjects = useMemo(() => {
-		return projects.reduce((acc, project) => {
-			const projectName = project.path.split('/').pop() || project.path;
-			if (!acc[projectName]) acc[projectName] = [];
-			acc[projectName].push(project);
-			return acc;
-		}, {} as Record<string, Project[]>);
-	}, [projects]);
 
 	return (
 		<div className="relative flex flex-col h-screen bg-zinc-50 dark:bg-zinc-950 retro:bg-[#050505] transition-all duration-500 overflow-hidden w-full font-sans text-zinc-900 dark:text-zinc-100 retro:text-cyan-400">
