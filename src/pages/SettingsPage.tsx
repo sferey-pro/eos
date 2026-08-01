@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Settings, Plus, Trash2, Edit2, Check, X, ArrowLeft, Upload, Download } from "lucide-react";
+import { Settings, Plus, Trash2, Edit2, Check, X, ArrowLeft, Upload, Download, AlertTriangle } from "lucide-react";
 import type { Preset, Project } from "@/lib/schemas";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -138,6 +138,19 @@ export function SettingsPage() {
 			reader.readAsText(file);
 		};
 		input.click();
+	};
+
+	const handleClear = async () => {
+		if (confirm("Êtes-vous sûr de vouloir vider TOUTE la configuration (projets, presets, apps) ? Cette action est irréversible.")) {
+			try {
+				await fetch("/api/clear", { method: "POST" });
+				fetchData(); // Reload everything
+				alert("Configuration vidée avec succès !");
+			} catch (err) {
+				console.error("Clear failed", err);
+				alert("Erreur lors de la suppression");
+			}
+		}
 	};
 
 	const startEdit = (preset?: Preset) => {
@@ -341,6 +354,10 @@ export function SettingsPage() {
 						<Button onClick={handleImport} className="bg-indigo-600 hover:bg-indigo-700 text-white retro:bg-transparent retro:border-2 retro:border-fuchsia-500 retro:text-fuchsia-500 retro:hover:bg-fuchsia-500/20">
 							<Upload className="w-4 h-4 mr-2" />
 							Importer
+						</Button>
+						<Button onClick={handleClear} className="bg-rose-600 hover:bg-rose-700 text-white ml-auto retro:bg-transparent retro:border-2 retro:border-rose-500 retro:text-rose-500 retro:hover:bg-rose-500/20">
+							<AlertTriangle className="w-4 h-4 mr-2" />
+							Vider tout
 						</Button>
 					</div>
 				</div>

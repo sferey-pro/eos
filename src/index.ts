@@ -161,6 +161,17 @@ const server = serve({
 			},
 		},
 
+		"/api/clear": {
+			async POST() {
+				try {
+					clearAllData();
+					return Response.json({ success: true });
+				} catch (e) {
+					return new Response(String(e), { status: 500 });
+				}
+			},
+		},
+
 		"/api/action": {
 			async POST(req) {
 				try {
