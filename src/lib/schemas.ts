@@ -7,6 +7,7 @@ export const ProjectStatusSchema = z.enum([
 	"running",
 	"healthy",
 	"error",
+	"waiting",
 ]);
 export type ProjectStatus = z.infer<typeof ProjectStatusSchema>;
 

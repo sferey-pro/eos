@@ -57,6 +57,8 @@ export function HomePage() {
 				return "text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/10 animate-pulse";
 			case "error":
 				return "text-rose-600 dark:text-rose-400 border-rose-500/30 bg-rose-500/10 shadow-[0_0_10px_rgba(244,63,94,0.2)]";
+			case "waiting":
+				return "text-purple-600 dark:text-purple-400 border-purple-500/30 bg-purple-500/10 animate-pulse";
 			default:
 				return "text-zinc-500 border-zinc-500/30 bg-zinc-500/10";
 		}
@@ -94,7 +96,10 @@ export function HomePage() {
 								<SelectItem value="frontend">Frontend + Storybook</SelectItem>
 							</SelectContent>
 						</Select>
-						<Button className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 group">
+						<Button
+							className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 group"
+							title="Démarrer l'environnement"
+						>
 							<Play className="w-4 h-4 mr-2 group-hover:animate-pulse" />
 							Aurore
 						</Button>
@@ -222,13 +227,14 @@ export function HomePage() {
 							<div className="w-16 h-16 mb-4 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shadow-sm border border-zinc-100 dark:border-zinc-800">
 								<Square className="w-8 h-8 text-zinc-400" />
 							</div>
-							<h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-1">
-								Aucun projet
+							<h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2">
+								Aucun projet configuré
 							</h3>
-							<p className="text-zinc-500 dark:text-zinc-400 max-w-sm">
-								Commencez par ajouter un projet depuis votre environnement de
-								développement local.
+							<p className="text-zinc-500 dark:text-zinc-400 max-w-sm mb-6">
+								Commencez par scanner un dossier pour détecter vos conteneurs
+								Docker ou vos cibles Makefile.
 							</p>
+							<AddProjectModal />
 						</div>
 					)}
 				</div>
