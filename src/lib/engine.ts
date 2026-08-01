@@ -140,6 +140,21 @@ export function startProject(projectId: string) {
 }
 
 export function stopProject(projectId: string) {
+	const project = getProjectById(projectId);
+	if (!project) return;
+
+	// For Docker projects, we need to explicitly stop the service container
+	if (project.type === "docker") {
+		const parts = project.command.split(" ");
+		const serviceName = parts[parts.length - 1];
+		if (serviceName) {
+			console.log(`[Engine] Stopping docker service: ${serviceName}`);
+			Bun.spawn(["docker", "compose", "stop", serviceName], {
+				cwd: project.path,
+			});
+		}
+	}
+
 	const proc = processes.get(projectId);
 	if (proc) {
 		proc.kill();
@@ -150,11 +165,9 @@ export function stopProject(projectId: string) {
 		logProc.kill();
 		logProcesses.delete(projectId);
 	}
-	const project = getProjectById(projectId);
-	if (project) {
-		project.status = "stopped";
-		updateProject(project);
-	}
+
+	project.status = "stopped";
+	updateProject(project);
 }
 
 export function startApp(appId: string) {
