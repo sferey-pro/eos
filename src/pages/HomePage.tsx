@@ -354,53 +354,53 @@ export function HomePage() {
 					{/* KPI DASHBOARD */}
 					{projects.length > 0 && (
 						<div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-500 delay-100">
-							<h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-								<Square className="w-5 h-5 text-zinc-500" />
+							<h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2 retro:text-cyan-400 retro:font-mono retro:uppercase retro:tracking-widest retro:drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
+								<Square className="w-5 h-5 text-zinc-500 retro:text-cyan-400" />
 								Infrastructure / Projets
 							</h2>
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-								<Card className="bg-white/40 dark:bg-zinc-900/40 border-zinc-200/50 dark:border-zinc-800/50 backdrop-blur-xl shadow-sm">
+								<Card className="bg-white/40 dark:bg-zinc-900/40 border-zinc-200/50 dark:border-zinc-800/50 backdrop-blur-xl shadow-sm retro:bg-black/60 retro:border-fuchsia-500/50 retro:shadow-[0_0_15px_rgba(217,70,239,0.2)]">
 									<CardContent className="p-6 flex items-center justify-between">
 										<div>
-											<p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+											<p className="text-sm font-medium text-zinc-500 dark:text-zinc-400 retro:text-fuchsia-400 retro:font-mono retro:uppercase tracking-widest">
 												Total Services
 											</p>
-											<h3 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+											<h3 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 retro:text-fuchsia-300 retro:drop-shadow-[0_0_8px_rgba(217,70,239,0.8)]">
 												{totalProjects}
 											</h3>
 										</div>
-										<div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800/80 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
-											<Square className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+										<div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800/80 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 retro:bg-fuchsia-500/10 retro:border-fuchsia-500/50 retro:shadow-[inset_0_0_10px_rgba(217,70,239,0.3)]">
+											<Square className="w-5 h-5 text-zinc-500 dark:text-zinc-400 retro:text-fuchsia-400" />
 										</div>
 									</CardContent>
 								</Card>
-								<Card className="bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/20 backdrop-blur-xl shadow-sm">
+								<Card className="bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/20 backdrop-blur-xl shadow-sm retro:bg-black/60 retro:border-cyan-400/50 retro:shadow-[0_0_15px_rgba(34,211,238,0.2)]">
 									<CardContent className="p-6 flex items-center justify-between">
 										<div>
-											<p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+											<p className="text-sm font-medium text-emerald-600 dark:text-emerald-400 retro:text-cyan-400 retro:font-mono retro:uppercase tracking-widest">
 												Services Actifs
 											</p>
-											<h3 className="text-3xl font-bold text-emerald-700 dark:text-emerald-300">
+											<h3 className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 retro:text-cyan-300 retro:drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
 												{healthyProjects}
 											</h3>
 										</div>
-										<div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center border border-emerald-200 dark:border-emerald-800/50">
-											<Play className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+										<div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center border border-emerald-200 dark:border-emerald-800/50 retro:bg-cyan-500/10 retro:border-cyan-400/50 retro:shadow-[inset_0_0_10px_rgba(34,211,238,0.3)]">
+											<Play className="w-5 h-5 text-emerald-600 dark:text-emerald-400 retro:text-cyan-400" />
 										</div>
 									</CardContent>
 								</Card>
-								<Card className="bg-rose-50/40 dark:bg-rose-950/20 border-rose-500/20 backdrop-blur-xl shadow-sm">
+								<Card className="bg-rose-50/40 dark:bg-rose-950/20 border-rose-500/20 backdrop-blur-xl shadow-sm retro:bg-black/60 retro:border-rose-500/50 retro:shadow-[0_0_15px_rgba(244,63,94,0.2)]">
 									<CardContent className="p-6 flex items-center justify-between">
 										<div>
-											<p className="text-sm font-medium text-rose-600 dark:text-rose-400">
+											<p className="text-sm font-medium text-rose-600 dark:text-rose-400 retro:text-rose-400 retro:font-mono retro:uppercase tracking-widest">
 												En Erreur
 											</p>
-											<h3 className="text-3xl font-bold text-rose-700 dark:text-rose-300">
+											<h3 className="text-3xl font-bold text-rose-700 dark:text-rose-300 retro:text-rose-300 retro:drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]">
 												{errorProjects}
 											</h3>
 										</div>
-										<div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center border border-rose-200 dark:border-rose-800/50">
-											<Terminal className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+										<div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center border border-rose-200 dark:border-rose-800/50 retro:bg-rose-500/10 retro:border-rose-500/50 retro:shadow-[inset_0_0_10px_rgba(244,63,94,0.3)]">
+											<Terminal className="w-5 h-5 text-rose-600 dark:text-rose-400 retro:text-rose-400" />
 										</div>
 									</CardContent>
 								</Card>
