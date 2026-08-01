@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle, Plus } from "lucide-react";
+import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle, Plus, Settings2, Download, Upload, Trash2 } from "lucide-react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
 import { PresetManagerModal } from "@/components/PresetManagerModal";
@@ -9,6 +9,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { Project, Preset, App } from "@/lib/schemas";
 
 export function HomePage() {
@@ -114,6 +115,55 @@ export function HomePage() {
 			fetchData();
 		} catch (e) {
 			console.error("App action failed:", e);
+		}
+	};
+
+	const handleExport = async () => {
+		try {
+			const res = await fetch("/api/export");
+			const data = await res.json();
+			const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = "eos-config.json";
+			a.click();
+			URL.revokeObjectURL(url);
+		} catch (e) {
+			console.error("Export failed:", e);
+		}
+	};
+
+	const handleImport = () => {
+		const input = document.createElement("input");
+		input.type = "file";
+		input.accept = ".json";
+		input.onchange = async (e) => {
+			const file = (e.target as HTMLInputElement).files?.[0];
+			if (!file) return;
+			try {
+				const text = await file.text();
+				await fetch("/api/import", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: text,
+				});
+				fetchData();
+			} catch (err) {
+				console.error("Import failed:", err);
+			}
+		};
+		input.click();
+	};
+
+	const handleReset = async () => {
+		if (confirm("Are you sure you want to reset all configurations? This cannot be undone.")) {
+			try {
+				await fetch("/api/clear", { method: "POST" });
+				fetchData();
+			} catch (e) {
+				console.error("Reset failed:", e);
+			}
 		}
 	};
 
@@ -273,6 +323,31 @@ export function HomePage() {
 							Start Preset
 						</Button>
 					</div>
+
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="ghost" size="icon" className="h-8 w-8 ml-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-600 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-300">
+								<Settings2 className="w-4 h-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end" className="w-56 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 retro:bg-black/90 retro:border-cyan-500/50 retro:text-cyan-400">
+							<DropdownMenuLabel className="font-mono text-xs">Application Settings</DropdownMenuLabel>
+							<DropdownMenuSeparator className="bg-zinc-200 dark:bg-zinc-800 retro:bg-cyan-500/30" />
+							<DropdownMenuItem className="cursor-pointer font-mono text-xs retro:focus:bg-cyan-900/50" onClick={handleExport}>
+								<Upload className="mr-2 h-4 w-4" />
+								<span>Export Configs</span>
+							</DropdownMenuItem>
+							<DropdownMenuItem className="cursor-pointer font-mono text-xs retro:focus:bg-cyan-900/50" onClick={handleImport}>
+								<Download className="mr-2 h-4 w-4" />
+								<span>Import Configs</span>
+							</DropdownMenuItem>
+							<DropdownMenuSeparator className="bg-zinc-200 dark:bg-zinc-800 retro:bg-cyan-500/30" />
+							<DropdownMenuItem className="cursor-pointer font-mono text-xs text-rose-600 focus:text-rose-600 dark:text-rose-500 dark:focus:text-rose-500 retro:text-rose-400 retro:focus:bg-rose-500/20 retro:focus:text-rose-300" onClick={handleReset}>
+								<Trash2 className="mr-2 h-4 w-4" />
+								<span>Reset Project</span>
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			</header>
 
