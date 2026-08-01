@@ -26,8 +26,12 @@ export function startProject(projectId: string) {
 			console.log(`[Engine] Process ${projectId} exited with code ${exitCode}`);
 			const p = getProjectById(projectId);
 			if (p) {
-				p.status = exitCode === 0 ? "stopped" : "error";
-				updateProject(p);
+				// detached processes like `docker compose up -d` exit immediately with 0
+				// we shouldn't mark them as stopped if they are docker types
+				if (p.type !== "docker") {
+					p.status = exitCode === 0 ? "stopped" : "error";
+					updateProject(p);
+				}
 			}
 			processes.delete(projectId);
 		},
@@ -62,10 +66,11 @@ export function startProject(projectId: string) {
 	if (proc.stdout) readStream(proc.stdout, "OUT");
 	if (proc.stderr) readStream(proc.stderr, "ERR");
 
-	// Temporarily set to 'running' immediately.
-	// Healthchecks will refine this in a future phase.
-	project.status = "running";
-	updateProject(project);
+	if (project.healthcheck?.type === "none") {
+		// If no healthcheck is configured, we assume it's immediately running
+		project.status = "running";
+		updateProject(project);
+	}
 }
 
 export function stopProject(projectId: string) {

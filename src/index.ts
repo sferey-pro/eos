@@ -11,6 +11,7 @@ import {
 	deletePreset,
 } from "./lib/db";
 import { scanDirectory } from "./lib/scanner";
+import { startHealthcheckEngine } from "./lib/healthcheck";
 import { ProjectSchema, AppSchema, PresetSchema } from "./lib/schemas";
 import {
 	startProject,
@@ -19,6 +20,8 @@ import {
 	stopApp,
 	getProjectLogs,
 } from "./lib/engine";
+
+startHealthcheckEngine();
 
 const server = serve({
 	port: process.env.PORT || 5173,
