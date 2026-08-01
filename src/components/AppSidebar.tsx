@@ -1,4 +1,4 @@
-import { Settings, PanelLeft, Box, Grid2x2, LayoutDashboard, FolderSearch, Database, Network, Container, TerminalSquare, Activity, Trash2, Globe, Paintbrush, Bell } from "lucide-react";
+import { Settings, Box, Grid2x2, LayoutDashboard, FolderSearch, Database, Network, Container, TerminalSquare, Activity, Trash2, Globe, Paintbrush, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -49,15 +49,17 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-zinc-200/50 dark:border-zinc-800/50 retro:border-fuchsia-500/50 retro:shadow-[0_0_15px_rgba(217,70,239,0.3)] bg-white/95 dark:bg-zinc-950/95 retro:bg-black/95 backdrop-blur-xl">
-      <SidebarHeader className="border-b border-zinc-200/50 dark:border-zinc-800/50 retro:border-fuchsia-500/50 flex flex-col justify-center h-16">
+      <SidebarHeader className="border-b border-zinc-200/50 dark:border-zinc-800/50 retro:border-fuchsia-500/50 flex flex-col justify-center h-16 px-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" onClick={() => navigate("/")} className="hover:bg-transparent">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-zinc-900 text-white retro:bg-cyan-500 retro:text-black retro:shadow-[0_0_10px_#00ffff]">
-                <PanelLeft className="size-4" />
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/50 retro:shadow-[0_0_10px_rgba(34,211,238,0.5)]">
+                <img src="/eos-logo.jpg" alt="EOS Logo" className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-semibold retro:text-cyan-400 retro:font-mono retro:uppercase tracking-widest text-lg">Projets</span>
+                <span className="font-black retro:text-transparent retro:bg-clip-text retro:bg-gradient-to-r retro:from-cyan-400 retro:to-fuchsia-500 retro:font-mono retro:uppercase tracking-widest text-xl retro:drop-shadow-[0_0_5px_rgba(217,70,239,0.8)]">
+                  EOS
+                </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
