@@ -1,4 +1,5 @@
-import { Play, Plus, RefreshCw, Square, Terminal } from "lucide-react";
+import { Play, RefreshCw, Square, Terminal } from "lucide-react";
+import { AddProjectModal } from "@/components/AddProjectModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -63,13 +64,7 @@ export function HomePage() {
 
 					{/* Right: Actions */}
 					<div className="flex items-center gap-2">
-						<Button variant="outline" size="sm" className="hidden sm:flex">
-							<Plus className="w-4 h-4 mr-2" />
-							Ajouter
-						</Button>
-						<Button variant="outline" size="icon" className="sm:hidden">
-							<Plus className="w-4 h-4" />
-						</Button>
+						<AddProjectModal />
 						<ThemeToggle />
 					</div>
 				</div>
