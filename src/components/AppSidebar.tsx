@@ -54,10 +54,6 @@ export function AppSidebar() {
             Tous les Projets
           </h2>
         </div>
-        <PanelLeft 
-          className="w-5 h-5 cursor-pointer text-zinc-600 dark:text-zinc-400 retro:text-cyan-400 hover:text-zinc-900 dark:hover:text-zinc-100 retro:hover:text-cyan-300 transition-colors" 
-          onClick={toggleSidebar} 
-        />
       </SidebarHeader>
       <SidebarContent className="scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
         <SidebarGroup>
