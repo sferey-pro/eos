@@ -1,4 +1,4 @@
-import { Settings, PanelLeft } from "lucide-react";
+import { Settings, PanelLeft, Box, Grid2x2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -47,13 +47,20 @@ export function AppSidebar() {
   }, []);
 
   return (
-    <Sidebar className="border-r border-zinc-200/50 dark:border-zinc-800/50 retro:border-fuchsia-500/50 retro:shadow-[0_0_15px_rgba(217,70,239,0.3)] bg-white/95 dark:bg-zinc-950/95 retro:bg-black/95 backdrop-blur-xl">
-      <SidebarHeader className="p-4 border-b border-zinc-200/50 dark:border-zinc-800/50 retro:border-fuchsia-500/50 h-16 flex items-center justify-between flex-row">
-        <div className="flex items-center gap-2 cursor-pointer group" onClick={() => navigate("/")}>
-          <h2 className="font-bold whitespace-nowrap retro:text-cyan-400 retro:font-mono retro:uppercase tracking-widest text-lg">
-            Tous les Projets
-          </h2>
-        </div>
+    <Sidebar collapsible="icon" className="border-r border-zinc-200/50 dark:border-zinc-800/50 retro:border-fuchsia-500/50 retro:shadow-[0_0_15px_rgba(217,70,239,0.3)] bg-white/95 dark:bg-zinc-950/95 retro:bg-black/95 backdrop-blur-xl">
+      <SidebarHeader className="border-b border-zinc-200/50 dark:border-zinc-800/50 retro:border-fuchsia-500/50 flex flex-col justify-center h-16">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" onClick={() => navigate("/")} className="hover:bg-transparent">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-zinc-900 text-white retro:bg-cyan-500 retro:text-black retro:shadow-[0_0_10px_#00ffff]">
+                <PanelLeft className="size-4" />
+              </div>
+              <div className="flex flex-col gap-0.5 leading-none">
+                <span className="font-semibold retro:text-cyan-400 retro:font-mono retro:uppercase tracking-widest text-lg">Projets</span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
         <SidebarGroup>
@@ -67,9 +74,10 @@ export function AppSidebar() {
                 <SidebarMenuItem key={preset.id}>
                   <SidebarMenuButton 
                     onClick={() => navigate("/settings")} 
-                    className="flex items-center justify-between hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl"
+                    className="hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl flex items-center gap-3 w-full"
                   >
-                    <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono">{preset.name}</span>
+                    <Grid2x2 className="w-4 h-4 text-zinc-500 retro:text-cyan-400 shrink-0" />
+                    <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono flex-1 text-left">{preset.name}</span>
                     <Settings className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 retro:text-fuchsia-400 retro:group-hover:text-cyan-400 transition-colors shrink-0" />
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -89,9 +97,10 @@ export function AppSidebar() {
                 <SidebarMenuItem key={project.id}>
                   <SidebarMenuButton 
                     onClick={() => navigate("/settings")}
-                    className="flex items-center justify-between hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl"
+                    className="hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl flex items-center gap-3 w-full"
                   >
-                    <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono">{project.name}</span>
+                    <Box className="w-4 h-4 text-zinc-500 retro:text-cyan-400 shrink-0" />
+                    <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono flex-1 text-left">{project.name}</span>
                     <Settings className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 retro:text-fuchsia-400 retro:group-hover:text-cyan-400 transition-colors shrink-0" />
                   </SidebarMenuButton>
                 </SidebarMenuItem>
