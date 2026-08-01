@@ -173,6 +173,12 @@ export function HomePage() {
 						<img src="/eos-logo-retro.jpg" alt="EOS Logo Retro" className="relative hidden retro:block w-full h-full rounded-full object-cover border-2 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.5)]" />
 					</div>
 					
+					<div className="space-y-4">
+						<h2 className="text-xl text-zinc-600 dark:text-zinc-400 retro:text-cyan-300 font-mono uppercase tracking-[0.3em] font-medium retro:drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]">
+							Environment Operating System
+						</h2>
+					</div>
+					
 					<p className="text-lg text-fuchsia-300/80 max-w-lg mx-auto font-medium">
 						Bienvenue dans votre nouveau terminal de commande. Gagnez un temps précieux en scannant vos projets locaux et laissez EOS orchestrer vos conteneurs Docker et vos scripts.
 					</p>
