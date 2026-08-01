@@ -153,14 +153,17 @@ export function HomePage() {
 	const errorProjects = projects.filter((p) => p.status === "error").length;
 
 	return (
-		<div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors duration-500 pb-20 overflow-hidden">
+		<div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-950 retro:bg-background transition-colors duration-500 pb-20 overflow-hidden">
+			{/* RETRO OVERLAYS */}
+			<div className="hidden retro:block fixed inset-0 z-[9999] pointer-events-none bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.15),rgba(0,0,0,0.15)_1px,transparent_1px,transparent_2px)] opacity-75"></div>
+			<div className="hidden retro:block fixed inset-0 z-[9998] pointer-events-none shadow-[inset_0_0_150px_rgba(0,0,0,0.9)]"></div>
 			{/* BACKGROUND PATTERN */}
-			<div className="absolute inset-0 z-0 pointer-events-none bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
-			<div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.2),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.25),rgba(255,255,255,0))]"></div>
+			<div className="absolute inset-0 z-0 pointer-events-none bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] retro:opacity-10"></div>
+			<div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.2),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.25),rgba(255,255,255,0))] retro:hidden"></div>
 
 			<div className="relative z-10 flex flex-col h-full">
 				{/* HEADER */}
-				<header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
+				<header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 dark:border-zinc-800/50 retro:border-primary/30 bg-white/70 dark:bg-zinc-950/70 retro:bg-background/90 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 retro:supports-[backdrop-filter]:bg-background/90">
 					<div className="w-full px-6 h-16 flex items-center justify-between">
 						{/* Logo & Title */}
 						<div className="flex items-center gap-4">
@@ -214,10 +217,10 @@ export function HomePage() {
 									/>
 								</div>
 								<div className="flex flex-col">
-									<h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400 tracking-tight">
+									<h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400 retro:from-primary retro:to-accent tracking-tight retro:drop-shadow-[0_0_5px_rgba(255,0,255,0.8)]">
 										EOS
 									</h1>
-									<span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider -mt-1">
+									<span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider -mt-1 retro:text-primary/70">
 										Environment Operating System
 									</span>
 								</div>
@@ -242,7 +245,7 @@ export function HomePage() {
 								<PresetManagerModal projects={projects} onPresetsChange={fetchData} />
 							</div>
 							<Button
-								className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 group"
+								className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 group retro:bg-none retro:bg-primary retro:hover:bg-primary/90 retro:shadow-[0_0_15px_var(--color-primary)] retro:text-primary-foreground retro:border-none retro:uppercase retro:tracking-widest"
 								title="Démarrer l'environnement"
 								onClick={() => {
 									let targetProjectIds = projects.map(p => p.id);
