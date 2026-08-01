@@ -9,6 +9,7 @@ import {
 	insertPreset,
 	updatePreset,
 	deletePreset,
+	clearAllData,
 } from "./lib/db";
 import { scanDirectory } from "./lib/scanner";
 import { startHealthcheckEngine } from "./lib/healthcheck";
@@ -154,6 +155,42 @@ const server = serve({
 					return new Response(String(e), { status: 400 });
 				}
 			}
+		},
+
+		"/api/export": {
+			async GET() {
+				try {
+					const projects = getProjects();
+					const presets = getPresets();
+					const apps = getApps();
+					return Response.json({ projects, presets, apps });
+				} catch (e) {
+					return new Response(String(e), { status: 500 });
+				}
+			},
+		},
+
+		"/api/import": {
+			async POST(req) {
+				try {
+					const data = await req.json();
+					clearAllData();
+					
+					if (data.projects && Array.isArray(data.projects)) {
+						for (const p of data.projects) insertProject(p);
+					}
+					if (data.presets && Array.isArray(data.presets)) {
+						for (const p of data.presets) insertPreset(p);
+					}
+					if (data.apps && Array.isArray(data.apps)) {
+						for (const a of data.apps) insertApp(a);
+					}
+					
+					return Response.json({ success: true });
+				} catch (e) {
+					return new Response(String(e), { status: 500 });
+				}
+			},
 		},
 
 		"/api/action": {

@@ -1,0 +1,10 @@
+{
+  "name": "demo-npm",
+  "version": "1.0.0",
+  "description": "Un projet de démo NPM/Bun pour EOS",
+  "scripts": {
+    "dev": "echo \"Lancement du serveur de dev...\" && sleep 10",
+    "start": "echo \"Lancement en production...\" && sleep 10",
+    "build": "echo \"Compilation...\""
+  }
+}

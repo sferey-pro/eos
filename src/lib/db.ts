@@ -39,6 +39,13 @@ db.run(`
   );
 `);
 
+// --- GENERAL ---
+export function clearAllData(): void {
+	db.run("DELETE FROM projects");
+	db.run("DELETE FROM presets");
+	db.run("DELETE FROM apps");
+}
+
 // --- PROJETS ---
 export function getProjects(): Project[] {
 	const query = db.query("SELECT * FROM projects");

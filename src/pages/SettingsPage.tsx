@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Settings, Plus, Trash2, Edit2, Check, X, ArrowLeft } from "lucide-react";
+import { Settings, Plus, Trash2, Edit2, Check, X, ArrowLeft, Upload, Download } from "lucide-react";
 import type { Preset, Project } from "@/lib/schemas";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -91,6 +91,53 @@ export function SettingsPage() {
 		} catch (error) {
 			console.error("Failed to delete preset:", error);
 		}
+	};
+
+	const handleExport = async () => {
+		try {
+			const res = await fetch("/api/export");
+			const data = await res.json();
+			const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `eos-config-${new Date().toISOString().split("T")[0]}.json`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+		} catch (e) {
+			console.error("Export failed", e);
+		}
+	};
+
+	const handleImport = () => {
+		const input = document.createElement("input");
+		input.type = "file";
+		input.accept = "application/json";
+		input.onchange = async (e) => {
+			const file = (e.target as HTMLInputElement).files?.[0];
+			if (!file) return;
+			const reader = new FileReader();
+			reader.onload = async (e) => {
+				try {
+					const content = e.target?.result as string;
+					const data = JSON.parse(content);
+					await fetch("/api/import", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify(data),
+					});
+					fetchData(); // Reload everything
+					alert("Configuration importée avec succès !");
+				} catch (err) {
+					console.error("Import failed", err);
+					alert("Erreur lors de l'import");
+				}
+			};
+			reader.readAsText(file);
+		};
+		input.click();
 	};
 
 	const startEdit = (preset?: Preset) => {
@@ -276,6 +323,25 @@ export function SettingsPage() {
 								</div>
 							</div>
 						)}
+					</div>
+				</div>
+
+				<div className="flex flex-col gap-4 py-4 mt-8 border-t border-zinc-200 dark:border-zinc-800 retro:border-fuchsia-500/50">
+					<h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2 retro:text-cyan-400 retro:font-mono retro:uppercase tracking-widest">
+						Import / Export
+					</h2>
+					<p className="text-sm text-zinc-500 dark:text-zinc-400">
+						Sauvegardez ou restaurez toute votre configuration (Projets, Presets, et Applications).
+					</p>
+					<div className="flex items-center gap-4 mt-2">
+						<Button onClick={handleExport} className="bg-emerald-600 hover:bg-emerald-700 text-white retro:bg-transparent retro:border-2 retro:border-cyan-400 retro:text-cyan-400 retro:hover:bg-cyan-400/20">
+							<Download className="w-4 h-4 mr-2" />
+							Exporter
+						</Button>
+						<Button onClick={handleImport} className="bg-indigo-600 hover:bg-indigo-700 text-white retro:bg-transparent retro:border-2 retro:border-fuchsia-500 retro:text-fuchsia-500 retro:hover:bg-fuchsia-500/20">
+							<Upload className="w-4 h-4 mr-2" />
+							Importer
+						</Button>
 					</div>
 				</div>
 			</div>
