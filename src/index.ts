@@ -3,8 +3,10 @@ import index from "./index.html";
 import {
 	getProjects,
 	insertProject,
+	updateProject,
 	getApps,
 	insertApp,
+	updateApp,
 	getPresets,
 	insertPreset,
 	updatePreset,
@@ -131,6 +133,17 @@ const server = serve<WebSocketData>({
 					const body = await req.json();
 					const app = AppSchema.parse(body);
 					insertApp(app);
+					return Response.json({ success: true });
+				} catch (e) {
+					return new Response(String(e), { status: 400 });
+				}
+			},
+			async PUT(req: Request) {
+				try {
+					const body = await req.json();
+					if (!body.id) return new Response("Missing id", { status: 400 });
+					const app = AppSchema.parse(body);
+					updateApp(app);
 					return Response.json({ success: true });
 				} catch (e) {
 					return new Response(String(e), { status: 400 });

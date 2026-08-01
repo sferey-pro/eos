@@ -1,5 +1,5 @@
 import { Loader2, Plus, Box } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -10,41 +10,49 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import type { ReactNode } from "react";
+import type { App } from "@/lib/schemas";
 
-export function AddAppModal({ children }: { children?: ReactNode }) {
+export function AddAppModal({ children, app, onSuccess }: { children?: ReactNode, app?: App, onSuccess?: () => void }) {
 	const [open, setOpen] = useState(false);
-	const [name, setName] = useState("");
-	const [path, setPath] = useState("");
-	const [command, setCommand] = useState("");
-	const [url, setUrl] = useState("http://localhost:3000");
-	const [icon, setIcon] = useState("");
+	const [name, setName] = useState(app?.name || "");
+	const [path, setPath] = useState(app?.path || "");
+	const [command, setCommand] = useState(app?.command || "");
+	const [url, setUrl] = useState(app?.url || "http://localhost:3000");
+	const [icon, setIcon] = useState(app?.icon || "");
 	const [isSaving, setIsSaving] = useState(false);
 
+	// Reset form when modal opens/closes or app changes
+	useEffect(() => {
+		if (open) {
+			setName(app?.name || "");
+			setPath(app?.path || "");
+			setCommand(app?.command || "");
+			setUrl(app?.url || "http://localhost:3000");
+			setIcon(app?.icon || "");
+		}
+	}, [open, app]);
+
 	const handleSave = async () => {
-		if (!name || !path || !command || !url) return;
 		setIsSaving(true);
-
-		const app = {
-			name,
-			path,
-			command,
-			url,
-			icon: icon || undefined,
-			status: "stopped",
-		};
-
 		try {
+			const appData = {
+				id: app?.id || crypto.randomUUID(),
+				name,
+				path,
+				command,
+				url,
+				icon: icon || undefined,
+				status: app?.status || "stopped",
+			};
+
 			await fetch("/api/apps", {
-				method: "POST",
+				method: app ? "PUT" : "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(app),
+				body: JSON.stringify(appData),
 			});
+
 			setOpen(false);
-			setName("");
-			setPath("");
-			setCommand("");
-			setUrl("http://localhost:3000");
-			setIcon("");
+			if (onSuccess) onSuccess();
 		} catch (e) {
 			console.error(e);
 		} finally {
@@ -72,7 +80,7 @@ export function AddAppModal({ children }: { children?: ReactNode }) {
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 retro:text-cyan-400 retro:font-mono uppercase tracking-widest">
 						<Box className="w-5 h-5 retro:text-fuchsia-500" />
-						Ajouter une Application
+						{app ? "Modifier l'Application" : "Ajouter une Application"}
 					</DialogTitle>
 				</DialogHeader>
 

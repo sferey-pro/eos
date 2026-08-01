@@ -433,7 +433,7 @@ export function HomePage() {
 					{/* APPLICATIONS DOCK IN LEFT PANE */}
 					<div className="h-10 border-y border-zinc-200 dark:border-zinc-800 retro:border-fuchsia-500/20 flex items-center px-4 bg-zinc-50/50 dark:bg-zinc-900/50 retro:bg-black/40">
 						<span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 retro:text-fuchsia-400/80 uppercase tracking-widest flex-1">Quick Apps</span>
-						<AddAppModal>
+						<AddAppModal onSuccess={fetchData}>
 							<Button variant="ghost" size="icon" className="h-6 w-6 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-500 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-300">
 								<Plus className="w-3.5 h-3.5" />
 							</Button>
@@ -460,11 +460,23 @@ export function HomePage() {
 								</div>
 								<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 									{(app.status === "stopped" || app.status === "error") ? (
-										<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-500 retro:text-cyan-500 retro:hover:bg-emerald-500/20 retro:hover:text-emerald-400" onClick={() => handleAppAction(app.id, "start")}>
-											<Play className="w-3 h-3" />
-										</Button>
+										<>
+											<AddAppModal app={app} onSuccess={fetchData}>
+												<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-500 retro:text-cyan-500 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-400">
+													<Settings2 className="w-3 h-3" />
+												</Button>
+											</AddAppModal>
+											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-500 retro:text-cyan-500 retro:hover:bg-emerald-500/20 retro:hover:text-emerald-400" onClick={() => handleAppAction(app.id, "start")}>
+												<Play className="w-3 h-3" />
+											</Button>
+										</>
 									) : (
 										<>
+											<AddAppModal app={app} onSuccess={fetchData}>
+												<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-500 retro:text-cyan-500 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-400">
+													<Settings2 className="w-3 h-3" />
+												</Button>
+											</AddAppModal>
 											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-blue-500 retro:text-cyan-500 retro:hover:bg-blue-500/20 retro:hover:text-blue-400" onClick={() => window.open(app.url, '_blank')}>
 												<Activity className="w-3 h-3" />
 											</Button>
