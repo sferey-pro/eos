@@ -67,6 +67,9 @@ export function startProject(projectId: string) {
 				if (p.type !== "docker") {
 					p.status = exitCode === 0 ? "stopped" : "error";
 					updateProject(p);
+				} else if (exitCode === 0) {
+					// Container is created and running, now we can safely attach logs
+					ensureLogStream(projectId);
 				}
 			}
 			processes.delete(projectId);
@@ -102,35 +105,8 @@ export function startProject(projectId: string) {
 	if (proc.stdout) readStream(proc.stdout, "OUT");
 	if (proc.stderr) readStream(proc.stderr, "ERR");
 
-	// For Docker projects, the 'up -d' command detaches and exits immediately.
-	// We need to spawn a separate process to tail the logs.
-	if (project.type === "docker") {
-		const parts = project.command.split(" ");
-		const serviceName = parts[parts.length - 1];
-		const logCmd = serviceName ? ["docker", "compose", "logs", "-f", "--tail=100", serviceName] : ["docker", "compose", "logs", "-f", "--tail=100"];
-		const logProc = Bun.spawn(logCmd, {
-			cwd: project.path,
-			stdout: "pipe",
-			stderr: "pipe",
-		});
-		logProcesses.set(projectId, logProc);
-		
-		const readLogStream = async (stream: ReadableStream) => {
-			const reader = stream.getReader();
-			const decoder = new TextDecoder();
-			try {
-				while (true) {
-					const { done, value } = await reader.read();
-					if (done) break;
-					const text = decoder.decode(value);
-					// Raw docker compose logs, just format newlines for xterm
-					broadcastLog(projectId, text.replace(/\n/g, "\r\n"));
-				}
-			} catch (e) {}
-		};
-		if (logProc.stdout) readLogStream(logProc.stdout);
-		if (logProc.stderr) readLogStream(logProc.stderr);
-	}
+	// For Docker projects, we wait for 'up -d' to exit with 0 before spawning logs.
+	// This ensures that we don't start tailing logs while images are still downloading.
 
 	if (project.healthcheck?.type === "none") {
 		// If no healthcheck is configured, we assume it's immediately running
@@ -146,13 +122,19 @@ export function stopProject(projectId: string) {
 	// For Docker projects, we need to explicitly stop the service container
 	if (project.type === "docker") {
 		const parts = project.command.split(" ");
-		const serviceName = parts[parts.length - 1];
-		if (serviceName) {
-			console.log(`[Engine] Stopping docker service: ${serviceName}`);
-			Bun.spawn(["docker", "compose", "stop", serviceName], {
-				cwd: project.path,
-			});
+		const lastPart = parts[parts.length - 1];
+		let serviceName = "";
+		if (lastPart && !lastPart.startsWith("-") && lastPart !== "up") {
+			serviceName = lastPart;
 		}
+		
+		const stopCmd = ["docker", "compose", "stop"];
+		if (serviceName) stopCmd.push(serviceName);
+
+		console.log(`[Engine] Stopping docker service: ${serviceName || "all"}`);
+		Bun.spawn(stopCmd, {
+			cwd: project.path,
+		});
 	}
 
 	const proc = processes.get(projectId);
@@ -296,10 +278,15 @@ export function ensureLogStream(projectId: string) {
 	if (!project || project.type !== "docker" || project.status === "stopped" || project.status === "error") return;
 
 	const parts = project.command.split(" ");
-	const serviceName = parts[parts.length - 1];
-	if (!serviceName) return;
+	const lastPart = parts[parts.length - 1];
+	let serviceName = "";
+	if (lastPart && !lastPart.startsWith("-") && lastPart !== "up") {
+		serviceName = lastPart;
+	}
 
-	const logCmd = ["docker", "compose", "logs", "-f", "--tail=100", serviceName];
+	const logCmd = ["docker", "compose", "logs", "-f", "--tail=100"];
+	if (serviceName) logCmd.push(serviceName);
+
 	const logProc = Bun.spawn(logCmd, {
 		cwd: project.path,
 		stdout: "pipe",
