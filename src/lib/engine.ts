@@ -1,5 +1,5 @@
 import type { Subprocess, ServerWebSocket } from "bun";
-import { getProjectById, updateProject, getAppById, updateApp } from "./db";
+import { getProjects, getProjectById, updateProject, getAppById, updateApp } from "./db";
 
 const processes = new Map<string, Subprocess>();
 const logProcesses = new Map<string, Subprocess>(); // For docker logs -f
@@ -310,4 +310,66 @@ export function ensureLogStream(projectId: string) {
 	
 	if (logProc.stdout) readLogStream(logProc.stdout);
 	if (logProc.stderr) readLogStream(logProc.stderr);
+}
+
+export function startProjectGroup(groupPath: string) {
+	const allProjects = getProjects();
+	const groupProjects = allProjects.filter(p => p.path === groupPath && p.type === "docker");
+	if (groupProjects.length === 0) return;
+
+	for (const p of groupProjects) {
+		p.status = "starting";
+		updateProject(p);
+	}
+
+	const cmd = ["docker", "compose", "up", "-d"];
+	const proc = Bun.spawn(cmd, {
+		cwd: groupPath,
+		stdout: "pipe",
+		stderr: "pipe",
+		onExit: (_proc, exitCode) => {
+			for (const p of groupProjects) {
+				const currentP = getProjectById(p.id);
+				if (currentP) {
+					if (exitCode === 0) {
+						ensureLogStream(p.id);
+					} else {
+						currentP.status = "error";
+						updateProject(currentP);
+					}
+				}
+			}
+		}
+	});
+
+	// To avoid blocking, we won't stream the output of this global command to every individual project,
+	// but we could stream it to the first project or all of them.
+	// For simplicity, when `up -d` finishes, `ensureLogStream` will fetch logs for each service.
+}
+
+export function stopProjectGroup(groupPath: string) {
+	const allProjects = getProjects();
+	const groupProjects = allProjects.filter(p => p.path === groupPath && p.type === "docker");
+	if (groupProjects.length === 0) return;
+
+	console.log(`[Engine] Stopping project group: ${groupPath}`);
+	Bun.spawn(["docker", "compose", "stop"], {
+		cwd: groupPath,
+	});
+
+	for (const p of groupProjects) {
+		const proc = processes.get(p.id);
+		if (proc) {
+			proc.kill();
+			processes.delete(p.id);
+		}
+		const logProc = logProcesses.get(p.id);
+		if (logProc) {
+			logProc.kill();
+			logProcesses.delete(p.id);
+		}
+
+		p.status = "stopped";
+		updateProject(p);
+	}
 }

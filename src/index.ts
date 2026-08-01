@@ -21,6 +21,8 @@ import {
 	stopProject,
 	startApp,
 	stopApp,
+	startProjectGroup,
+	stopProjectGroup,
 	getProjectLogs,
 	getProjectMetrics,
 	subscribeToLogs,
@@ -275,11 +277,16 @@ const server = serve<WebSocketData>({
 		"/api/action": {
 			async POST(req: Request) {
 				try {
-					const { id, action, type = "project" } = await req.json();
+					const body = await req.json();
+					const { id, action, type = "project", path } = body;
 
 					if (type === "app") {
 						if (action === "start") startApp(id);
 						else if (action === "stop") stopApp(id);
+						else return new Response("Unknown action", { status: 400 });
+					} else if (type === "group") {
+						if (action === "start" && path) startProjectGroup(path);
+						else if (action === "stop" && path) stopProjectGroup(path);
 						else return new Response("Unknown action", { status: 400 });
 					} else {
 						if (action === "start") startProject(id);

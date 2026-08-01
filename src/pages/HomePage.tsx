@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle, Plus, Settings2, Download, Upload, Trash2, Box, Monitor } from "lucide-react";
+import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle, Plus, Settings2, Download, Upload, Trash2, Box, Monitor, GitBranch, ArrowUp, ArrowDown } from "lucide-react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
 import { PresetManagerModal } from "@/components/PresetManagerModal";
@@ -112,6 +112,19 @@ export function HomePage() {
 			fetchData();
 		} catch (e) {
 			console.error("Action failed:", e);
+		}
+	};
+
+	const handleGroupAction = async (path: string, action: "start" | "stop") => {
+		try {
+			await fetch("/api/action", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ action, type: "group", path }),
+			});
+			fetchData();
+		} catch (e) {
+			console.error("Group action failed:", e);
 		}
 	};
 
@@ -386,10 +399,32 @@ export function HomePage() {
 								}, {} as Record<string, Project[]>)
 							).map(([projectName, projectGroup]) => (
 								<AccordionItem key={projectName} value={projectName} className="border border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/30 rounded-md overflow-hidden bg-white/40 dark:bg-zinc-900/40 retro:bg-black/40">
-									<AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-zinc-100 dark:hover:bg-zinc-800/50 retro:hover:bg-cyan-950/30 transition-colors">
-										<div className="flex items-center gap-2">
-											<span className="font-semibold text-sm text-zinc-700 dark:text-zinc-300 retro:text-cyan-300 tracking-wide uppercase">{projectName}</span>
-											<span className="text-[10px] bg-zinc-200 dark:bg-zinc-800 retro:bg-cyan-900/50 text-zinc-500 dark:text-zinc-400 retro:text-cyan-400 px-1.5 py-0.5 rounded-full font-mono">{projectGroup.length} services</span>
+									<AccordionTrigger className="group px-3 py-2 hover:no-underline hover:bg-zinc-100 dark:hover:bg-zinc-800/50 retro:hover:bg-cyan-950/30 transition-colors">
+										<div className="flex items-center gap-3">
+											<div className="flex items-center gap-2">
+												<span className="font-semibold text-sm text-zinc-700 dark:text-zinc-300 retro:text-cyan-300 tracking-wide uppercase">{projectName}</span>
+												<span className="text-[10px] bg-zinc-200 dark:bg-zinc-800 retro:bg-cyan-900/50 text-zinc-500 dark:text-zinc-400 retro:text-cyan-400 px-1.5 py-0.5 rounded-full font-mono">{projectGroup.length} services</span>
+											</div>
+											{projectGroup[0]?.gitStatus?.isGit && (
+												<div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/30 retro:bg-fuchsia-900/30 border border-indigo-100 dark:border-indigo-900/50 retro:border-fuchsia-500/30">
+													<GitBranch className="w-3 h-3 text-indigo-500 retro:text-fuchsia-400" />
+													<span className="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 retro:text-fuchsia-300 max-w-[80px] truncate">{projectGroup[0].gitStatus.branch}</span>
+													{(projectGroup[0].gitStatus.ahead! > 0 || projectGroup[0].gitStatus.behind! > 0) && (
+														<div className="flex items-center gap-0.5 text-[9px] font-bold">
+															{projectGroup[0].gitStatus.ahead! > 0 && <span className="text-emerald-500 retro:text-emerald-400 flex items-center"><ArrowUp className="w-2.5 h-2.5" />{projectGroup[0].gitStatus.ahead}</span>}
+															{projectGroup[0].gitStatus.behind! > 0 && <span className="text-rose-500 retro:text-rose-400 flex items-center"><ArrowDown className="w-2.5 h-2.5" />{projectGroup[0].gitStatus.behind}</span>}
+														</div>
+													)}
+												</div>
+											)}
+										</div>
+										<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-500 retro:text-cyan-500 retro:hover:bg-emerald-500/20 retro:hover:text-emerald-400" onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (projectGroup[0]) handleGroupAction(projectGroup[0].path, "start"); }} title="Tout démarrer">
+												<Play className="w-3 h-3" />
+											</Button>
+											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-500 retro:text-cyan-500 retro:hover:bg-rose-500/20 retro:hover:text-rose-400" onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (projectGroup[0]) handleGroupAction(projectGroup[0].path, "stop"); }} title="Tout arrêter">
+												<Square className="w-3 h-3" />
+											</Button>
 										</div>
 									</AccordionTrigger>
 									<AccordionContent className="p-1 space-y-0.5 border-t border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/20 bg-zinc-50/30 dark:bg-zinc-950/30 retro:bg-black/20">
