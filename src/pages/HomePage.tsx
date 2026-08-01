@@ -5,11 +5,18 @@ import {
 	Terminal,
 	ExternalLink,
 	Box,
+	Grid2x2,
+	Plus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -129,7 +136,7 @@ export function HomePage() {
 	const getStatusColor = (status: string) => {
 		switch (status) {
 			case "healthy":
-				return "text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_10px_rgba(16,185,129,0.2)]";
+				return "text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_10px_rgba(10,185,129,0.2)]";
 			case "running":
 				return "text-blue-600 dark:text-blue-400 border-blue-500/30 bg-blue-500/10 shadow-[0_0_10px_rgba(59,130,246,0.2)]";
 			case "starting":
@@ -208,7 +215,80 @@ export function HomePage() {
 
 						{/* Right: Actions */}
 						<div className="flex items-center gap-2">
-							<AddAppModal />
+							<Popover>
+								<PopoverTrigger asChild>
+									<Button
+										variant="ghost"
+										size="icon"
+										className="relative hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+									>
+										<Grid2x2 className="w-5 h-5" />
+										{apps.length > 0 && (
+											<span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-500 border border-white dark:border-zinc-950"></span>
+										)}
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent
+									align="end"
+									className="w-[340px] p-4 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl rounded-2xl"
+								>
+									<div className="flex items-center gap-2 mb-4 px-1">
+										<Box className="w-5 h-5 text-indigo-500" />
+										<h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+											Lanceur d'Applications
+										</h3>
+									</div>
+									<div className="grid grid-cols-3 gap-3">
+										{apps.map((app) => (
+											<div key={app.id} className="relative group">
+												<button
+													onClick={() =>
+														app.status === "running" || app.status === "healthy"
+															? window.open(app.url, "_blank")
+															: handleAppAction(app.id, "start")
+													}
+													className={`w-full flex flex-col items-center justify-center p-3 rounded-xl border ${app.status === "running" || app.status === "healthy" ? "bg-indigo-50/50 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]" : "bg-white dark:bg-zinc-900 border-zinc-200/50 dark:border-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-zinc-800"} transition-all cursor-pointer`}
+												>
+													<div
+														className={`w-10 h-10 mb-2 flex items-center justify-center rounded-lg ${app.status === "running" || app.status === "healthy" ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400" : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"}`}
+													>
+														<Box className="w-5 h-5" />
+													</div>
+													<span className="text-xs font-medium text-center truncate w-full text-zinc-700 dark:text-zinc-300">
+														{app.name}
+													</span>
+													{(app.status === "running" ||
+														app.status === "healthy") && (
+														<div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)] animate-pulse" />
+													)}
+												</button>
+												{(app.status === "running" ||
+													app.status === "healthy") && (
+													<button
+														onClick={(e) => {
+															e.stopPropagation();
+															handleAppAction(app.id, "stop");
+														}}
+														className="absolute -top-2 -left-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full p-1 opacity-0 group-hover:opacity-100 shadow-sm transition-opacity hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-500 z-10"
+													>
+														<Square className="w-3 h-3 fill-current" />
+													</button>
+												)}
+											</div>
+										))}
+										<AddAppModal>
+											<button className="flex flex-col items-center justify-center p-3 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all group h-full">
+												<div className="w-10 h-10 mb-2 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50">
+													<Plus className="w-5 h-5 text-zinc-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
+												</div>
+												<span className="text-xs font-medium text-zinc-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+													Ajouter
+												</span>
+											</button>
+										</AddAppModal>
+									</div>
+								</PopoverContent>
+							</Popover>
 							<AddProjectModal />
 							<ThemeToggle />
 						</div>
@@ -217,74 +297,6 @@ export function HomePage() {
 
 				{/* MAIN CONTENT */}
 				<main className="w-full max-w-screen-2xl mx-auto px-6 py-8 flex flex-col gap-12">
-					{/* APPS DOCK / SECTION */}
-					{apps.length > 0 && (
-						<div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
-							<h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-								<Box className="w-5 h-5 text-indigo-500" />
-								Mes Applications
-							</h2>
-							<div className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
-								{apps.map((app) => (
-									<div
-										key={app.id}
-										className={`flex-shrink-0 w-64 p-4 rounded-2xl border ${app.status === "running" || app.status === "healthy" ? "bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-800/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]" : "bg-white/40 dark:bg-zinc-900/40 border-zinc-200/50 dark:border-zinc-800/50"} backdrop-blur-xl transition-all duration-300 flex flex-col gap-4 group`}
-									>
-										<div className="flex items-center justify-between">
-											<div className="flex items-center gap-3">
-												<div
-													className={`w-10 h-10 rounded-xl flex items-center justify-center ${app.status === "running" || app.status === "healthy" ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400" : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"}`}
-												>
-													<Box className="w-5 h-5" />
-												</div>
-												<div>
-													<h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
-														{app.name}
-													</h3>
-													<p
-														className="text-xs text-zinc-500 font-mono line-clamp-1"
-														title={app.url}
-													>
-														{new URL(app.url).host}
-													</p>
-												</div>
-											</div>
-											<div
-												className={`w-2.5 h-2.5 rounded-full ${app.status === "error" ? "bg-rose-500" : app.status === "running" || app.status === "healthy" ? "bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" : "bg-zinc-300 dark:bg-zinc-700"}`}
-											/>
-										</div>
-										<div className="grid grid-cols-2 gap-2 mt-auto">
-											{app.status === "stopped" || app.status === "error" ? (
-												<Button
-													onClick={() => handleAppAction(app.id, "start")}
-													className="w-full bg-indigo-600 hover:bg-indigo-700 text-white col-span-2"
-												>
-													Démarrer
-												</Button>
-											) : (
-												<>
-													<Button
-														onClick={() => handleAppAction(app.id, "stop")}
-														variant="outline"
-														className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900/50 dark:text-rose-400 dark:hover:bg-rose-950/50"
-													>
-														Arrêter
-													</Button>
-													<Button
-														onClick={() => window.open(app.url, "_blank")}
-														className="w-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-900"
-													>
-														Ouvrir <ExternalLink className="w-3 h-3 ml-2" />
-													</Button>
-												</>
-											)}
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-					)}
-
 					{/* KPI DASHBOARD */}
 					{projects.length > 0 && (
 						<div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-500 delay-100">

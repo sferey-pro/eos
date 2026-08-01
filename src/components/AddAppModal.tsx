@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
-export function AddAppModal() {
+export function AddAppModal({ children }: { children?: React.ReactNode }) {
 	const [open, setOpen] = useState(false);
 	const [name, setName] = useState("");
 	const [path, setPath] = useState("");
@@ -52,14 +52,18 @@ export function AddAppModal() {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button
-					variant="outline"
-					size="sm"
-					className="hidden sm:flex transition-all hover:scale-105 active:scale-95 bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/50"
-				>
-					<Plus className="w-4 h-4 mr-2" />
-					Ajouter une App
-				</Button>
+				{children ? (
+					children
+				) : (
+					<Button
+						variant="outline"
+						size="sm"
+						className="hidden sm:flex transition-all hover:scale-105 active:scale-95 bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/50"
+					>
+						<Plus className="w-4 h-4 mr-2" />
+						Ajouter une App
+					</Button>
+				)}
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-[425px] bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl">
 				<DialogHeader>
