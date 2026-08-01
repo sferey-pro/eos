@@ -4,6 +4,15 @@ import { Input } from "@/components/ui/input";
 import { Settings, Plus, Trash2, Edit2, Check, X, ArrowLeft, Upload, Download, AlertTriangle } from "lucide-react";
 import type { Preset, Project } from "@/lib/schemas";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
 
 import { useNavigate } from "react-router-dom";
 
@@ -141,15 +150,13 @@ export function SettingsPage() {
 	};
 
 	const handleClear = async () => {
-		if (confirm("Êtes-vous sûr de vouloir vider TOUTE la configuration (projets, presets, apps) ? Cette action est irréversible.")) {
-			try {
-				await fetch("/api/clear", { method: "POST" });
-				fetchData(); // Reload everything
-				alert("Configuration vidée avec succès !");
-			} catch (err) {
-				console.error("Clear failed", err);
-				alert("Erreur lors de la suppression");
-			}
+		try {
+			await fetch("/api/clear", { method: "POST" });
+			fetchData(); // Reload everything
+			alert("Configuration vidée avec succès !");
+		} catch (err) {
+			console.error("Clear failed", err);
+			alert("Erreur lors de la suppression");
 		}
 	};
 
@@ -355,10 +362,35 @@ export function SettingsPage() {
 							<Upload className="w-4 h-4 mr-2" />
 							Importer
 						</Button>
-						<Button onClick={handleClear} className="bg-rose-600 hover:bg-rose-700 text-white ml-auto retro:bg-transparent retro:border-2 retro:border-rose-500 retro:text-rose-500 retro:hover:bg-rose-500/20">
-							<AlertTriangle className="w-4 h-4 mr-2" />
-							Vider tout
-						</Button>
+						<Dialog>
+							<DialogTrigger asChild>
+								<Button className="bg-rose-600 hover:bg-rose-700 text-white ml-auto retro:bg-transparent retro:border-2 retro:border-rose-500 retro:text-rose-500 retro:hover:bg-rose-500/20">
+									<AlertTriangle className="w-4 h-4 mr-2" />
+									Vider tout
+								</Button>
+							</DialogTrigger>
+							<DialogContent className="sm:max-w-[425px] retro:bg-black retro:border-2 retro:border-rose-500 retro:shadow-[0_0_20px_rgba(244,63,94,0.3)]">
+								<DialogHeader>
+									<DialogTitle className="flex items-center gap-2 text-rose-500 retro:font-mono retro:uppercase">
+										<AlertTriangle className="w-5 h-5" />
+										Vider la configuration
+									</DialogTitle>
+									<DialogDescription className="text-zinc-500 dark:text-zinc-400">
+										Êtes-vous sûr de vouloir vider TOUTE la configuration (projets, presets, apps) ? Cette action est irréversible et supprimera tout le contenu du tableau de bord.
+									</DialogDescription>
+								</DialogHeader>
+								<DialogFooter className="mt-4">
+									<DialogTrigger asChild>
+										<Button variant="outline" className="retro:bg-transparent retro:border-cyan-400 retro:text-cyan-400 retro:hover:bg-cyan-400/10">Annuler</Button>
+									</DialogTrigger>
+									<DialogTrigger asChild>
+										<Button onClick={handleClear} className="bg-rose-600 hover:bg-rose-700 text-white retro:bg-transparent retro:border-2 retro:border-rose-500 retro:text-rose-500 retro:hover:bg-rose-500/20">
+											Confirmer la suppression
+										</Button>
+									</DialogTrigger>
+								</DialogFooter>
+							</DialogContent>
+						</Dialog>
 					</div>
 				</div>
 			</div>
