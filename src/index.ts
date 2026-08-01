@@ -12,7 +12,7 @@ import {
 	clearAllData,
 } from "./lib/db";
 import { scanDirectory } from "./lib/scanner";
-import { startHealthcheckEngine } from "./lib/healthcheck";
+import { startHealthcheckEngine, gitStatusCache } from "./lib/healthcheck";
 import { ProjectSchema, AppSchema, PresetSchema } from "./lib/schemas";
 import {
 	startProject,
@@ -84,7 +84,10 @@ const server = serve({
 						],
 					});
 				}
-				const projects = getProjects();
+				const projects = getProjects().map(p => ({
+					...p,
+					gitStatus: gitStatusCache.get(p.id) || null
+				}));
 				return Response.json({ projects });
 			},
 			async POST(req) {

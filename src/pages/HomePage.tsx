@@ -1,4 +1,4 @@
-import { Play, RefreshCw, Square, Terminal, ExternalLink, Box, Grid2x2, Plus, PanelLeft, Server, Settings } from "lucide-react";
+import { Play, RefreshCw, Square, Terminal, ExternalLink, Box, Grid2x2, Plus, PanelLeft, Server, Settings, GitBranch, ArrowDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
@@ -448,6 +448,20 @@ export function HomePage() {
 									<p className="text-sm text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors retro:text-zinc-400 retro:group-hover:text-fuchsia-200">
 										{project.path}
 									</p>
+									{project.gitStatus?.isGit && (
+										<div className="flex items-center gap-2 mt-2 text-xs font-medium">
+											<div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-400 retro:text-cyan-400">
+												<GitBranch className="w-3 h-3" />
+												{project.gitStatus.branch}
+											</div>
+											{project.gitStatus.behind > 0 && (
+												<div className="flex items-center gap-0.5 text-rose-500 bg-rose-50 dark:bg-rose-950/30 px-1.5 py-0.5 rounded-full retro:bg-rose-900/40 retro:text-rose-400 retro:shadow-[0_0_8px_rgba(244,63,94,0.4)]" title={`${project.gitStatus.behind} commit(s) de retard sur ${project.gitStatus.mainBranch}`}>
+													<ArrowDown className="w-3 h-3" />
+													{project.gitStatus.behind}
+												</div>
+											)}
+										</div>
+									)}
 									<p
 										className="text-xs text-zinc-400 dark:text-zinc-500 mt-2 font-mono line-clamp-1 bg-zinc-100/50 dark:bg-zinc-950/50 p-1.5 rounded-md retro:bg-fuchsia-950/30 retro:text-cyan-300/80 retro:border retro:border-fuchsia-500/30"
 										title={project.command}

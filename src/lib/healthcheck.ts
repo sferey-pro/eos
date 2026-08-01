@@ -1,9 +1,30 @@
 import { getProjects, updateProject } from "./db";
+import { getGitStatus, type GitStatus } from "./git";
+
+export const gitStatusCache = new Map<string, GitStatus>();
+let gitLoopInterval: ReturnType<typeof setInterval> | null = null;
 
 let loopInterval: ReturnType<typeof setInterval> | null = null;
 
 export function startHealthcheckEngine() {
 	if (loopInterval) return;
+
+	// Git Status Loop (every 15 seconds)
+	gitLoopInterval = setInterval(async () => {
+		const projects = getProjects();
+		for (const p of projects) {
+			const status = await getGitStatus(p.path);
+			gitStatusCache.set(p.id, status);
+		}
+	}, 15000);
+	// Initial run
+	setTimeout(async () => {
+		const projects = getProjects();
+		for (const p of projects) {
+			const status = await getGitStatus(p.path);
+			gitStatusCache.set(p.id, status);
+		}
+	}, 1000);
 
 	// Loop every 5 seconds
 	loopInterval = setInterval(async () => {

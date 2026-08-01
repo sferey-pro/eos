@@ -39,6 +39,7 @@ export const ProjectSchema = z.object({
 	status: ProjectStatusSchema.default("stopped"),
 	dependsOn: z.array(z.string()).default([]), // IDs des projets dont il dépend
 	healthcheck: HealthcheckSchema.default({ type: "none" }),
+	gitStatus: z.any().optional(), // Injected by backend cache
 });
 export type Project = z.infer<typeof ProjectSchema>;
 
