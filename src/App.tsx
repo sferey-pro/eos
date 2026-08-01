@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { HomePage } from "@/pages/HomePage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { PlaceholderPage } from "@/pages/PlaceholderPage";
+import { CleanPage } from "@/pages/CleanPage";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -23,7 +24,7 @@ export function App() {
 								<Route path="/networks" element={<PlaceholderPage />} />
 								<Route path="/terminal" element={<PlaceholderPage />} />
 								<Route path="/metrics" element={<PlaceholderPage />} />
-								<Route path="/clean" element={<PlaceholderPage />} />
+								<Route path="/clean" element={<CleanPage />} />
 								<Route path="/proxy" element={<PlaceholderPage />} />
 								<Route path="/theme" element={<PlaceholderPage />} />
 								<Route path="/notifications" element={<PlaceholderPage />} />
