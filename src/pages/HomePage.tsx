@@ -42,7 +42,8 @@ export function HomePage() {
 	const [presets, setPresets] = useState<Preset[]>([]);
 	const [selectedPresetId, setSelectedPresetId] = useState<string>("all");
 	const [isLogsOpen, setIsLogsOpen] = useState(false);
-	const [activeLogId, setActiveLogId] = useState<string>("");
+	const [activeLogId, setActiveLogId] = useState<string | null>(null);
+	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const [activeLogs, setActiveLogs] = useState<string>("");
 
 	useEffect(() => {
@@ -153,16 +154,19 @@ export function HomePage() {
 	const errorProjects = projects.filter((p) => p.status === "error").length;
 
 	return (
-		<div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-950 retro:bg-background transition-colors duration-500 pb-20 overflow-hidden pl-16">
-			{/* SIDEBAR (Drawer au survol) */}
-			<aside className="group fixed top-0 left-0 h-screen z-50 w-16 hover:w-[320px] transition-all duration-300 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-r border-zinc-200/50 dark:border-zinc-800/50 flex flex-col overflow-hidden retro:bg-black/95 retro:border-fuchsia-500/50 retro:shadow-[0_0_15px_rgba(217,70,239,0.3)]">
-				<div className="p-4 border-b border-zinc-200/50 dark:border-zinc-800/50 flex items-center gap-4 retro:border-fuchsia-500/50 h-16 shrink-0">
+		<div className={`relative min-h-screen bg-zinc-50 dark:bg-zinc-950 retro:bg-background transition-all duration-500 pb-20 overflow-hidden ${isSidebarOpen ? 'pl-[320px]' : 'pl-16'}`}>
+			{/* SIDEBAR (Drawer au clic) */}
+			<aside className={`fixed top-0 left-0 h-screen z-50 transition-all duration-300 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-r border-zinc-200/50 dark:border-zinc-800/50 flex flex-col overflow-hidden retro:bg-black/95 retro:border-fuchsia-500/50 retro:shadow-[0_0_15px_rgba(217,70,239,0.3)] ${isSidebarOpen ? 'w-[320px]' : 'w-16'}`}>
+				<div 
+					className="p-4 border-b border-zinc-200/50 dark:border-zinc-800/50 flex items-center gap-4 retro:border-fuchsia-500/50 h-16 shrink-0 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors"
+					onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+				>
 					<PanelLeft className="w-8 h-8 p-1.5 shrink-0 text-zinc-600 dark:text-zinc-400 retro:text-cyan-400 transition-colors" />
-					<h2 className="font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 retro:text-cyan-400 retro:font-mono retro:uppercase tracking-widest text-lg">
+					<h2 className={`font-bold whitespace-nowrap transition-opacity duration-300 retro:text-cyan-400 retro:font-mono retro:uppercase tracking-widest text-lg ${isSidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
 						Tous les Projets
 					</h2>
 				</div>
-				<div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-[320px]">
+				<div className={`flex-1 overflow-y-auto p-4 flex flex-col gap-2 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800 transition-opacity duration-300 w-[320px] ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
 					{projects.length === 0 && (
 						<div className="text-sm text-zinc-500 italic p-4 text-center w-full">Aucun projet enregistré.</div>
 					)}
