@@ -176,24 +176,6 @@ export function HomePage() {
 						{/* Logo & Title */}
 						<div className="flex items-center gap-4">
 							<SidebarTrigger className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-400" />
-							<div className="flex items-center gap-3 group cursor-pointer">
-								<div className="relative">
-									<div className="absolute -inset-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 opacity-0 group-hover:opacity-40 blur transition-opacity duration-500" />
-									<img
-										src="/eos-logo.jpg"
-										alt="EOS Logo"
-										className="relative w-9 h-9 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform duration-300"
-									/>
-								</div>
-								<div className="flex flex-col">
-									<h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400 retro:from-[#ff00ff] retro:to-[#00ffff] tracking-tight retro:drop-shadow-[0_0_8px_rgba(255,0,255,0.8)] retro:italic">
-										EOS
-									</h1>
-									<span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider -mt-1 retro:text-[#00ffff] retro:drop-shadow-[0_0_5px_rgba(0,255,255,0.8)]">
-										Environment Operating System
-									</span>
-								</div>
-							</div>
 						</div>
 
 						{/* Center: Presets */}

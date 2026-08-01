@@ -56,9 +56,12 @@ export function AppSidebar() {
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/50 retro:shadow-[0_0_10px_rgba(34,211,238,0.5)]">
                 <img src="/eos-logo.jpg" alt="EOS Logo" className="w-full h-full object-cover" />
               </div>
-              <div className="flex flex-col gap-0.5 leading-none">
+              <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden truncate">
                 <span className="font-black retro:text-transparent retro:bg-clip-text retro:bg-gradient-to-r retro:from-cyan-400 retro:to-fuchsia-500 retro:font-mono retro:uppercase tracking-widest text-xl retro:drop-shadow-[0_0_5px_rgba(217,70,239,0.8)]">
                   EOS
+                </span>
+                <span className="text-[10px] font-medium text-zinc-500 retro:text-cyan-600/80 uppercase tracking-widest truncate">
+                  Environment Operating System
                 </span>
               </div>
             </SidebarMenuButton>
