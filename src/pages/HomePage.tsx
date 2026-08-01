@@ -33,12 +33,20 @@ export function HomePage() {
 				setProjects(data.projects || []);
 				setPresets(data.presets || []);
 				setApps(data.apps || []);
-				if (!selectedProjectId && data.projects?.length > 0) {
-					setSelectedProjectId(data.projects[0].id);
-				}
-				if (!activePresetId && data.presets?.length > 0) {
-					setActivePresetId(data.presets[0].id);
-				}
+				setSelectedProjectId(prev => {
+					// Only set the first project if we don't have one selected yet
+					if (!prev && data.projects?.length > 0) {
+						return data.projects[0].id;
+					}
+					return prev;
+				});
+				
+				setActivePresetId(prev => {
+					if (!prev && data.presets?.length > 0) {
+						return data.presets[0].id;
+					}
+					return prev;
+				});
 			}
 		} catch (error) {
 			console.error("Failed to fetch data:", error);
