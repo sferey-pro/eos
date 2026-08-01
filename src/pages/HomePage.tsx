@@ -416,15 +416,16 @@ export function HomePage() {
 									animationDelay: `${index * 50}ms`,
 									animationFillMode: "both",
 								}}
-								className={`group relative overflow-hidden bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md border-zinc-200/50 dark:border-zinc-800/50 hover:border-zinc-300/80 dark:hover:border-zinc-700/80 hover:shadow-xl dark:hover:shadow-zinc-900/50 hover:-translate-y-1 transition-all duration-300 ease-out animate-in fade-in zoom-in-95 slide-in-from-bottom-4 ${project.status === "stopped" ? "opacity-70 grayscale-[20%]" : ""}`}
+								className={`group relative overflow-hidden bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md border-zinc-200/50 dark:border-zinc-800/50 hover:border-zinc-300/80 dark:hover:border-zinc-700/80 hover:shadow-xl dark:hover:shadow-zinc-900/50 hover:-translate-y-1 transition-all duration-300 ease-out animate-in fade-in zoom-in-95 slide-in-from-bottom-4 retro:bg-black/80 retro:border-fuchsia-500/80 retro:shadow-[0_0_15px_rgba(217,70,239,0.3)] retro:hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] retro:hover:border-cyan-400 ${project.status === "stopped" ? "opacity-70 grayscale-[20%]" : ""}`}
 							>
-								<CardHeader className="pb-3 flex flex-row items-center justify-between">
-									<CardTitle className="text-lg font-medium">
+								<div className="hidden retro:block absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] pointer-events-none z-0"></div>
+								<CardHeader className="pb-3 flex flex-row items-center justify-between relative z-10">
+									<CardTitle className="text-lg font-medium retro:text-cyan-400 retro:font-mono retro:uppercase retro:tracking-widest retro:drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
 										{project.name}
 									</CardTitle>
 									<Badge
 										variant="outline"
-										className={`shadow-sm bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 capitalize ${getStatusColor(
+										className={`shadow-sm bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 capitalize retro:bg-transparent retro:border-fuchsia-500/70 retro:text-fuchsia-300 retro:shadow-[0_0_10px_rgba(217,70,239,0.4)] ${getStatusColor(
 											project.status,
 										)}`}
 									>
@@ -432,23 +433,23 @@ export function HomePage() {
 											project.status.slice(1)}
 									</Badge>
 								</CardHeader>
-								<CardContent>
-									<p className="text-sm text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors">
+								<CardContent className="relative z-10">
+									<p className="text-sm text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors retro:text-zinc-400 retro:group-hover:text-fuchsia-200">
 										{project.path}
 									</p>
 									<p
-										className="text-xs text-zinc-400 dark:text-zinc-500 mt-2 font-mono line-clamp-1 bg-zinc-100/50 dark:bg-zinc-950/50 p-1.5 rounded-md"
+										className="text-xs text-zinc-400 dark:text-zinc-500 mt-2 font-mono line-clamp-1 bg-zinc-100/50 dark:bg-zinc-950/50 p-1.5 rounded-md retro:bg-fuchsia-950/30 retro:text-cyan-300/80 retro:border retro:border-fuchsia-500/30"
 										title={project.command}
 									>
 										{project.command}
 									</p>
 								</CardContent>
-								<CardFooter className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex justify-between bg-zinc-50/30 dark:bg-zinc-900/30">
+								<CardFooter className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex justify-between bg-zinc-50/30 dark:bg-zinc-900/30 relative z-10 retro:border-fuchsia-500/50 retro:bg-fuchsia-950/20">
 									<div className="flex gap-1">
 										<Button
 											variant="ghost"
 											size="icon"
-											className="h-8 w-8 text-zinc-400 hover:text-emerald-500 hover:bg-emerald-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
+											className="h-8 w-8 text-zinc-400 hover:text-emerald-500 hover:bg-emerald-500/10 hover:scale-110 active:scale-95 transition-all duration-200 retro:text-cyan-500 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-300 retro:hover:shadow-[0_0_10px_rgba(34,211,238,0.5)]"
 											disabled={
 												project.status !== "stopped" &&
 												project.status !== "error"
@@ -460,7 +461,7 @@ export function HomePage() {
 										<Button
 											variant="ghost"
 											size="icon"
-											className="h-8 w-8 text-zinc-400 hover:text-amber-500 hover:bg-amber-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
+											className="h-8 w-8 text-zinc-400 hover:text-amber-500 hover:bg-amber-500/10 hover:scale-110 active:scale-95 transition-all duration-200 retro:text-fuchsia-500 retro:hover:bg-fuchsia-500/20 retro:hover:text-fuchsia-300 retro:hover:shadow-[0_0_10px_rgba(217,70,239,0.5)]"
 											disabled={project.status === "stopped"}
 											onClick={() => {
 												handleAction(project.id, "stop");
@@ -475,7 +476,7 @@ export function HomePage() {
 										<Button
 											variant="ghost"
 											size="icon"
-											className="h-8 w-8 text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
+											className="h-8 w-8 text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 hover:scale-110 active:scale-95 transition-all duration-200 retro:text-rose-500 retro:hover:bg-rose-500/20 retro:hover:text-rose-300 retro:hover:shadow-[0_0_10px_rgba(244,63,94,0.5)]"
 											disabled={project.status === "stopped"}
 											onClick={() => handleAction(project.id, "stop")}
 										>
@@ -486,7 +487,7 @@ export function HomePage() {
 									<Button
 										variant="ghost"
 										size="sm"
-										className="text-zinc-500 h-8 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+										className="text-zinc-500 h-8 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors retro:text-cyan-400 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-300 retro:border retro:border-transparent retro:hover:border-cyan-500/50 retro:hover:shadow-[0_0_10px_rgba(34,211,238,0.4)]"
 										disabled={project.status === "stopped"}
 										onClick={() => {
 											setActiveLogId(project.id);
