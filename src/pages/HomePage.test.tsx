@@ -1,25 +1,45 @@
-import { describe, expect, test, mock, beforeEach } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { describe, expect, test, mock, beforeEach, afterEach } from "bun:test";
+import { render, screen, cleanup, waitFor, fireEvent } from "@testing-library/react";
 import { HomePage } from "./HomePage";
 
 // Mock des dépendances pour ne pas avoir à instancier tout le réseau
 mock.module("@/components/AddProjectModal", () => ({
-	AddProjectModal: () => <div data-testid="mock-add-project-modal" />
+	AddProjectModal: ({ trigger }: any) => <div data-testid="mock-add-project-modal">{trigger}</div>
 }));
 
 mock.module("@/components/AddAppModal", () => ({
-	AddAppModal: () => <div data-testid="mock-add-app-modal" />
+	AddAppModal: ({ children }: any) => <div data-testid="mock-add-app-modal">{children}</div>
 }));
 
-mock.module("@/components/ThemeToggle", () => ({
-	ThemeToggle: () => <div data-testid="mock-theme-toggle" />
+mock.module("@/components/PresetManagerModal", () => ({
+	PresetManagerModal: ({ trigger }: any) => <div data-testid="mock-preset-manager-modal">{trigger}</div>
 }));
+
+mock.module("@/components/TerminalComponent", () => ({
+	TerminalComponent: () => <div data-testid="mock-terminal" />
+}));
+
+const originalFetch = globalThis.fetch;
 
 describe("HomePage", () => {
 	beforeEach(() => {
 		globalThis.fetch = mock(() => 
-			Promise.resolve(new Response(JSON.stringify([])))
+			Promise.resolve(new Response(JSON.stringify({
+				projects: [],
+				presets: [],
+				apps: []
+			})))
 		) as any;
+	});
+
+	afterEach(() => {
+		globalThis.fetch = originalFetch;
+		cleanup();
+	});
+
+	test("renders the homepage correctly when empty", async () => {
+		render(<HomePage />);
+		expect(await screen.findByText("Environment Operating System")).toBeTruthy();
 	});
 
 	test("renders the homepage correctly", () => {
