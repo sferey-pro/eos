@@ -8,13 +8,21 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { ThemeProvider } from "./components/ThemeProvider";
 
-const elem = document.getElementById("root")!;
+const elem = document.getElementById("root");
+if (!elem) throw new Error("Root element not found");
+
 const app = (
-  <StrictMode>
-    <App />
-  </StrictMode>
+	<StrictMode>
+		<ThemeProvider defaultTheme="light">
+			<App />
+		</ThemeProvider>
+	</StrictMode>
 );
 
 // https://bun.com/docs/bundler/hot-reloading#import-meta-hot-data
-(import.meta.hot.data.root ??= createRoot(elem)).render(app);
+if (!import.meta.hot.data.root) {
+	import.meta.hot.data.root = createRoot(elem);
+}
+import.meta.hot.data.root.render(app);
