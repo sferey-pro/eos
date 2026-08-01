@@ -32,6 +32,37 @@ export function HomePage() {
 	const [projects, setProjects] = useState<Project[]>([]);
 	const [isLogsOpen, setIsLogsOpen] = useState(false);
 	const [activeLogId, setActiveLogId] = useState<string>("");
+	const [activeLogs, setActiveLogs] = useState<string>("");
+
+	useEffect(() => {
+		if (!isLogsOpen || !activeLogId) return;
+		const fetchLogs = async () => {
+			try {
+				const res = await fetch(`/api/logs?id=${activeLogId}`);
+				if (res.ok) {
+					const data = await res.json();
+					setActiveLogs(data.logs || "");
+				}
+			} catch (e) {
+				console.error(e);
+			}
+		};
+		fetchLogs();
+		const interval = setInterval(fetchLogs, 1000);
+		return () => clearInterval(interval);
+	}, [isLogsOpen, activeLogId]);
+
+	const handleAction = async (id: string, action: "start" | "stop") => {
+		try {
+			await fetch("/api/action", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ id, action }),
+			});
+		} catch (e) {
+			console.error("Action failed:", e);
+		}
+	};
 
 	useEffect(() => {
 		const fetchProjects = async () => {
@@ -127,6 +158,7 @@ export function HomePage() {
 							<Button
 								className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 group"
 								title="Démarrer l'environnement"
+								onClick={() => projects.forEach(p => { handleAction(p.id, "start"); })}
 							>
 								<Play className="w-4 h-4 mr-2 group-hover:animate-pulse" />
 								Aurore
@@ -237,6 +269,7 @@ export function HomePage() {
 												project.status !== "stopped" &&
 												project.status !== "error"
 											}
+											onClick={() => handleAction(project.id, "start")}
 										>
 											<Play className="h-4 w-4" />
 										</Button>
@@ -245,6 +278,13 @@ export function HomePage() {
 											size="icon"
 											className="h-8 w-8 text-zinc-400 hover:text-amber-500 hover:bg-amber-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
 											disabled={project.status === "stopped"}
+											onClick={() => {
+												handleAction(project.id, "stop");
+												setTimeout(
+													() => handleAction(project.id, "start"),
+													500,
+												);
+											}}
 										>
 											<RefreshCw className="h-4 w-4" />
 										</Button>
@@ -253,6 +293,7 @@ export function HomePage() {
 											size="icon"
 											className="h-8 w-8 text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
 											disabled={project.status === "stopped"}
+											onClick={() => handleAction(project.id, "stop")}
 										>
 											<Square className="h-4 w-4" />
 										</Button>
@@ -346,23 +387,10 @@ export function HomePage() {
 												className="h-full m-0 data-[state=active]:flex flex-col"
 											>
 												<ScrollArea className="h-full pr-4">
-													<pre className="text-xs font-mono text-zinc-400 leading-relaxed">
-														[INFO] Starting {p.name}...{"\n"}
-														{p.status === "healthy" && (
-															<span className="text-emerald-400">
-																[OK] Healthcheck passed.
-															</span>
-														)}
-														{p.status === "error" && (
-															<span className="text-rose-400">
-																[ERROR] Process exited with code 1.
-															</span>
-														)}
-														{p.status === "waiting" && (
-															<span className="text-purple-400">
-																[WAIT] Waiting for dependencies...
-															</span>
-														)}
+													<pre className="text-xs font-mono text-zinc-400 leading-relaxed whitespace-pre-wrap break-all">
+														{activeLogId === p.id && activeLogs
+															? activeLogs
+															: `[EOS] Waiting for logs from ${p.name}...`}
 													</pre>
 												</ScrollArea>
 											</TabsContent>

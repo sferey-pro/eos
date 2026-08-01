@@ -38,6 +38,17 @@ export function getProjects(): Project[] {
 	}));
 }
 
+export function getProjectById(id: string): Project | undefined {
+	const query = db.query("SELECT * FROM projects WHERE id = $id");
+	const row = query.get({ $id: id }) as any;
+	if (!row) return undefined;
+	return {
+		...row,
+		dependsOn: JSON.parse(row.dependsOn),
+		healthcheck: JSON.parse(row.healthcheck) as Healthcheck,
+	};
+}
+
 export function updateProject(project: Project): void {
 	const query = db.query(`
     UPDATE projects

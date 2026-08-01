@@ -3,6 +3,7 @@ import index from "./index.html";
 import { getProjects, insertProject } from "./lib/db";
 import { scanDirectory } from "./lib/scanner";
 import { ProjectSchema } from "./lib/schemas";
+import { startProject, stopProject, getProjectLogs } from "./lib/engine";
 
 const server = serve({
 	port: process.env.PORT || 5173,
@@ -80,6 +81,35 @@ const server = serve({
 				} catch (e) {
 					return new Response(String(e), { status: 400 });
 				}
+			},
+		},
+
+		"/api/action": {
+			async POST(req) {
+				try {
+					const { id, action } = await req.json();
+					if (action === "start") {
+						startProject(id);
+					} else if (action === "stop") {
+						stopProject(id);
+					} else {
+						return new Response("Unknown action", { status: 400 });
+					}
+					return Response.json({ success: true });
+				} catch (e) {
+					return new Response(String(e), { status: 500 });
+				}
+			},
+		},
+
+		"/api/logs": {
+			async GET(req) {
+				const url = new URL(req.url);
+				const id = url.searchParams.get("id");
+				if (!id) return new Response("Missing id", { status: 400 });
+
+				const logs = getProjectLogs(id);
+				return Response.json({ logs });
 			},
 		},
 	},
