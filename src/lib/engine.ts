@@ -111,6 +111,12 @@ export function startProject(projectId: string) {
 
 	// For Docker projects, we wait for 'up -d' to exit with 0 before spawning logs.
 	// This ensures that we don't start tailing logs while images are still downloading.
+
+	if (project.type !== "docker" && project.healthcheck?.type === "none") {
+		// If no healthcheck is configured for a long-running process, we assume it's immediately running
+		project.status = "running";
+		updateProject(project);
+	}
 }
 
 export function stopProject(projectId: string) {

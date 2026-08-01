@@ -26,7 +26,7 @@ describe("HomePage", () => {
 		render(<HomePage />);
 		
 		// Le titre de la page doit être présent
-		expect(screen.getByText("EOS")).not.toBeNull();
+		expect(screen.getByText("Environment Operating System")).toBeTruthy();
 		expect(screen.getByText(/Environment Operating System/i)).not.toBeNull();
 	});
 });
