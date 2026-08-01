@@ -50,30 +50,33 @@ export function HomePage() {
 	const getStatusColor = (status: string) => {
 		switch (status) {
 			case "healthy":
-				return "text-emerald-500 border-emerald-500/30 bg-emerald-500/10";
+				return "text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_10px_rgba(16,185,129,0.2)]";
 			case "running":
-				return "text-blue-500 border-blue-500/30 bg-blue-500/10";
+				return "text-blue-600 dark:text-blue-400 border-blue-500/30 bg-blue-500/10 shadow-[0_0_10px_rgba(59,130,246,0.2)]";
 			case "starting":
-				return "text-amber-500 border-amber-500/30 bg-amber-500/10";
+				return "text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/10 animate-pulse";
 			case "error":
-				return "text-rose-500 border-rose-500/30 bg-rose-500/10";
+				return "text-rose-600 dark:text-rose-400 border-rose-500/30 bg-rose-500/10 shadow-[0_0_10px_rgba(244,63,94,0.2)]";
 			default:
 				return "text-zinc-500 border-zinc-500/30 bg-zinc-500/10";
 		}
 	};
 
 	return (
-		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors duration-200">
+		<div className="min-h-screen bg-zinc-50/50 dark:bg-zinc-950/50 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.1),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] transition-colors duration-500">
 			{/* HEADER */}
-			<header className="sticky top-0 z-50 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur">
+			<header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
 				<div className="w-full px-6 h-16 flex items-center justify-between">
 					{/* Logo & Title */}
-					<div className="flex items-center gap-3">
-						<img
-							src="/eos-logo.jpg"
-							alt="EOS Logo"
-							className="w-8 h-8 rounded-full object-cover shadow-sm"
-						/>
+					<div className="flex items-center gap-3 group cursor-pointer">
+						<div className="relative">
+							<div className="absolute -inset-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 opacity-0 group-hover:opacity-40 blur transition-opacity duration-500" />
+							<img
+								src="/eos-logo.jpg"
+								alt="EOS Logo"
+								className="relative w-8 h-8 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform duration-300"
+							/>
+						</div>
 						<h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
 							EOS
 						</h1>
@@ -91,8 +94,8 @@ export function HomePage() {
 								<SelectItem value="frontend">Frontend + Storybook</SelectItem>
 							</SelectContent>
 						</Select>
-						<Button className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-lg transition-all hover:scale-105">
-							<Play className="w-4 h-4 mr-2" />
+						<Button className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 group">
+							<Play className="w-4 h-4 mr-2 group-hover:animate-pulse" />
 							Aurore
 						</Button>
 					</div>
@@ -108,10 +111,14 @@ export function HomePage() {
 			{/* MAIN CONTENT */}
 			<main className="w-full px-6 py-8">
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-					{projects.map((project) => (
+					{projects.map((project, index) => (
 						<Card
 							key={project.id}
-							className={`bg-white/50 dark:bg-zinc-900/50 backdrop-blur border-zinc-200 dark:border-zinc-800/50 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all ${project.status === "stopped" ? "opacity-70" : ""}`}
+							style={{
+								animationDelay: `${index * 50}ms`,
+								animationFillMode: "both",
+							}}
+							className={`group relative overflow-hidden bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md border-zinc-200/50 dark:border-zinc-800/50 hover:border-zinc-300/80 dark:hover:border-zinc-700/80 hover:shadow-xl dark:hover:shadow-zinc-900/50 hover:-translate-y-1 transition-all duration-300 ease-out animate-in fade-in zoom-in-95 slide-in-from-bottom-4 ${project.status === "stopped" ? "opacity-70 grayscale-[20%]" : ""}`}
 						>
 							<CardHeader className="pb-3 flex flex-row items-center justify-between">
 								<CardTitle className="text-lg font-medium">
@@ -119,29 +126,29 @@ export function HomePage() {
 								</CardTitle>
 								<Badge
 									variant="outline"
-									className={getStatusColor(project.status)}
+									className={`${getStatusColor(project.status)} transition-colors duration-300`}
 								>
 									{project.status.charAt(0).toUpperCase() +
 										project.status.slice(1)}
 								</Badge>
 							</CardHeader>
 							<CardContent>
-								<p className="text-sm text-zinc-500 dark:text-zinc-400">
+								<p className="text-sm text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors">
 									{project.path}
 								</p>
 								<p
-									className="text-xs text-zinc-400 dark:text-zinc-500 mt-1 font-mono line-clamp-1"
+									className="text-xs text-zinc-400 dark:text-zinc-500 mt-2 font-mono line-clamp-1 bg-zinc-100/50 dark:bg-zinc-950/50 p-1.5 rounded-md"
 									title={project.command}
 								>
 									{project.command}
 								</p>
 							</CardContent>
-							<CardFooter className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex justify-between">
+							<CardFooter className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex justify-between bg-zinc-50/30 dark:bg-zinc-900/30">
 								<div className="flex gap-1">
 									<Button
 										variant="ghost"
 										size="icon"
-										className="h-8 w-8 text-zinc-400 hover:text-emerald-500"
+										className="h-8 w-8 text-zinc-400 hover:text-emerald-500 hover:bg-emerald-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
 										disabled={
 											project.status !== "stopped" && project.status !== "error"
 										}
@@ -151,7 +158,7 @@ export function HomePage() {
 									<Button
 										variant="ghost"
 										size="icon"
-										className="h-8 w-8 text-zinc-400 hover:text-amber-500"
+										className="h-8 w-8 text-zinc-400 hover:text-amber-500 hover:bg-amber-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
 										disabled={project.status === "stopped"}
 									>
 										<RefreshCw className="h-4 w-4" />
@@ -159,7 +166,7 @@ export function HomePage() {
 									<Button
 										variant="ghost"
 										size="icon"
-										className="h-8 w-8 text-zinc-400 hover:text-rose-500"
+										className="h-8 w-8 text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
 										disabled={project.status === "stopped"}
 									>
 										<Square className="h-4 w-4" />
@@ -171,7 +178,7 @@ export function HomePage() {
 										<Button
 											variant="ghost"
 											size="sm"
-											className="text-zinc-500 h-8"
+											className="text-zinc-500 h-8 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
 											disabled={project.status === "stopped"}
 										>
 											<Terminal className="h-4 w-4 mr-2" />
@@ -211,11 +218,17 @@ export function HomePage() {
 					))}
 
 					{projects.length === 0 && (
-						<div className="col-span-full py-20 text-center flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/20">
-							<p className="text-zinc-500 dark:text-zinc-400 mb-4">
-								Aucun projet configuré dans cet environnement.
+						<div className="col-span-full py-24 text-center flex flex-col items-center justify-center border-2 border-dashed border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/20 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+							<div className="w-16 h-16 mb-4 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shadow-sm border border-zinc-100 dark:border-zinc-800">
+								<Square className="w-8 h-8 text-zinc-400" />
+							</div>
+							<h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-1">
+								Aucun projet
+							</h3>
+							<p className="text-zinc-500 dark:text-zinc-400 max-w-sm">
+								Commencez par ajouter un projet depuis votre environnement de
+								développement local.
 							</p>
-							{/* Le bouton d'ajout sera dans le header, mais on pourrait le rappeler ici */}
 						</div>
 					)}
 				</div>

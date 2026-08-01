@@ -80,12 +80,16 @@ export function AddProjectModal() {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button variant="outline" size="sm" className="hidden sm:flex">
+				<Button
+					variant="outline"
+					size="sm"
+					className="hidden sm:flex transition-all hover:scale-105 active:scale-95 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+				>
 					<Plus className="w-4 h-4 mr-2" />
 					Ajouter
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-[600px] bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800">
+			<DialogContent className="sm:max-w-[600px] bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl overflow-hidden transition-all duration-300">
 				<DialogHeader>
 					<DialogTitle>Ajouter un ou plusieurs projets</DialogTitle>
 				</DialogHeader>
@@ -97,8 +101,13 @@ export function AddProjectModal() {
 							value={path}
 							onChange={(e) => setPath(e.target.value)}
 							onKeyDown={(e) => e.key === "Enter" && handleScan()}
+							className="focus-visible:ring-emerald-500/30 dark:focus-visible:ring-emerald-500/30 transition-shadow bg-white/50 dark:bg-zinc-900/50"
 						/>
-						<Button onClick={handleScan} disabled={isScanning || !path}>
+						<Button
+							onClick={handleScan}
+							disabled={isScanning || !path}
+							className="transition-all active:scale-95"
+						>
 							{isScanning ? (
 								<Loader2 className="w-4 h-4 animate-spin" />
 							) : (
@@ -108,44 +117,45 @@ export function AddProjectModal() {
 					</div>
 
 					{proposals.length > 0 && (
-						<div className="border border-zinc-200 dark:border-zinc-800 rounded-md p-4 space-y-3 mt-2 bg-zinc-50 dark:bg-zinc-900/50">
-							<h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
-								Commandes détectées ({proposals.length})
+						<div className="border border-zinc-200/50 dark:border-zinc-800/50 rounded-lg p-4 space-y-3 mt-2 bg-zinc-50/50 dark:bg-zinc-900/30 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-300">
+							<h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3 flex items-center gap-2">
+								Commandes détectées
+								<span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 py-0.5 px-2 rounded-full text-xs font-bold">
+									{proposals.length}
+								</span>
 							</h4>
-							<div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+							<div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-700">
 								{proposals.map((prop, i) => (
-									<div
+									<label
 										key={prop.name}
-										className="flex items-start space-x-3 p-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors"
+										htmlFor={`prop-${i}`}
+										className={`flex items-start space-x-3 p-3 rounded-lg border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-white dark:hover:bg-zinc-800/50 hover:shadow-sm transition-all duration-200 cursor-pointer ${selectedIndices.has(i) ? "bg-white dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 shadow-sm" : ""}`}
 									>
 										<Checkbox
 											id={`prop-${i}`}
 											checked={selectedIndices.has(i)}
 											onCheckedChange={() => toggleSelection(i)}
-											className="mt-1"
+											className="mt-1 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 transition-colors"
 										/>
 										<div className="grid gap-1.5 leading-none flex-1">
-											<label
-												htmlFor={`prop-${i}`}
-												className="text-sm font-medium leading-none cursor-pointer select-none"
-											>
+											<span className="text-sm font-medium leading-none select-none">
 												{prop.name}{" "}
-												<span className="text-xs text-zinc-500 ml-2 px-1.5 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-700">
+												<span className="text-xs text-zinc-500 ml-2 px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
 													{prop.type}
 												</span>
-											</label>
-											<p className="text-xs text-zinc-500 font-mono mt-1">
+											</span>
+											<p className="text-xs text-zinc-400 dark:text-zinc-500 font-mono mt-1 bg-zinc-50 dark:bg-zinc-950 p-1.5 rounded inline-block border border-zinc-100 dark:border-zinc-800/50">
 												{prop.command}
 											</p>
 										</div>
-									</div>
+									</label>
 								))}
 							</div>
 							<div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 flex justify-end">
 								<Button
 									onClick={handleSave}
 									disabled={selectedIndices.size === 0 || isSaving}
-									className="w-full sm:w-auto"
+									className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all hover:-translate-y-0.5 active:translate-y-0"
 								>
 									{isSaving ? (
 										<Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -159,9 +169,11 @@ export function AddProjectModal() {
 					)}
 
 					{proposals.length === 0 && hasScanned && path && (
-						<p className="text-sm text-zinc-500 text-center italic mt-4">
-							Aucune configuration (Docker/Make) détectée dans ce dossier.
-						</p>
+						<div className="text-center p-6 bg-zinc-50/50 dark:bg-zinc-900/20 rounded-lg border border-dashed border-zinc-200 dark:border-zinc-800 animate-in fade-in duration-300 mt-4">
+							<p className="text-sm text-zinc-500 dark:text-zinc-400">
+								Aucune configuration détectée dans ce dossier.
+							</p>
+						</div>
 					)}
 				</div>
 			</DialogContent>
