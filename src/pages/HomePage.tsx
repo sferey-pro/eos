@@ -1,8 +1,7 @@
-import { Play, RefreshCw, Square, Terminal, ExternalLink, Box, Grid2x2, Plus, PanelLeft, Server } from "lucide-react";
+import { Play, RefreshCw, Square, Terminal, ExternalLink, Box, Grid2x2, Plus, PanelLeft, Server, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
-import { PresetManagerModal } from "@/components/PresetManagerModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
 	Popover,
@@ -35,8 +34,10 @@ import {
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Project, App, Preset } from "@/lib/schemas";
+import { useNavigate } from "react-router-dom";
 
 export function HomePage() {
+	const navigate = useNavigate();
 	const [projects, setProjects] = useState<Project[]>([]);
 	const [apps, setApps] = useState<App[]>([]);
 	const [presets, setPresets] = useState<Preset[]>([]);
@@ -244,7 +245,9 @@ export function HomePage() {
 									</SelectContent>
 								</Select>
 								<div className="w-px h-4 bg-zinc-300 dark:bg-zinc-700 mx-1 retro:bg-fuchsia-500/50 retro:shadow-[0_0_5px_rgba(217,70,239,0.8)]"></div>
-								<PresetManagerModal projects={projects} onPresetsChange={fetchData} />
+								<Button variant="ghost" size="icon" onClick={() => navigate("/settings")} className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-400 retro:hover:bg-cyan-500/20" title="Configuration">
+									<Settings className="w-4 h-4" />
+								</Button>
 							</div>
 							<Button
 								className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 group retro:bg-none retro:bg-transparent retro:border-2 retro:border-[#00ffff] retro:text-[#00ffff] retro:hover:bg-[#00ffff]/20 retro:shadow-[0_0_15px_#00ffff,inset_0_0_10px_#00ffff] retro:uppercase retro:tracking-widest retro:italic retro:font-bold"

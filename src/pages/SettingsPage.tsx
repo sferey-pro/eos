@@ -1,29 +1,42 @@
 import { useEffect, useState } from "react";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Settings, Plus, Trash2, Edit2, Check, X } from "lucide-react";
+import { Settings, Plus, Trash2, Edit2, Check, X, ArrowLeft } from "lucide-react";
 import type { Preset, Project } from "@/lib/schemas";
 import { Checkbox } from "@/components/ui/checkbox";
 
-export function PresetManagerModal({
-	projects,
-	onPresetsChange,
-}: {
-	projects: Project[];
-	onPresetsChange?: () => void;
-}) {
-	const [open, setOpen] = useState(false);
+import { useNavigate } from "react-router-dom";
+
+export function SettingsPage() {
+	const navigate = useNavigate();
+	const [projects, setProjects] = useState<Project[]>([]);
 	const [presets, setPresets] = useState<Preset[]>([]);
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [editName, setEditName] = useState("");
 	const [editProjectIds, setEditProjectIds] = useState<string[]>([]);
+
+	const fetchData = async () => {
+		try {
+			const [resProj, resPres] = await Promise.all([
+				fetch("/api/projects"),
+				fetch("/api/presets")
+			]);
+			if (resProj.ok) {
+				const data = await resProj.json();
+				setProjects(data.projects || []);
+			}
+			if (resPres.ok) {
+				const data = await resPres.json();
+				setPresets(data.presets || []);
+			}
+		} catch (error) {
+			console.error("Failed to fetch data:", error);
+		}
+	};
+
+	useEffect(() => {
+		fetchData();
+	}, []);
 
 	const fetchPresets = async () => {
 		try {
@@ -36,13 +49,6 @@ export function PresetManagerModal({
 			console.error("Failed to fetch presets:", error);
 		}
 	};
-
-	useEffect(() => {
-		if (open) {
-			fetchPresets();
-			setEditingId(null);
-		}
-	}, [open]);
 
 	const handleSave = async (id: string) => {
 		if (!editName.trim()) return;
@@ -65,7 +71,6 @@ export function PresetManagerModal({
 			});
 			setEditingId(null);
 			fetchPresets();
-			onPresetsChange?.();
 		} catch (error) {
 			console.error("Failed to save preset:", error);
 		}
@@ -83,7 +88,6 @@ export function PresetManagerModal({
 				body: JSON.stringify({ id }),
 			});
 			fetchPresets();
-			onPresetsChange?.();
 		} catch (error) {
 			console.error("Failed to delete preset:", error);
 		}
@@ -102,21 +106,17 @@ export function PresetManagerModal({
 	};
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button
-					variant="ghost"
-					size="icon"
-					className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-					title="Gérer les presets"
-				>
-					<Settings className="w-4 h-4" />
-				</Button>
-			</DialogTrigger>
-			<DialogContent className="sm:max-w-[500px]">
-				<DialogHeader>
-					<DialogTitle>Gestion des Presets</DialogTitle>
-				</DialogHeader>
+		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-6 flex flex-col gap-6 retro:bg-background retro:text-cyan-400">
+			<div className="max-w-4xl mx-auto w-full">
+				<div className="flex items-center gap-4 mb-8 border-b border-zinc-200 dark:border-zinc-800 retro:border-fuchsia-500/50 pb-4">
+					<Button variant="ghost" size="icon" onClick={() => navigate("/")} className="retro:hover:bg-cyan-500/20 retro:text-cyan-400">
+						<ArrowLeft className="w-5 h-5" />
+					</Button>
+					<h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2 retro:text-cyan-400 retro:font-mono retro:uppercase tracking-widest">
+						<Settings className="w-6 h-6 retro:text-fuchsia-500" />
+						Configuration & Presets
+					</h1>
+				</div>
 
 				<div className="flex flex-col gap-4 py-4">
 					<div className="flex justify-end">
@@ -278,7 +278,7 @@ export function PresetManagerModal({
 						)}
 					</div>
 				</div>
-			</DialogContent>
-		</Dialog>
+			</div>
+		</div>
 	);
 }
