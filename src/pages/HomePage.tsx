@@ -2,6 +2,7 @@ import { Play, RefreshCw, Square, Terminal, ExternalLink, Box, Grid2x2, Plus, Pa
 import { useEffect, useState } from "react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
+import { PresetManagerModal } from "@/components/PresetManagerModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
 	Popover,
@@ -33,11 +34,13 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Project, App } from "@/lib/schemas";
+import type { Project, App, Preset } from "@/lib/schemas";
 
 export function HomePage() {
 	const [projects, setProjects] = useState<Project[]>([]);
 	const [apps, setApps] = useState<App[]>([]);
+	const [presets, setPresets] = useState<Preset[]>([]);
+	const [selectedPresetId, setSelectedPresetId] = useState<string>("all");
 	const [isLogsOpen, setIsLogsOpen] = useState(false);
 	const [activeLogId, setActiveLogId] = useState<string>("");
 	const [activeLogs, setActiveLogs] = useState<string>("");
@@ -72,34 +75,34 @@ export function HomePage() {
 		}
 	};
 
-	useEffect(() => {
-		const fetchProjects = async () => {
-			try {
-				const res = await fetch("/api/projects");
-				const data = await res.json();
+	const fetchData = async () => {
+		try {
+			const [resProjects, resApps, resPresets] = await Promise.all([
+				fetch("/api/projects"),
+				fetch("/api/apps"),
+				fetch("/api/presets"),
+			]);
+			if (resProjects.ok) {
+				const data = await resProjects.json();
 				setProjects(data.projects || []);
-			} catch (e) {
-				console.error(e);
 			}
-		};
-
-		const fetchApps = async () => {
-			try {
-				const res = await fetch("/api/apps");
-				if (res.ok) {
-					const data = await res.json();
-					setApps(data.apps || []);
-				}
-			} catch (e) {
-				console.error(e);
+			if (resApps.ok) {
+				const data = await resApps.json();
+				setApps(data.apps || []);
 			}
-		};
+			if (resPresets.ok) {
+				const data = await resPresets.json();
+				setPresets(data.presets || []);
+			}
+		} catch (error) {
+			console.error("Failed to fetch data:", error);
+		}
+	};
 
-		fetchProjects();
-		fetchApps();
+	useEffect(() => {
+		fetchData();
 		const interval = setInterval(() => {
-			fetchProjects();
-			fetchApps();
+			fetchData();
 		}, 2000);
 		return () => clearInterval(interval);
 	}, []);
@@ -223,24 +226,34 @@ export function HomePage() {
 
 						{/* Center: Presets */}
 						<div className="hidden md:flex items-center gap-2">
-							<Select defaultValue="all">
-								<SelectTrigger className="w-[200px]">
-									<SelectValue placeholder="Choisir un preset..." />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="all">Tout lancer (Défaut)</SelectItem>
-									<SelectItem value="backend">Backend Uniquement</SelectItem>
-									<SelectItem value="frontend">Frontend + Storybook</SelectItem>
-								</SelectContent>
-							</Select>
+							<div className="flex items-center bg-zinc-100 dark:bg-zinc-900 rounded-md p-1">
+								<Select value={selectedPresetId} onValueChange={setSelectedPresetId}>
+									<SelectTrigger className="w-[200px] border-none bg-transparent shadow-none h-8 focus:ring-0">
+										<SelectValue placeholder="Choisir un preset..." />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="all">Tout lancer (Défaut)</SelectItem>
+										{presets.map(p => (
+											<SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<div className="w-px h-4 bg-zinc-300 dark:bg-zinc-700 mx-1"></div>
+								<PresetManagerModal projects={projects} onPresetsChange={fetchData} />
+							</div>
 							<Button
 								className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 group"
 								title="Démarrer l'environnement"
-								onClick={() =>
-									projects.forEach((p) => {
-										handleAction(p.id, "start");
-									})
-								}
+								onClick={() => {
+									let targetProjectIds = projects.map(p => p.id);
+									if (selectedPresetId !== "all") {
+										const preset = presets.find(p => p.id === selectedPresetId);
+										if (preset) targetProjectIds = preset.projectIds;
+									}
+									targetProjectIds.forEach((id) => {
+										handleAction(id, "start");
+									});
+								}}
 							>
 								<Play className="w-4 h-4 mr-2 group-hover:animate-pulse" />
 								Aurore

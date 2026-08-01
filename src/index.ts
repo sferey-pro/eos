@@ -1,8 +1,17 @@
 import { serve } from "bun";
 import index from "./index.html";
-import { getProjects, insertProject, getApps, insertApp } from "./lib/db";
+import {
+	getProjects,
+	insertProject,
+	getApps,
+	insertApp,
+	getPresets,
+	insertPreset,
+	updatePreset,
+	deletePreset,
+} from "./lib/db";
 import { scanDirectory } from "./lib/scanner";
-import { ProjectSchema, AppSchema } from "./lib/schemas";
+import { ProjectSchema, AppSchema, PresetSchema } from "./lib/schemas";
 import {
 	startProject,
 	stopProject,
@@ -105,6 +114,43 @@ const server = serve({
 					return new Response(String(e), { status: 400 });
 				}
 			},
+		},
+
+		"/api/presets": {
+			async GET() {
+				const presets = getPresets();
+				return Response.json({ presets });
+			},
+			async POST(req) {
+				try {
+					const body = await req.json();
+					const preset = PresetSchema.parse(body);
+					insertPreset(preset);
+					return Response.json({ success: true });
+				} catch (e) {
+					return new Response(String(e), { status: 400 });
+				}
+			},
+			async PUT(req) {
+				try {
+					const body = await req.json();
+					if (!body.id) return new Response("Missing id", { status: 400 });
+					updatePreset(body.id, body);
+					return Response.json({ success: true });
+				} catch (e) {
+					return new Response(String(e), { status: 400 });
+				}
+			},
+			async DELETE(req) {
+				try {
+					const body = await req.json();
+					if (!body.id) return new Response("Missing id", { status: 400 });
+					deletePreset(body.id);
+					return Response.json({ success: true });
+				} catch (e) {
+					return new Response(String(e), { status: 400 });
+				}
+			}
 		},
 
 		"/api/action": {

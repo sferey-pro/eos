@@ -123,6 +123,27 @@ export function insertPreset(preset: Preset): void {
 	});
 }
 
+export function updatePreset(id: string, updates: Partial<Omit<Preset, "id">>): void {
+	const current = getPresets().find((p) => p.id === id);
+	if (!current) return;
+	const updated = { ...current, ...updates };
+	const query = db.query(`
+		UPDATE presets 
+		SET name = $name, projectIds = $projectIds
+		WHERE id = $id
+	`);
+	query.run({
+		$id: id,
+		$name: updated.name,
+		$projectIds: JSON.stringify(updated.projectIds),
+	});
+}
+
+export function deletePreset(id: string): void {
+	const query = db.query("DELETE FROM presets WHERE id = $id");
+	query.run({ $id: id });
+}
+
 // --- APPS ---
 export function getApps(): App[] {
 	const query = db.query("SELECT * FROM apps");
