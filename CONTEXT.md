@@ -9,7 +9,7 @@ Ce document centralise les règles métier, les décisions architecturales et le
 ## 2. Fonctionnement Métier (Le Moteur EOS)
 - **Scan Intelligent** : Lorsqu'un utilisateur renseigne un chemin d'accès (et un éventuel sous-dossier), EOS doit parcourir le dossier pour déduire les commandes de démarrage pertinentes.
 - **Backend Bun** : Le routage natif de Bun (`src/index.ts`) agit comme un proxy local. Il est responsable du "process spawning" (lancement des terminaux en arrière-plan) et de la récupération de la sortie standard (stdout/stderr).
-- **Persistance** : La liste des projets configurés doit être sauvegardée localement (ex: dans un `eos-projects.json`) pour subsister aux redémarrages.
+- **Persistance** : La liste des projets configurés doit être sauvegardée localement dans une base de données **SQLite** gérée nativement par Bun (`bun:sqlite`) pour subsister aux redémarrages.
 
 ## 3. Conventions de Développement
 - **Nommage React** : Les composants React métiers et les pages utilisent le `PascalCase.tsx`.

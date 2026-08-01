@@ -10,7 +10,7 @@ Ce document suit l'évolution technique du projet, les étapes à venir, et la d
 
 ## Phase 2 : Modélisation et Scanner (À FAIRE)
 - **Modèle de données** : Créer les schémas Zod pour représenter un "Projet" (nom, chemin, commande, statut).
-- **Stockage local** : Mettre en place la lecture/écriture du fichier `eos-projects.json` via l'API Bun.
+- **Stockage local** : Mettre en place la base de données **SQLite** (`bun:sqlite`) pour sauvegarder l'état des projets.
 - **Scanner IA/Logique** : Développer l'utilitaire backend (`src/lib/scanner.ts`) capable de lire un dossier pour détecter les `package.json`, `docker-compose.yml`, etc.
 
 ## Phase 3 : Interface Utilisateur (UI)
