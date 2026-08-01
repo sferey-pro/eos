@@ -33,6 +33,7 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import type { Project, App, Preset } from "@/lib/schemas";
 import { useNavigate } from "react-router-dom";
 
@@ -44,15 +45,9 @@ export function HomePage() {
 	const [selectedPresetId, setSelectedPresetId] = useState<string>("all");
 	const [isLogsOpen, setIsLogsOpen] = useState(false);
 	const [activeLogId, setActiveLogId] = useState<string | null>(null);
-	const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-		const saved = localStorage.getItem("eos_sidebar_open");
-		return saved ? JSON.parse(saved) : false;
-	});
 	const [activeLogs, setActiveLogs] = useState<string>("");
 
-	useEffect(() => {
-		localStorage.setItem("eos_sidebar_open", JSON.stringify(isSidebarOpen));
-	}, [isSidebarOpen]);
+
 
 	useEffect(() => {
 		if (!isLogsOpen || !activeLogId) return;
@@ -162,46 +157,7 @@ export function HomePage() {
 	const errorProjects = projects.filter((p) => p.status === "error").length;
 
 	return (
-		<div className={`relative min-h-screen bg-zinc-50 dark:bg-zinc-950 retro:bg-background transition-all duration-500 pb-20 overflow-hidden ${isSidebarOpen ? 'pl-[320px]' : 'pl-16'}`}>
-			{/* SIDEBAR (Drawer au clic) */}
-			<aside className={`fixed top-0 left-0 h-screen z-50 transition-all duration-300 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-r border-zinc-200/50 dark:border-zinc-800/50 flex flex-col overflow-hidden retro:bg-black/95 retro:border-fuchsia-500/50 retro:shadow-[0_0_15px_rgba(217,70,239,0.3)] ${isSidebarOpen ? 'w-[320px]' : 'w-16'}`}>
-				<div 
-					className="p-4 border-b border-zinc-200/50 dark:border-zinc-800/50 flex items-center gap-4 retro:border-fuchsia-500/50 h-16 shrink-0 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors"
-					onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-				>
-					<PanelLeft className="w-8 h-8 p-1.5 shrink-0 text-zinc-600 dark:text-zinc-400 retro:text-cyan-400 transition-colors" />
-					<h2 className={`font-bold whitespace-nowrap transition-opacity duration-300 retro:text-cyan-400 retro:font-mono retro:uppercase tracking-widest text-lg ${isSidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
-						Tous les Projets
-					</h2>
-				</div>
-				<div className={`flex-1 overflow-y-auto p-4 flex flex-col gap-6 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800 transition-opacity duration-300 w-[320px] ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-					<div>
-						<h3 className="text-xs font-semibold text-zinc-500 mb-3 uppercase tracking-wider retro:text-fuchsia-500">Presets de lancement</h3>
-						<div className="flex flex-col gap-2">
-							{presets.length === 0 && <span className="text-sm text-zinc-400 italic">Aucun preset</span>}
-							{presets.map((preset) => (
-								<div key={preset.id} onClick={() => navigate("/settings")} className="group flex items-center justify-between p-3 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors retro:bg-fuchsia-950/20 retro:border-fuchsia-500/30 retro:hover:border-cyan-400/50 cursor-pointer w-[288px]">
-									<span className="font-medium text-sm text-zinc-900 dark:text-zinc-100 truncate pr-2 retro:text-cyan-300 retro:font-mono">{preset.name}</span>
-									<Settings className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 retro:text-fuchsia-400 retro:group-hover:text-cyan-400 transition-colors" />
-								</div>
-							))}
-						</div>
-					</div>
-
-					<div>
-						<h3 className="text-xs font-semibold text-zinc-500 mb-3 uppercase tracking-wider retro:text-fuchsia-500">Projets détectés</h3>
-						<div className="flex flex-col gap-2">
-							{projects.length === 0 && <span className="text-sm text-zinc-400 italic">Aucun projet</span>}
-							{projects.map((project) => (
-								<div key={project.id} onClick={() => navigate("/settings")} className="group flex items-center justify-between p-3 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors retro:bg-fuchsia-950/20 retro:border-fuchsia-500/30 retro:hover:border-cyan-400/50 cursor-pointer w-[288px]">
-									<span className="font-medium text-sm text-zinc-900 dark:text-zinc-100 truncate pr-2 retro:text-cyan-300 retro:font-mono">{project.name}</span>
-									<Settings className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 retro:text-fuchsia-400 retro:group-hover:text-cyan-400 transition-colors" />
-								</div>
-							))}
-						</div>
-					</div>
-				</div>
-			</aside>
+		<div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-950 retro:bg-background transition-all duration-500 pb-20 overflow-hidden w-full">
 			{/* RETRO OVERLAYS */}
 			<div className="hidden retro:block fixed inset-0 z-[9999] pointer-events-none bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.2),rgba(0,0,0,0.2)_2px,transparent_2px,transparent_4px)] opacity-50 mix-blend-overlay"></div>
 			<div className="hidden retro:block fixed inset-0 z-[9998] pointer-events-none shadow-[inset_0_0_200px_rgba(255,0,255,0.15)]"></div>
@@ -219,7 +175,9 @@ export function HomePage() {
 					<div className="w-full px-6 h-16 flex items-center justify-between">
 						{/* Logo & Title */}
 						<div className="flex items-center gap-4">
-
+							<div className="md:hidden">
+								<SidebarTrigger className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-400" />
+							</div>
 							<div className="flex items-center gap-3 group cursor-pointer">
 								<div className="relative">
 									<div className="absolute -inset-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 opacity-0 group-hover:opacity-40 blur transition-opacity duration-500" />
