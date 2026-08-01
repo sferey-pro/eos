@@ -99,12 +99,17 @@ export function HomePage() {
 								<img
 									src="/eos-logo.jpg"
 									alt="EOS Logo"
-									className="relative w-8 h-8 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform duration-300"
+									className="relative w-9 h-9 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform duration-300"
 								/>
 							</div>
-							<h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-								EOS
-							</h1>
+							<div className="flex flex-col">
+								<h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 leading-none">
+									EOS
+								</h1>
+								<span className="text-[10px] text-zinc-500 font-medium tracking-wider uppercase mt-1">
+									Environment Orchestration System
+								</span>
+							</div>
 						</div>
 
 						{/* Center: Presets */}
