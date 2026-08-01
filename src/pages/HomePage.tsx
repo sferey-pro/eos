@@ -457,7 +457,7 @@ export function HomePage() {
 								<div className="flex items-center gap-3">
 									<div className="relative">
 										{app.icon && app.icon !== "Box" ? (
-											<img src={app.icon} alt={app.name} className="w-6 h-6 rounded-sm object-contain bg-white/10" />
+											<img src={app.icon.startsWith("http") ? app.icon : `/api/logo?appId=${app.id}`} alt={app.name} className="w-6 h-6 rounded-sm object-contain bg-white/10" />
 										) : (
 											<div className="w-6 h-6 rounded-sm bg-zinc-200 dark:bg-zinc-800 retro:bg-cyan-900/50 flex items-center justify-center">
 												<Box className="w-3.5 h-3.5 text-zinc-500 retro:text-cyan-400" />

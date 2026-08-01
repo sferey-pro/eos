@@ -45,6 +45,16 @@ const server = serve<WebSocketData>({
 			return new Response("Upgrade failed", { status: 500 });
 		}
 		
+		if (req.method === "OPTIONS") {
+			return new Response(null, {
+				headers: {
+					"Access-Control-Allow-Origin": "*",
+					"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+					"Access-Control-Allow-Headers": "Content-Type, Authorization",
+				},
+			});
+		}
+
 		// Let the fallback routes handle everything else
 		return; 
 	},
@@ -149,6 +159,33 @@ const server = serve<WebSocketData>({
 					return new Response(String(e), { status: 400 });
 				}
 			},
+		},
+
+		"/api/logo": {
+			async GET(req: Request) {
+				const url = new URL(req.url);
+				const appId = url.searchParams.get("appId");
+				if (!appId) return new Response("Missing appId", { status: 400 });
+				
+				const apps = getApps();
+				const app = apps.find(a => a.id === appId);
+				if (!app) return new Response("App not found", { status: 404 });
+				if (!app.icon || app.icon === "Box") return new Response("No icon", { status: 404 });
+
+				if (app.icon.startsWith("http://") || app.icon.startsWith("https://")) {
+					return Response.redirect(app.icon);
+				}
+
+				const path = require("path");
+				// Assuming app.icon is a relative path to the project directory or an absolute path
+				const fullPath = path.resolve(app.path, app.icon);
+				const file = Bun.file(fullPath);
+				
+				if (await file.exists()) {
+					return new Response(file);
+				}
+				return new Response("Logo not found", { status: 404 });
+			}
 		},
 
 		"/api/presets": {
