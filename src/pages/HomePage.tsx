@@ -1,4 +1,4 @@
-import { Play, RefreshCw, Square, Terminal, ExternalLink, Box, Grid2x2, Plus, PanelLeft, Server, Settings, GitBranch, ArrowDown } from "lucide-react";
+import { Play, RefreshCw, Square, Terminal, ExternalLink, Box, Grid2x2, Plus, PanelLeft, Server, Settings, GitBranch, ArrowDown, FolderSearch } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
@@ -154,6 +154,49 @@ export function HomePage() {
 		(p) => p.status === "healthy" || p.status === "running",
 	).length;
 	const errorProjects = projects.filter((p) => p.status === "error").length;
+
+	if (totalProjects === 0) {
+		return (
+			<div className="relative min-h-screen bg-zinc-950 retro:bg-background transition-all duration-500 overflow-hidden w-full flex items-center justify-center p-6">
+				{/* Retro overlays */}
+				<div className="fixed inset-0 z-0 pointer-events-none bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.2),rgba(0,0,0,0.2)_2px,transparent_2px,transparent_4px)] opacity-50 mix-blend-overlay"></div>
+				<div className="fixed inset-0 z-0 pointer-events-none shadow-[inset_0_0_200px_rgba(255,0,255,0.15)]"></div>
+				
+				<div className="absolute inset-0 z-0 pointer-events-none [perspective:1000px] overflow-hidden">
+					<div className="absolute bottom-0 w-[200%] h-[120%] -left-[50%] bg-[linear-gradient(to_right,var(--color-primary)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-primary)_1px,transparent_1px)] bg-[size:60px_60px] [transform:rotateX(75deg)_translateY(200px)_translateZ(-200px)] opacity-30 shadow-[0_0_20px_var(--color-primary)] [mask-image:linear-gradient(to_bottom,transparent,black_40%)]"></div>
+				</div>
+
+				<div className="relative z-10 w-full max-w-2xl flex flex-col items-center justify-center text-center space-y-10 p-10 bg-black/40 backdrop-blur-md border border-fuchsia-500/30 rounded-3xl shadow-[0_0_50px_rgba(217,70,239,0.2)]">
+					<div className="relative w-40 h-40">
+						<div className="absolute -inset-4 rounded-full bg-cyan-500/20 blur-2xl animate-pulse" />
+						<img src="/eos-logo.jpg" alt="EOS Logo" className="relative w-full h-full rounded-full object-cover border-2 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.5)]" />
+					</div>
+					
+					<div className="space-y-4">
+						<h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 font-mono tracking-tighter drop-shadow-[0_0_15px_rgba(255,0,255,0.6)] uppercase italic">
+							EOS
+						</h1>
+						<h2 className="text-xl text-cyan-300 font-mono uppercase tracking-[0.3em] font-medium drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]">
+							Environment Operating System
+						</h2>
+					</div>
+					
+					<p className="text-lg text-fuchsia-300/80 max-w-lg mx-auto font-medium">
+						Bienvenue dans votre nouveau terminal de commande. Gagnez un temps précieux en scannant vos projets locaux et laissez EOS orchestrer vos conteneurs Docker et vos scripts.
+					</p>
+
+					<div className="pt-8">
+						<AddProjectModal trigger={
+							<Button size="lg" className="h-16 px-10 text-lg bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-mono uppercase tracking-widest border-2 border-fuchsia-400 shadow-[0_0_25px_rgba(217,70,239,0.5),inset_0_0_15px_rgba(217,70,239,0.5)] hover:shadow-[0_0_35px_rgba(217,70,239,0.7),inset_0_0_20px_rgba(217,70,239,0.7)] hover:scale-105 transition-all duration-300 cursor-pointer">
+								<FolderSearch className="w-6 h-6 mr-3" />
+								Scanner un dossier
+							</Button>
+						} />
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-950 retro:bg-background transition-all duration-500 pb-20 overflow-hidden w-full">
@@ -462,21 +505,7 @@ export function HomePage() {
 							</Card>
 						))}
 
-						{projects.length === 0 && (
-							<div className="col-span-full py-24 text-center flex flex-col items-center justify-center border-2 border-dashed border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/20 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all retro:border-cyan-400/50 retro:bg-black/60 retro:hover:border-fuchsia-500 retro:shadow-[0_0_15px_rgba(34,211,238,0.2)] retro:hover:shadow-[0_0_30px_rgba(217,70,239,0.5)]">
-								<div className="w-16 h-16 mb-4 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shadow-sm border border-zinc-100 dark:border-zinc-800 retro:bg-cyan-500/10 retro:border-cyan-400/50 retro:shadow-[inset_0_0_15px_rgba(34,211,238,0.4)]">
-									<Square className="w-8 h-8 text-zinc-400 retro:text-cyan-400" />
-								</div>
-								<h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2 retro:text-fuchsia-400 retro:font-mono retro:uppercase retro:tracking-widest retro:drop-shadow-[0_0_8px_rgba(217,70,239,0.8)]">
-									Aucun projet configuré
-								</h3>
-								<p className="text-zinc-500 dark:text-zinc-400 max-w-sm mb-6 retro:text-cyan-300">
-									Commencez par scanner un dossier pour détecter vos conteneurs
-									Docker ou vos cibles Makefile.
-								</p>
-								<AddProjectModal />
-							</div>
-						)}
+
 					</div>
 				</main>
 
