@@ -28,6 +28,7 @@ const server = serve({
 	port: process.env.PORT || 5173,
 	routes: {
 		"/eos-logo.jpg": Bun.file("./public/eos-logo.jpg"),
+		"/eos-logo-retro.jpg": Bun.file("./public/eos-logo-retro.jpg"),
 		// Serve index.html for all unmatched routes.
 		"/*": index,
 
