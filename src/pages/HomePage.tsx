@@ -20,6 +20,7 @@ export function HomePage() {
 	const [activePresetId, setActivePresetId] = useState<string | null>(null);
 	const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 	const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
+	const [appViewMode, setAppViewMode] = useState<"web" | "logs">("web");
 	const [metrics, setMetrics] = useState<{ cpu: string, ram: string }>({ cpu: "0%", ram: "0%" });
 	const [metricHistory, setMetricHistory] = useState<{ cpu: number, ram: number }[]>([]);
 
@@ -518,6 +519,14 @@ export function HomePage() {
 									{apps.find(a => a.id === selectedAppId)?.name}
 								</h1>
 								<div className="flex items-center gap-2">
+									<div className="flex bg-zinc-100 dark:bg-zinc-900 retro:bg-black/50 p-1 rounded-md border border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/30 mr-2">
+										<button onClick={() => setAppViewMode("web")} className={`px-3 py-1 text-xs font-semibold rounded-sm transition-colors ${appViewMode === "web" ? "bg-white dark:bg-zinc-800 retro:bg-cyan-900/50 text-zinc-900 dark:text-white retro:text-cyan-300 shadow-sm" : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 retro:text-cyan-600/50"}`}>
+											Web
+										</button>
+										<button onClick={() => setAppViewMode("logs")} className={`px-3 py-1 text-xs font-semibold rounded-sm transition-colors ${appViewMode === "logs" ? "bg-white dark:bg-zinc-800 retro:bg-cyan-900/50 text-zinc-900 dark:text-white retro:text-cyan-300 shadow-sm" : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 retro:text-cyan-600/50"}`}>
+											Logs
+										</button>
+									</div>
 									<Button size="sm" variant="outline" className="retro:border-cyan-500/50 retro:text-cyan-400 retro:hover:bg-cyan-500/20" onClick={() => window.open(apps.find(a => a.id === selectedAppId)?.url, '_blank')}>
 										<Activity className="w-4 h-4 mr-2" />
 										Open in New Tab
@@ -528,7 +537,13 @@ export function HomePage() {
 								</div>
 							</div>
 							<div className="flex-1 w-full bg-white dark:bg-black relative">
-								{(apps.find(a => a.id === selectedAppId)?.status === "stopped" || apps.find(a => a.id === selectedAppId)?.status === "error") ? (
+								{appViewMode === "logs" ? (
+									<div className="absolute inset-0 p-4">
+										<div className="w-full h-full bg-[#0a0a0b] dark:bg-black retro:bg-black/80 rounded-md border border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/40 shadow-inner overflow-hidden flex flex-col retro:shadow-[inset_0_0_20px_rgba(34,211,238,0.1)] p-4">
+											<TerminalComponent projectId={selectedAppId} />
+										</div>
+									</div>
+								) : (apps.find(a => a.id === selectedAppId)?.status === "stopped" || apps.find(a => a.id === selectedAppId)?.status === "error") ? (
 									<div className="absolute inset-0 flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 retro:bg-black/80 flex-col gap-4">
 										<Monitor className="w-12 h-12 text-zinc-300 dark:text-zinc-700 retro:text-cyan-900/50" />
 										<span className="text-zinc-500 font-mono text-sm uppercase retro:text-cyan-600/80 tracking-widest">
