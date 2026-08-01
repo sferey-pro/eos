@@ -5,6 +5,7 @@ import { scanDirectory } from "./lib/scanner";
 import { ProjectSchema } from "./lib/schemas";
 
 const server = serve({
+	port: process.env.PORT || 5173,
 	routes: {
 		// Serve index.html for all unmatched routes.
 		"/*": index,
