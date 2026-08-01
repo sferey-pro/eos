@@ -196,16 +196,18 @@ export function HomePage() {
 			{/* GLOBAL HEADER */}
 			<header className="relative z-10 flex-none h-14 border-b border-zinc-200 dark:border-zinc-800 retro:border-fuchsia-500/40 bg-white dark:bg-zinc-950 retro:bg-black/80 flex items-center justify-between px-4">
 				<div className="flex items-center gap-6 w-1/3 min-w-[300px]">
-					<div className="font-mono font-bold tracking-widest uppercase retro:text-fuchsia-400 retro:drop-shadow-[0_0_8px_rgba(217,70,239,0.6)] flex items-center gap-2">
-						<div className="w-6 h-6 rounded-sm bg-zinc-900 dark:bg-zinc-100 retro:bg-cyan-400 retro:shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
-						EOS
+					<div className="font-mono font-bold tracking-widest uppercase retro:text-fuchsia-400 retro:drop-shadow-[0_0_8px_rgba(217,70,239,0.6)] flex items-center gap-3">
+						{theme === 'retro' ? (
+							<img src="/eos-logo-retro.jpg" alt="EOS Logo Retro" className="w-7 h-7 rounded-full object-cover border border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
+						) : (
+							<img src="/eos-logo.jpg" alt="EOS Logo" className="w-7 h-7 rounded-full object-cover border border-zinc-200 dark:border-zinc-800" />
+						)}
+						<span className="text-lg">EOS</span>
 					</div>
-					<div className="relative flex-1 max-w-sm">
-						<Search className="absolute left-2.5 top-1.5 h-4 w-4 text-zinc-400 retro:text-cyan-500/70" />
-						<Input 
-							placeholder="Command palette..." 
-							className="h-8 pl-9 bg-zinc-100 dark:bg-zinc-900 border-transparent focus-visible:ring-1 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600 retro:bg-black/60 retro:border-cyan-500/50 retro:text-cyan-300 retro:placeholder:text-cyan-700 retro:focus-visible:ring-cyan-400 retro:focus-visible:shadow-[0_0_10px_rgba(34,211,238,0.3)] font-mono text-xs rounded-sm"
-						/>
+					<div className="hidden sm:block">
+						<span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 retro:text-cyan-600/80 uppercase tracking-[0.2em] font-semibold">
+							Environment Operating System
+						</span>
 					</div>
 				</div>
 				<div className="flex items-center gap-3">
