@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Search, Plus, Copy, Upload, Trash2, Undo2, Star, Beaker, Rocket, Settings2 } from "lucide-react";
 import type { Preset, Project } from "@/lib/schemas";
@@ -16,6 +17,7 @@ export function PresetManagerModal({ trigger }: PresetManagerModalProps) {
 	const [presets, setPresets] = useState<Preset[]>([]);
 	const [projects, setProjects] = useState<Project[]>([]);
 	const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
+	const [selectedProjectFilter, setSelectedProjectFilter] = useState<string>("all");
 
 	useEffect(() => {
 		if (isOpen) {
@@ -150,14 +152,29 @@ export function PresetManagerModal({ trigger }: PresetManagerModalProps) {
 								</div>
 								
 								<div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-									<h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-widest mb-4 retro:text-fuchsia-500/80">Micro-services Configurations</h3>
+									<div className="flex items-center justify-between mb-4">
+										<h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-widest retro:text-fuchsia-500/80">Micro-services Configurations</h3>
+										<Select value={selectedProjectFilter} onValueChange={setSelectedProjectFilter}>
+											<SelectTrigger className="w-[250px] h-8 bg-[#1a1a1e] border-zinc-700 retro:bg-cyan-950/20 retro:border-cyan-500/30 retro:text-cyan-300">
+												<SelectValue placeholder="Select a project" />
+											</SelectTrigger>
+											<SelectContent className="bg-[#1a1a1e] border-zinc-700 text-zinc-300 retro:bg-black/90 retro:border-cyan-500/50 retro:text-cyan-400">
+												<SelectItem value="all" className="retro:focus:bg-cyan-900/50">All Projects</SelectItem>
+												{[...new Set(projects.map(p => p.path))].map(path => (
+													<SelectItem key={path} value={path} className="retro:focus:bg-cyan-900/50">
+														{path.split('/').pop() || path}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</div>
 									
 									<Accordion type="single" collapsible className="space-y-3">
-										{projects.map((project) => (
+										{projects.filter(p => selectedProjectFilter === "all" || p.path === selectedProjectFilter).map((project) => (
 											<AccordionItem key={project.id} value={project.id} className="border border-zinc-800 rounded-lg bg-[#121214] overflow-hidden retro:border-cyan-500/30 retro:bg-black/40 px-1">
 												<AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-zinc-800/30 retro:hover:bg-cyan-950/30 transition-colors">
 													<div className="flex items-center gap-3">
-														<span className="font-medium text-sm retro:text-cyan-300">{project.name}</span>
+														<span className="font-medium text-sm retro:text-cyan-300">{project.name.replace(/^\[.*?\]\s*/, '')}</span>
 													</div>
 												</AccordionTrigger>
 												<AccordionContent className="px-4 pb-4 pt-2 border-t border-zinc-800/50 retro:border-cyan-500/20 space-y-5">
