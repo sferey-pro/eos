@@ -31,7 +31,7 @@ export function HomePage() {
 		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors duration-200">
 			{/* HEADER */}
 			<header className="sticky top-0 z-50 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur">
-				<div className="container mx-auto px-4 h-16 flex items-center justify-between">
+				<div className="w-full px-6 h-16 flex items-center justify-between">
 					{/* Logo & Title */}
 					<div className="flex items-center gap-3">
 						<img
@@ -71,8 +71,8 @@ export function HomePage() {
 			</header>
 
 			{/* MAIN CONTENT */}
-			<main className="container mx-auto px-4 py-8">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			<main className="w-full px-6 py-8">
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
 					{/* Card Mockup 1 */}
 					<Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur border-zinc-200 dark:border-zinc-800/50 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all">
 						<CardHeader className="pb-3 flex flex-row items-center justify-between">
