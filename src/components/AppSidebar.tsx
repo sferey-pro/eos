@@ -1,4 +1,4 @@
-import { Settings, PanelLeft, Box, Grid2x2, LayoutDashboard, FolderSearch, Database, Network, Container } from "lucide-react";
+import { Settings, PanelLeft, Box, Grid2x2, LayoutDashboard, FolderSearch, Database, Network, Container, TerminalSquare, Activity, Trash2, Globe, Paintbrush, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -133,6 +133,89 @@ export function AppSidebar() {
                 >
                   <Network className="w-4 h-4 text-zinc-500 retro:text-cyan-400 shrink-0" />
                   <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono flex-1 text-left">Réseaux</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500 mt-2 group-data-[collapsible=icon]:hidden">
+            Monitoring & Observabilité
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => navigate("/terminal")}
+                  className="hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl flex items-center gap-3 w-full"
+                >
+                  <TerminalSquare className="w-4 h-4 text-zinc-500 retro:text-cyan-400 shrink-0" />
+                  <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono flex-1 text-left">Terminal Global</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => navigate("/metrics")}
+                  className="hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl flex items-center gap-3 w-full"
+                >
+                  <Activity className="w-4 h-4 text-zinc-500 retro:text-cyan-400 shrink-0" />
+                  <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono flex-1 text-left">Performances</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500 mt-2 group-data-[collapsible=icon]:hidden">
+            Outils Rapides
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => navigate("/clean")}
+                  className="hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl flex items-center gap-3 w-full"
+                >
+                  <Trash2 className="w-4 h-4 text-zinc-500 retro:text-cyan-400 shrink-0" />
+                  <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono flex-1 text-left">Nettoyage Système</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => navigate("/proxy")}
+                  className="hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl flex items-center gap-3 w-full"
+                >
+                  <Globe className="w-4 h-4 text-zinc-500 retro:text-cyan-400 shrink-0" />
+                  <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono flex-1 text-left">Reverse Proxy</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500 mt-2 group-data-[collapsible=icon]:hidden">
+            Préférences de l'Interface
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => navigate("/theme")}
+                  className="hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl flex items-center gap-3 w-full"
+                >
+                  <Paintbrush className="w-4 h-4 text-zinc-500 retro:text-cyan-400 shrink-0" />
+                  <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono flex-1 text-left">Personnalisation</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => navigate("/notifications")}
+                  className="hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl flex items-center gap-3 w-full"
+                >
+                  <Bell className="w-4 h-4 text-zinc-500 retro:text-cyan-400 shrink-0" />
+                  <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono flex-1 text-left">Notifications</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

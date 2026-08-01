@@ -11,6 +11,12 @@ export function PlaceholderPage() {
 		"/containers": "Conteneurs Actifs",
 		"/volumes": "Volumes & Bases de données",
 		"/networks": "Réseaux",
+		"/terminal": "Terminal Global",
+		"/metrics": "Performances",
+		"/clean": "Nettoyage Système",
+		"/proxy": "Reverse Proxy",
+		"/theme": "Personnalisation",
+		"/notifications": "Notifications",
 	};
 
 	const title = pageTitles[location.pathname] || "En construction";

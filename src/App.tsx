@@ -21,6 +21,12 @@ export function App() {
 								<Route path="/containers" element={<PlaceholderPage />} />
 								<Route path="/volumes" element={<PlaceholderPage />} />
 								<Route path="/networks" element={<PlaceholderPage />} />
+								<Route path="/terminal" element={<PlaceholderPage />} />
+								<Route path="/metrics" element={<PlaceholderPage />} />
+								<Route path="/clean" element={<PlaceholderPage />} />
+								<Route path="/proxy" element={<PlaceholderPage />} />
+								<Route path="/theme" element={<PlaceholderPage />} />
+								<Route path="/notifications" element={<PlaceholderPage />} />
 							</Routes>
 						</main>
 					</div>
