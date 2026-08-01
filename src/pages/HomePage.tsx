@@ -1,6 +1,14 @@
-import { Play, RefreshCw, Square, Terminal } from "lucide-react";
+import {
+	Play,
+	RefreshCw,
+	Square,
+	Terminal,
+	ExternalLink,
+	Box,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { AddProjectModal } from "@/components/AddProjectModal";
+import { AddAppModal } from "@/components/AddAppModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,10 +34,11 @@ import {
 	SheetTitle,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Project } from "@/lib/schemas";
+import type { Project, App } from "@/lib/schemas";
 
 export function HomePage() {
 	const [projects, setProjects] = useState<Project[]>([]);
+	const [apps, setApps] = useState<App[]>([]);
 	const [isLogsOpen, setIsLogsOpen] = useState(false);
 	const [activeLogId, setActiveLogId] = useState<string>("");
 	const [activeLogs, setActiveLogs] = useState<string>("");
@@ -75,10 +84,38 @@ export function HomePage() {
 			}
 		};
 
+		const fetchApps = async () => {
+			try {
+				const res = await fetch("/api/apps");
+				if (res.ok) {
+					const data = await res.json();
+					setApps(data.apps || []);
+				}
+			} catch (e) {
+				console.error(e);
+			}
+		};
+
 		fetchProjects();
-		const interval = setInterval(fetchProjects, 2000);
+		fetchApps();
+		const interval = setInterval(() => {
+			fetchProjects();
+			fetchApps();
+		}, 2000);
 		return () => clearInterval(interval);
 	}, []);
+
+	const handleAppAction = async (id: string, action: "start" | "stop") => {
+		try {
+			await fetch("/api/action", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ id, action, type: "app" }),
+			});
+		} catch (e) {
+			console.error("Action failed:", e);
+		}
+	};
 
 	// Ouvrir automatiquement si une erreur survient (Optionnel)
 	useEffect(() => {
@@ -158,7 +195,11 @@ export function HomePage() {
 							<Button
 								className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 group"
 								title="Démarrer l'environnement"
-								onClick={() => projects.forEach(p => { handleAction(p.id, "start"); })}
+								onClick={() =>
+									projects.forEach((p) => {
+										handleAction(p.id, "start");
+									})
+								}
 							>
 								<Play className="w-4 h-4 mr-2 group-hover:animate-pulse" />
 								Aurore
@@ -167,6 +208,7 @@ export function HomePage() {
 
 						{/* Right: Actions */}
 						<div className="flex items-center gap-2">
+							<AddAppModal />
 							<AddProjectModal />
 							<ThemeToggle />
 						</div>
@@ -174,55 +216,129 @@ export function HomePage() {
 				</header>
 
 				{/* MAIN CONTENT */}
-				<main className="w-full max-w-screen-2xl mx-auto px-6 py-8 flex flex-col gap-8">
+				<main className="w-full max-w-screen-2xl mx-auto px-6 py-8 flex flex-col gap-12">
+					{/* APPS DOCK / SECTION */}
+					{apps.length > 0 && (
+						<div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+							<h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+								<Box className="w-5 h-5 text-indigo-500" />
+								Mes Applications
+							</h2>
+							<div className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
+								{apps.map((app) => (
+									<div
+										key={app.id}
+										className={`flex-shrink-0 w-64 p-4 rounded-2xl border ${app.status === "running" || app.status === "healthy" ? "bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-800/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]" : "bg-white/40 dark:bg-zinc-900/40 border-zinc-200/50 dark:border-zinc-800/50"} backdrop-blur-xl transition-all duration-300 flex flex-col gap-4 group`}
+									>
+										<div className="flex items-center justify-between">
+											<div className="flex items-center gap-3">
+												<div
+													className={`w-10 h-10 rounded-xl flex items-center justify-center ${app.status === "running" || app.status === "healthy" ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400" : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"}`}
+												>
+													<Box className="w-5 h-5" />
+												</div>
+												<div>
+													<h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+														{app.name}
+													</h3>
+													<p
+														className="text-xs text-zinc-500 font-mono line-clamp-1"
+														title={app.url}
+													>
+														{new URL(app.url).host}
+													</p>
+												</div>
+											</div>
+											<div
+												className={`w-2.5 h-2.5 rounded-full ${app.status === "error" ? "bg-rose-500" : app.status === "running" || app.status === "healthy" ? "bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" : "bg-zinc-300 dark:bg-zinc-700"}`}
+											/>
+										</div>
+										<div className="grid grid-cols-2 gap-2 mt-auto">
+											{app.status === "stopped" || app.status === "error" ? (
+												<Button
+													onClick={() => handleAppAction(app.id, "start")}
+													className="w-full bg-indigo-600 hover:bg-indigo-700 text-white col-span-2"
+												>
+													Démarrer
+												</Button>
+											) : (
+												<>
+													<Button
+														onClick={() => handleAppAction(app.id, "stop")}
+														variant="outline"
+														className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900/50 dark:text-rose-400 dark:hover:bg-rose-950/50"
+													>
+														Arrêter
+													</Button>
+													<Button
+														onClick={() => window.open(app.url, "_blank")}
+														className="w-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-900"
+													>
+														Ouvrir <ExternalLink className="w-3 h-3 ml-2" />
+													</Button>
+												</>
+											)}
+										</div>
+									</div>
+								))}
+							</div>
+						</div>
+					)}
+
 					{/* KPI DASHBOARD */}
 					{projects.length > 0 && (
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
-							<Card className="bg-white/40 dark:bg-zinc-900/40 border-zinc-200/50 dark:border-zinc-800/50 backdrop-blur-xl shadow-sm">
-								<CardContent className="p-6 flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-											Total Services
-										</p>
-										<h3 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-											{totalProjects}
-										</h3>
-									</div>
-									<div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800/80 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
-										<Square className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
-									</div>
-								</CardContent>
-							</Card>
-							<Card className="bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/20 backdrop-blur-xl shadow-sm">
-								<CardContent className="p-6 flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-											Services Actifs
-										</p>
-										<h3 className="text-3xl font-bold text-emerald-700 dark:text-emerald-300">
-											{healthyProjects}
-										</h3>
-									</div>
-									<div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center border border-emerald-200 dark:border-emerald-800/50">
-										<Play className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-									</div>
-								</CardContent>
-							</Card>
-							<Card className="bg-rose-50/40 dark:bg-rose-950/20 border-rose-500/20 backdrop-blur-xl shadow-sm">
-								<CardContent className="p-6 flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium text-rose-600 dark:text-rose-400">
-											En Erreur
-										</p>
-										<h3 className="text-3xl font-bold text-rose-700 dark:text-rose-300">
-											{errorProjects}
-										</h3>
-									</div>
-									<div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center border border-rose-200 dark:border-rose-800/50">
-										<Terminal className="w-5 h-5 text-rose-600 dark:text-rose-400" />
-									</div>
-								</CardContent>
-							</Card>
+						<div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-500 delay-100">
+							<h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+								<Square className="w-5 h-5 text-zinc-500" />
+								Infrastructure / Projets
+							</h2>
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+								<Card className="bg-white/40 dark:bg-zinc-900/40 border-zinc-200/50 dark:border-zinc-800/50 backdrop-blur-xl shadow-sm">
+									<CardContent className="p-6 flex items-center justify-between">
+										<div>
+											<p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+												Total Services
+											</p>
+											<h3 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+												{totalProjects}
+											</h3>
+										</div>
+										<div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800/80 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
+											<Square className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+										</div>
+									</CardContent>
+								</Card>
+								<Card className="bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/20 backdrop-blur-xl shadow-sm">
+									<CardContent className="p-6 flex items-center justify-between">
+										<div>
+											<p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+												Services Actifs
+											</p>
+											<h3 className="text-3xl font-bold text-emerald-700 dark:text-emerald-300">
+												{healthyProjects}
+											</h3>
+										</div>
+										<div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center border border-emerald-200 dark:border-emerald-800/50">
+											<Play className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+										</div>
+									</CardContent>
+								</Card>
+								<Card className="bg-rose-50/40 dark:bg-rose-950/20 border-rose-500/20 backdrop-blur-xl shadow-sm">
+									<CardContent className="p-6 flex items-center justify-between">
+										<div>
+											<p className="text-sm font-medium text-rose-600 dark:text-rose-400">
+												En Erreur
+											</p>
+											<h3 className="text-3xl font-bold text-rose-700 dark:text-rose-300">
+												{errorProjects}
+											</h3>
+										</div>
+										<div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center border border-rose-200 dark:border-rose-800/50">
+											<Terminal className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+										</div>
+									</CardContent>
+								</Card>
+							</div>
 						</div>
 					)}
 

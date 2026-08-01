@@ -1,9 +1,15 @@
 import { serve } from "bun";
 import index from "./index.html";
-import { getProjects, insertProject } from "./lib/db";
+import { getProjects, insertProject, getApps, insertApp } from "./lib/db";
 import { scanDirectory } from "./lib/scanner";
-import { ProjectSchema } from "./lib/schemas";
-import { startProject, stopProject, getProjectLogs } from "./lib/engine";
+import { ProjectSchema, AppSchema } from "./lib/schemas";
+import {
+	startProject,
+	stopProject,
+	startApp,
+	stopApp,
+	getProjectLogs,
+} from "./lib/engine";
 
 const server = serve({
 	port: process.env.PORT || 5173,
@@ -84,17 +90,38 @@ const server = serve({
 			},
 		},
 
+		"/api/apps": {
+			async GET() {
+				const apps = getApps();
+				return Response.json({ apps });
+			},
+			async POST(req) {
+				try {
+					const body = await req.json();
+					const app = AppSchema.parse(body);
+					insertApp(app);
+					return Response.json({ success: true });
+				} catch (e) {
+					return new Response(String(e), { status: 400 });
+				}
+			},
+		},
+
 		"/api/action": {
 			async POST(req) {
 				try {
-					const { id, action } = await req.json();
-					if (action === "start") {
-						startProject(id);
-					} else if (action === "stop") {
-						stopProject(id);
+					const { id, action, type = "project" } = await req.json();
+
+					if (type === "app") {
+						if (action === "start") startApp(id);
+						else if (action === "stop") stopApp(id);
+						else return new Response("Unknown action", { status: 400 });
 					} else {
-						return new Response("Unknown action", { status: 400 });
+						if (action === "start") startProject(id);
+						else if (action === "stop") stopProject(id);
+						else return new Response("Unknown action", { status: 400 });
 					}
+
 					return Response.json({ success: true });
 				} catch (e) {
 					return new Response(String(e), { status: 500 });

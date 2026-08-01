@@ -42,6 +42,22 @@ export const ProjectSchema = z.object({
 });
 export type Project = z.infer<typeof ProjectSchema>;
 
+export const AppSchema = z.object({
+	id: z
+		.string()
+		.uuid()
+		.default(() => crypto.randomUUID()),
+	name: z.string().min(1, "Name is required"),
+	path: z.string().min(1, "Path is required"),
+	command: z.string().min(1, "Command is required"),
+	url: z.string().min(1, "URL is required"),
+	icon: z.string().default("Box"),
+	status: z
+		.enum(["stopped", "starting", "running", "healthy", "error", "waiting"])
+		.default("stopped"),
+});
+export type App = z.infer<typeof AppSchema>;
+
 // Schéma d'un Preset (Profil de lancement)
 export const PresetSchema = z.object({
 	id: z.string().uuid(),

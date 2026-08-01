@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import type { Healthcheck, Preset, Project } from "./schemas";
+import type { Healthcheck, Preset, Project, App } from "./schemas";
 
 const dbPath = process.env.NODE_ENV === "test" ? ":memory:" : "eos.sqlite";
 const db = new Database(dbPath, { create: true });
@@ -24,6 +24,18 @@ db.run(`
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     projectIds TEXT NOT NULL
+  );
+`);
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS apps (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    path TEXT NOT NULL,
+    command TEXT NOT NULL,
+    url TEXT NOT NULL,
+    icon TEXT DEFAULT 'Box',
+    status TEXT DEFAULT 'stopped'
   );
 `);
 
@@ -106,6 +118,50 @@ export function insertPreset(preset: Preset): void {
 		$id: preset.id,
 		$name: preset.name,
 		$projectIds: JSON.stringify(preset.projectIds),
+	});
+}
+
+// --- APPS ---
+export function getApps(): App[] {
+	const query = db.query("SELECT * FROM apps");
+	return query.all() as App[];
+}
+
+export function getAppById(id: string): App | undefined {
+	const query = db.query("SELECT * FROM apps WHERE id = $id");
+	return query.get({ $id: id }) as App | undefined;
+}
+
+export function updateApp(app: App): void {
+	const query = db.query(`
+    UPDATE apps
+    SET name = $name, path = $path, command = $command, url = $url, icon = $icon, status = $status
+    WHERE id = $id
+  `);
+	query.run({
+		$id: app.id,
+		$name: app.name,
+		$path: app.path,
+		$command: app.command,
+		$url: app.url,
+		$icon: app.icon,
+		$status: app.status,
+	});
+}
+
+export function insertApp(app: App): void {
+	const query = db.query(`
+    INSERT INTO apps (id, name, path, command, url, icon, status)
+    VALUES ($id, $name, $path, $command, $url, $icon, $status)
+  `);
+	query.run({
+		$id: app.id,
+		$name: app.name,
+		$path: app.path,
+		$command: app.command,
+		$url: app.url,
+		$icon: app.icon,
+		$status: app.status,
 	});
 }
 
