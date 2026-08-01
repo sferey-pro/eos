@@ -24,12 +24,14 @@ import {
 	SheetContent,
 	SheetHeader,
 	SheetTitle,
-	SheetTrigger,
 } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Project } from "@/lib/schemas";
 
 export function HomePage() {
 	const [projects, setProjects] = useState<Project[]>([]);
+	const [isLogsOpen, setIsLogsOpen] = useState(false);
+	const [activeLogId, setActiveLogId] = useState<string>("");
 
 	useEffect(() => {
 		const fetchProjects = async () => {
@@ -46,6 +48,15 @@ export function HomePage() {
 		const interval = setInterval(fetchProjects, 2000);
 		return () => clearInterval(interval);
 	}, []);
+
+	// Ouvrir automatiquement si une erreur survient (Optionnel)
+	useEffect(() => {
+		const errorProject = projects.find((p) => p.status === "error");
+		if (errorProject && !isLogsOpen) {
+			setActiveLogId(errorProject.id);
+			setIsLogsOpen(true);
+		}
+	}, [projects, isLogsOpen]);
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
@@ -64,8 +75,10 @@ export function HomePage() {
 		}
 	};
 
+	const activeProjects = projects.filter((p) => p.status !== "stopped");
+
 	return (
-		<div className="min-h-screen bg-zinc-50/50 dark:bg-zinc-950/50 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.1),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] transition-colors duration-500">
+		<div className="min-h-screen bg-zinc-50/50 dark:bg-zinc-950/50 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.1),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] transition-colors duration-500 pb-20">
 			{/* HEADER */}
 			<header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
 				<div className="w-full px-6 h-16 flex items-center justify-between">
@@ -178,46 +191,19 @@ export function HomePage() {
 									</Button>
 								</div>
 
-								<Sheet>
-									<SheetTrigger asChild>
-										<Button
-											variant="ghost"
-											size="sm"
-											className="text-zinc-500 h-8 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
-											disabled={project.status === "stopped"}
-										>
-											<Terminal className="h-4 w-4 mr-2" />
-											Logs
-										</Button>
-									</SheetTrigger>
-									<SheetContent
-										side="bottom"
-										className="h-[40vh] sm:h-[50vh] bg-black text-zinc-100 border-t border-zinc-800"
-									>
-										<SheetHeader>
-											<SheetTitle className="text-zinc-300 font-mono text-sm flex items-center">
-												<Terminal className="w-4 h-4 mr-2" />
-												Logs: {project.name}
-											</SheetTitle>
-										</SheetHeader>
-										<ScrollArea className="h-full mt-4 rounded-md border border-zinc-800 bg-zinc-950 p-4">
-											<pre className="text-xs font-mono text-zinc-400 leading-relaxed">
-												{/* Simulation de logs pour le moment */}
-												[INFO] Starting {project.name}...{"\n"}
-												{project.status === "healthy" && (
-													<span className="text-emerald-400">
-														[OK] Healthcheck passed.
-													</span>
-												)}
-												{project.status === "error" && (
-													<span className="text-rose-400">
-														[ERROR] Process exited with code 1.
-													</span>
-												)}
-											</pre>
-										</ScrollArea>
-									</SheetContent>
-								</Sheet>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="text-zinc-500 h-8 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+									disabled={project.status === "stopped"}
+									onClick={() => {
+										setActiveLogId(project.id);
+										setIsLogsOpen(true);
+									}}
+								>
+									<Terminal className="h-4 w-4 mr-2" />
+									Logs
+								</Button>
 							</CardFooter>
 						</Card>
 					))}
@@ -239,6 +225,91 @@ export function HomePage() {
 					)}
 				</div>
 			</main>
+
+			{/* GLOBAL LOGS TERMINAL */}
+			<Sheet open={isLogsOpen} onOpenChange={setIsLogsOpen}>
+				<SheetContent
+					side="bottom"
+					className="h-[50vh] sm:h-[60vh] bg-zinc-950 text-zinc-100 border-t border-zinc-800 flex flex-col p-0"
+				>
+					<div className="flex flex-col h-full">
+						<SheetHeader className="p-4 border-b border-zinc-800 bg-zinc-900">
+							<SheetTitle className="text-zinc-300 font-mono text-sm flex items-center">
+								<Terminal className="w-4 h-4 mr-2" />
+								Terminal de Logs
+							</SheetTitle>
+						</SheetHeader>
+
+						{activeProjects.length > 0 ? (
+							<Tabs
+								value={activeLogId || activeProjects[0]?.id || ""}
+								onValueChange={setActiveLogId}
+								className="flex-1 flex flex-col overflow-hidden"
+							>
+								<div className="bg-zinc-900 border-b border-zinc-800 px-4 pt-2">
+									<TabsList className="bg-zinc-950 border border-zinc-800">
+										{activeProjects.map((p) => (
+											<TabsTrigger
+												key={p.id}
+												value={p.id}
+												className="data-[state=active]:bg-zinc-800 data-[state=active]:text-zinc-100 text-zinc-400"
+											>
+												<span
+													className={`w-2 h-2 rounded-full mr-2 ${
+														p.status === "error"
+															? "bg-rose-500"
+															: p.status === "healthy"
+																? "bg-emerald-500"
+																: p.status === "waiting"
+																	? "bg-purple-500"
+																	: "bg-blue-500"
+													}`}
+												/>
+												{p.name}
+											</TabsTrigger>
+										))}
+									</TabsList>
+								</div>
+
+								<div className="flex-1 bg-black p-4 overflow-hidden">
+									{activeProjects.map((p) => (
+										<TabsContent
+											key={p.id}
+											value={p.id}
+											className="h-full m-0 data-[state=active]:flex flex-col"
+										>
+											<ScrollArea className="h-full pr-4">
+												<pre className="text-xs font-mono text-zinc-400 leading-relaxed">
+													[INFO] Starting {p.name}...{"\n"}
+													{p.status === "healthy" && (
+														<span className="text-emerald-400">
+															[OK] Healthcheck passed.
+														</span>
+													)}
+													{p.status === "error" && (
+														<span className="text-rose-400">
+															[ERROR] Process exited with code 1.
+														</span>
+													)}
+													{p.status === "waiting" && (
+														<span className="text-purple-400">
+															[WAIT] Waiting for dependencies...
+														</span>
+													)}
+												</pre>
+											</ScrollArea>
+										</TabsContent>
+									))}
+								</div>
+							</Tabs>
+						) : (
+							<div className="flex-1 flex items-center justify-center text-zinc-500 font-mono text-sm">
+								Aucun service en cours d'exécution.
+							</div>
+						)}
+					</div>
+				</SheetContent>
+			</Sheet>
 		</div>
 	);
 }
