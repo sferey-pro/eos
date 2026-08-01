@@ -13,7 +13,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+
 
 import { useNavigate } from "react-router-dom";
 
@@ -177,7 +177,6 @@ export function SettingsPage() {
 		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-6 flex flex-col gap-6 retro:bg-background retro:text-cyan-400">
 			<div className="max-w-4xl mx-auto w-full">
 				<div className="flex items-center gap-4 mb-8 border-b border-zinc-200 dark:border-zinc-800 retro:border-fuchsia-500/50 pb-4">
-					<SidebarTrigger className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-400" />
 					<Button variant="ghost" size="icon" onClick={() => navigate("/")} className="retro:hover:bg-cyan-500/20 retro:text-cyan-400">
 						<ArrowLeft className="w-5 h-5" />
 					</Button>
@@ -187,213 +186,10 @@ export function SettingsPage() {
 					</h1>
 				</div>
 
-				<div className="flex flex-col gap-4 py-4">
-					<div className="flex justify-end">
-						<Button size="sm" onClick={() => startEdit()} disabled={!!editingId}>
-							<Plus className="w-4 h-4 mr-2" />
-							Nouveau
-						</Button>
-					</div>
-
-					<div className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
-						{presets.map((preset) => (
-							<div
-								key={preset.id}
-								className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 bg-zinc-50/50 dark:bg-zinc-900/50"
-							>
-								{editingId === preset.id ? (
-									<div className="flex flex-col gap-3">
-										<div className="flex items-center gap-2">
-											<Input
-												value={editName}
-												onChange={(e) => setEditName(e.target.value)}
-												placeholder="Nom du preset..."
-												className="h-8"
-											/>
-											<Button
-												size="sm"
-												variant="ghost"
-												className="h-8 w-8 p-0 text-emerald-500"
-												onClick={() => handleSave(preset.id)}
-											>
-												<Check className="w-4 h-4" />
-											</Button>
-											<Button
-												size="sm"
-												variant="ghost"
-												className="h-8 w-8 p-0"
-												onClick={() => setEditingId(null)}
-											>
-												<X className="w-4 h-4" />
-											</Button>
-										</div>
-										<div className="text-sm font-medium text-zinc-500 mt-2">
-											Projets inclus :
-										</div>
-										<div className="grid grid-cols-2 gap-2">
-											{projects.map((p) => (
-												<div key={p.id} className="flex items-center gap-2">
-													<Checkbox
-														id={`project-${p.id}`}
-														checked={editProjectIds.includes(p.id)}
-														onCheckedChange={(checked) => {
-															if (checked) {
-																setEditProjectIds([...editProjectIds, p.id]);
-															} else {
-																setEditProjectIds(
-																	editProjectIds.filter((id) => id !== p.id),
-																);
-															}
-														}}
-													/>
-													<label
-														htmlFor={`project-${p.id}`}
-														className="text-sm cursor-pointer truncate"
-													>
-														{p.name}
-													</label>
-												</div>
-											))}
-										</div>
-									</div>
-								) : (
-									<div className="flex items-center justify-between">
-										<div className="flex flex-col">
-											<span className="font-medium text-sm">{preset.name}</span>
-											<span className="text-xs text-zinc-500">
-												{preset.projectIds.length} projet(s)
-											</span>
-										</div>
-										<div className="flex items-center gap-1">
-											<Button
-												size="sm"
-												variant="ghost"
-												className="h-8 w-8 p-0"
-												onClick={() => startEdit(preset)}
-											>
-												<Edit2 className="w-4 h-4" />
-											</Button>
-											<Button
-												size="sm"
-												variant="ghost"
-												className="h-8 w-8 p-0 text-rose-500"
-												onClick={() => handleDelete(preset.id)}
-											>
-												<Trash2 className="w-4 h-4" />
-											</Button>
-										</div>
-									</div>
-								)}
-							</div>
-						))}
-
-						{editingId === "new-preset" && (
-							<div className="border border-indigo-200 dark:border-indigo-800 rounded-lg p-4 bg-indigo-50/30 dark:bg-indigo-900/10">
-								<div className="flex flex-col gap-3">
-									<div className="flex items-center gap-2">
-										<Input
-											value={editName}
-											onChange={(e) => setEditName(e.target.value)}
-											placeholder="Nom du preset..."
-											className="h-8"
-										/>
-										<Button
-											size="sm"
-											variant="ghost"
-											className="h-8 w-8 p-0 text-emerald-500"
-											onClick={() => handleSave("new-preset")}
-										>
-											<Check className="w-4 h-4" />
-										</Button>
-										<Button
-											size="sm"
-											variant="ghost"
-											className="h-8 w-8 p-0"
-											onClick={() => setEditingId(null)}
-										>
-											<X className="w-4 h-4" />
-										</Button>
-									</div>
-									<div className="text-sm font-medium text-zinc-500 mt-2">
-										Projets inclus :
-									</div>
-									<div className="grid grid-cols-2 gap-2">
-										{projects.map((p) => (
-											<div key={p.id} className="flex items-center gap-2">
-												<Checkbox
-													id={`new-project-${p.id}`}
-													checked={editProjectIds.includes(p.id)}
-													onCheckedChange={(checked) => {
-														if (checked) {
-															setEditProjectIds([...editProjectIds, p.id]);
-														} else {
-															setEditProjectIds(
-																editProjectIds.filter((id) => id !== p.id),
-															);
-														}
-													}}
-												/>
-												<label
-													htmlFor={`new-project-${p.id}`}
-													className="text-sm cursor-pointer truncate"
-												>
-													{p.name}
-												</label>
-											</div>
-										))}
-									</div>
-								</div>
-							</div>
-						)}
-					</div>
-				</div>
-
-				<div className="flex flex-col gap-4 py-4 mt-8 border-t border-zinc-200 dark:border-zinc-800 retro:border-fuchsia-500/50">
-					<h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2 retro:text-cyan-400 retro:font-mono retro:uppercase tracking-widest">
-						Import / Export
-					</h2>
-					<p className="text-sm text-zinc-500 dark:text-zinc-400">
-						Sauvegardez ou restaurez toute votre configuration (Projets, Presets, et Applications).
+				<div className="flex flex-col gap-4 py-4 text-center mt-12">
+					<p className="text-zinc-500 retro:text-cyan-600 font-mono">
+						// Espace nettoyé pour la refonte de l'interface
 					</p>
-					<div className="flex items-center gap-4 mt-2">
-						<Button onClick={handleExport} className="bg-emerald-600 hover:bg-emerald-700 text-white retro:bg-transparent retro:border-2 retro:border-cyan-400 retro:text-cyan-400 retro:hover:bg-cyan-400/20">
-							<Download className="w-4 h-4 mr-2" />
-							Exporter
-						</Button>
-						<Button onClick={handleImport} className="bg-indigo-600 hover:bg-indigo-700 text-white retro:bg-transparent retro:border-2 retro:border-fuchsia-500 retro:text-fuchsia-500 retro:hover:bg-fuchsia-500/20">
-							<Upload className="w-4 h-4 mr-2" />
-							Importer
-						</Button>
-						<Dialog>
-							<DialogTrigger asChild>
-								<Button className="bg-rose-600 hover:bg-rose-700 text-white ml-auto retro:bg-transparent retro:border-2 retro:border-rose-500 retro:text-rose-500 retro:hover:bg-rose-500/20">
-									<AlertTriangle className="w-4 h-4 mr-2" />
-									Vider tout
-								</Button>
-							</DialogTrigger>
-							<DialogContent className="sm:max-w-[425px] retro:bg-black retro:border-2 retro:border-rose-500 retro:shadow-[0_0_20px_rgba(244,63,94,0.3)]">
-								<DialogHeader>
-									<DialogTitle className="flex items-center gap-2 text-rose-500 retro:font-mono retro:uppercase">
-										<AlertTriangle className="w-5 h-5" />
-										Vider la configuration
-									</DialogTitle>
-									<DialogDescription className="text-zinc-500 dark:text-zinc-400">
-										Êtes-vous sûr de vouloir vider TOUTE la configuration (projets, presets, apps) ? Cette action est irréversible et supprimera tout le contenu du tableau de bord.
-									</DialogDescription>
-								</DialogHeader>
-								<DialogFooter className="mt-4">
-									<DialogTrigger asChild>
-										<Button variant="outline" className="retro:bg-transparent retro:border-cyan-400 retro:text-cyan-400 retro:hover:bg-cyan-400/10">Annuler</Button>
-									</DialogTrigger>
-									<DialogTrigger asChild>
-										<Button onClick={handleClear} className="bg-rose-600 hover:bg-rose-700 text-white retro:bg-transparent retro:border-2 retro:border-rose-500 retro:text-rose-500 retro:hover:bg-rose-500/20">
-											Confirmer la suppression
-										</Button>
-									</DialogTrigger>
-								</DialogFooter>
-							</DialogContent>
-						</Dialog>
-					</div>
 				</div>
 			</div>
 		</div>
