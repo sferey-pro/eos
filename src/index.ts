@@ -86,6 +86,7 @@ const server = serve<WebSocketData>({
 				try {
 					const proc = Bun.spawn(["docker", "system", "prune", "-af", "--volumes"]);
 					const text = await new Response(proc.stdout).text();
+					await proc.exited;
 					const match = text.match(/Total reclaimed space: (.*)/);
 					const reclaimed = match ? match[1] : "0 B";
 					return Response.json({ success: true, reclaimed, text });
@@ -180,7 +181,13 @@ const server = serve<WebSocketData>({
 
 				const path = require("path");
 				// Assuming app.icon is a relative path to the project directory or an absolute path
-				const fullPath = path.resolve(app.path, app.icon);
+				const resolvedAppPath = path.resolve(app.path);
+				const fullPath = path.resolve(resolvedAppPath, app.icon);
+				
+				if (!fullPath.startsWith(resolvedAppPath)) {
+					return new Response("Forbidden access", { status: 403 });
+				}
+
 				const file = Bun.file(fullPath);
 				
 				if (await file.exists()) {

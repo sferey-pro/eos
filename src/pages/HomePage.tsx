@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle, Plus, Settings2, Download, Upload, Trash2, Box, Monitor, GitBranch, ArrowUp, ArrowDown } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Activity, Cpu, MemoryStick, AlertTriangle, Plus, Settings2, Download, Upload, Trash2, Box, Monitor, GitBranch, ArrowUp, ArrowDown } from "lucide-react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
 import { PresetManagerModal } from "@/components/PresetManagerModal";
@@ -55,9 +55,22 @@ export function HomePage() {
 	};
 
 	useEffect(() => {
-		fetchData();
-		const interval = setInterval(fetchData, 2000);
-		return () => clearInterval(interval);
+		let timeoutId: NodeJS.Timeout;
+		let isMounted = true;
+
+		const pollData = async () => {
+			if (!isMounted) return;
+			await fetchData();
+			if (isMounted) {
+				timeoutId = setTimeout(pollData, 2000);
+			}
+		};
+
+		pollData();
+		return () => {
+			isMounted = false;
+			clearTimeout(timeoutId);
+		};
 	}, []);
 
 	// Reset metric history when changing project
@@ -67,7 +80,11 @@ export function HomePage() {
 
 	useEffect(() => {
 		if (!selectedProjectId) return;
+		let timeoutId: NodeJS.Timeout;
+		let isMounted = true;
+
 		const fetchMetrics = async () => {
+			if (!isMounted) return;
 			try {
 				const res = await fetch(`/api/metrics?id=${selectedProjectId}`);
 				if (res.ok) {
@@ -84,12 +101,15 @@ export function HomePage() {
 			} catch (e) {
 				console.error(e);
 			}
+			if (isMounted) {
+				timeoutId = setTimeout(fetchMetrics, 3000);
+			}
 		};
 
 		fetchMetrics();
-		const metricsInterval = setInterval(fetchMetrics, 3000);
 		return () => {
-			clearInterval(metricsInterval);
+			isMounted = false;
+			clearTimeout(timeoutId);
 		};
 	}, [selectedProjectId]);
 
@@ -283,6 +303,15 @@ export function HomePage() {
 
 	const selectedProject = projects.find(p => p.id === selectedProjectId) || projects[0];
 
+	const groupedProjects = useMemo(() => {
+		return projects.reduce((acc, project) => {
+			const projectName = project.path.split('/').pop() || project.path;
+			if (!acc[projectName]) acc[projectName] = [];
+			acc[projectName].push(project);
+			return acc;
+		}, {} as Record<string, Project[]>);
+	}, [projects]);
+
 	return (
 		<div className="relative flex flex-col h-screen bg-zinc-50 dark:bg-zinc-950 retro:bg-[#050505] transition-all duration-500 overflow-hidden w-full font-sans text-zinc-900 dark:text-zinc-100 retro:text-cyan-400">
 			{/* RETRO OVERLAYS */}
@@ -384,20 +413,8 @@ export function HomePage() {
 						<span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 retro:text-cyan-500/60 uppercase tracking-widest w-24 text-right">States</span>
 					</div>
 					<div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
-						<Accordion type="multiple" defaultValue={Object.keys(projects.reduce((acc, project) => {
-							const projectName = project.path.split('/').pop() || project.path;
-							if (!acc[projectName]) acc[projectName] = [];
-							acc[projectName].push(project);
-							return acc;
-						}, {} as Record<string, Project[]>))} className="space-y-2">
-							{Object.entries(
-								projects.reduce((acc, project) => {
-									const projectName = project.path.split('/').pop() || project.path;
-									if (!acc[projectName]) acc[projectName] = [];
-									acc[projectName].push(project);
-									return acc;
-								}, {} as Record<string, Project[]>)
-							).map(([projectName, projectGroup]) => (
+						<Accordion type="multiple" defaultValue={Object.keys(groupedProjects)} className="space-y-2">
+							{Object.entries(groupedProjects).map(([projectName, projectGroup]) => (
 								<AccordionItem key={projectName} value={projectName} className="border border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/30 rounded-md overflow-hidden bg-white/40 dark:bg-zinc-900/40 retro:bg-black/40">
 									<AccordionTrigger className="group px-3 py-2 hover:no-underline hover:bg-zinc-100 dark:hover:bg-zinc-800/50 retro:hover:bg-cyan-950/30 transition-colors">
 										<div className="flex items-center gap-3">
@@ -431,6 +448,9 @@ export function HomePage() {
 										{projectGroup.map((project) => (
 											<div 
 												key={project.id}
+												role="button"
+												tabIndex={0}
+												onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setSelectedProjectId(project.id); setSelectedAppId(null); } }}
 												onClick={() => { setSelectedProjectId(project.id); setSelectedAppId(null); }}
 												className={`group flex items-center h-9 px-2 rounded-sm cursor-pointer transition-colors border ${
 													selectedProjectId === project.id 
@@ -491,6 +511,9 @@ export function HomePage() {
 						{apps.map(app => (
 							<div 
 								key={app.id} 
+								role="button"
+								tabIndex={0}
+								onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setSelectedAppId(app.id); setSelectedProjectId(null); } }}
 								onClick={() => { setSelectedAppId(app.id); setSelectedProjectId(null); }}
 								className={`group flex items-center justify-between h-10 px-3 rounded-md cursor-pointer transition-colors border ${
 									selectedAppId === app.id

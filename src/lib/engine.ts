@@ -289,6 +289,9 @@ export function ensureLogStream(projectId: string) {
 		cwd: project.path,
 		stdout: "pipe",
 		stderr: "pipe",
+		onExit: () => {
+			logProcesses.delete(projectId);
+		}
 	});
 	
 	logProcesses.set(projectId, logProc);
@@ -343,6 +346,7 @@ export function startProjectGroup(groupPath: string) {
 			}
 		}
 	});
+	processes.set(groupPath, proc);
 
 	// To avoid blocking, we won't stream the output of this global command to every individual project,
 	// but we could stream it to the first project or all of them.
@@ -355,6 +359,12 @@ export function stopProjectGroup(groupPath: string) {
 	if (groupProjects.length === 0) return;
 
 	console.log(`[Engine] Stopping project group: ${groupPath}`);
+	const procGroup = processes.get(groupPath);
+	if (procGroup) {
+		procGroup.kill();
+		processes.delete(groupPath);
+	}
+
 	Bun.spawn(["docker", "compose", "stop"], {
 		cwd: groupPath,
 	});

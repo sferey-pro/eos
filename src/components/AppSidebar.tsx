@@ -44,9 +44,22 @@ export function AppSidebar() {
   };
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 2000);
-    return () => clearInterval(interval);
+    let timeoutId: NodeJS.Timeout;
+    let isMounted = true;
+
+    const pollData = async () => {
+      if (!isMounted) return;
+      await fetchData();
+      if (isMounted) {
+        timeoutId = setTimeout(pollData, 2000);
+      }
+    };
+
+    pollData();
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   return (
