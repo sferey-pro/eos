@@ -7,8 +7,9 @@ Ce document centralise les règles métier, les décisions architecturales et le
 - Si un composant UI est nécessaire et existe dans **Shadcn UI**, il doit être utilisé (pas de création sur-mesure inutile).
 
 ## 2. Fonctionnement Métier (Le Moteur EOS)
-- **Scan Intelligent** : Lorsqu'un utilisateur renseigne un chemin d'accès (et un éventuel sous-dossier), EOS doit parcourir le dossier pour déduire les commandes de démarrage pertinentes.
-- **Backend Bun** : Le routage natif de Bun (`src/index.ts`) agit comme un proxy local. Il est responsable du "process spawning" (lancement des terminaux en arrière-plan) et de la récupération de la sortie standard (stdout/stderr).
+- **Scan Intelligent (Orienté Docker)** : Lorsqu'un utilisateur renseigne un chemin d'accès, EOS parcourt le dossier en cherchant principalement des fichiers `docker-compose.yml`.
+- **Backend Bun (Super-Orchestrateur)** : Le routage natif de Bun agit comme un proxy local. Il est responsable d'orchestrer les commandes Docker, de resynchroniser son état au redémarrage (via `docker ps`) et de la récupération de la sortie standard.
+- **Healthchecks Actifs** : EOS ne fait pas aveuglément confiance au statut "running" de Docker Compose. Il vérifie activement l'état des services via des pings (HTTP ou TCP) pour s'assurer de leur santé réelle.
 - **Persistance** : La liste des projets configurés doit être sauvegardée localement dans une base de données **SQLite** gérée nativement par Bun (`bun:sqlite`) pour subsister aux redémarrages.
 
 ## 3. Conventions de Développement
