@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="public/eos-logo.jpg" alt="EOS Logo" width="150" />
+</div>
+
 # EOS - Environment Orchestration System
 
 > Dans la mythologie grecque, Éos est la déesse de l'Aurore. Tout comme elle illumine le ciel et réveille le monde, le projet **EOS** réveille et démarre l'intégralité de votre environnement de développement distribué. Projet frère de *Aegis* (agrégateur de vulnérabilités).
@@ -29,4 +33,4 @@
    ```bash
    bun run dev
    ```
-3. L'interface est disponible sur `http://localhost:3000`.
+3. L'interface est disponible sur `http://localhost:5173`.
