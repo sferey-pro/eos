@@ -28,9 +28,10 @@ export function AddAppModal({ children, app, onSuccess }: { children?: ReactNode
 			setPath(app?.path || "");
 			setCommand(app?.command || "");
 			setUrl(app?.url || "http://localhost:3000");
-			setIcon(app?.icon || "");
+			// If the icon is "Box" (default), show it as empty in the input so the user can easily change it
+			setIcon(app?.icon === "Box" ? "" : (app?.icon || ""));
 		}
-	}, [open, app]);
+	}, [open, app?.name, app?.path, app?.command, app?.url, app?.icon]);
 
 	const handleSave = async () => {
 		setIsSaving(true);
