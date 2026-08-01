@@ -14,7 +14,7 @@ export function App() {
 			<TooltipProvider>
 				<SidebarProvider>
 					<div className="flex w-full min-h-screen">
-						<AppSidebar />
+						{/* <AppSidebar /> */}
 						<main className="flex-1 w-full relative">
 							<Routes>
 								<Route path="/" element={<HomePage />} />

@@ -33,7 +33,6 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import type { Project, App, Preset } from "@/lib/schemas";
 import { useNavigate } from "react-router-dom";
 
@@ -175,7 +174,6 @@ export function HomePage() {
 					<div className="w-full px-6 h-16 flex items-center justify-between">
 						{/* Logo & Title */}
 						<div className="flex items-center gap-4">
-							<SidebarTrigger className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-400" />
 						</div>
 
 						{/* Center: Presets */}
