@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle } from "lucide-react";
+import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle, Plus } from "lucide-react";
 import { AddProjectModal } from "@/components/AddProjectModal";
+import { AddAppModal } from "@/components/AddAppModal";
 import { PresetManagerModal } from "@/components/PresetManagerModal";
 import { TerminalComponent } from "@/components/TerminalComponent";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -8,12 +9,13 @@ import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { Project, Preset } from "@/lib/schemas";
+import type { Project, Preset, App } from "@/lib/schemas";
 
 export function HomePage() {
 	const { theme } = useTheme();
 	const [projects, setProjects] = useState<Project[]>([]);
 	const [presets, setPresets] = useState<Preset[]>([]);
+	const [apps, setApps] = useState<App[]>([]);
 	const [activePresetId, setActivePresetId] = useState<string | null>(null);
 	const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 	const [metrics, setMetrics] = useState<{ cpu: string, ram: string }>({ cpu: "0%", ram: "0%" });
@@ -28,6 +30,7 @@ export function HomePage() {
 				const data = await res.json();
 				setProjects(data.projects || []);
 				setPresets(data.presets || []);
+				setApps(data.apps || []);
 				if (!selectedProjectId && data.projects?.length > 0) {
 					setSelectedProjectId(data.projects[0].id);
 				}
@@ -98,6 +101,19 @@ export function HomePage() {
 			fetchData();
 		} catch (e) {
 			console.error("Action failed:", e);
+		}
+	};
+
+	const handleAppAction = async (id: string, action: "start" | "stop") => {
+		try {
+			await fetch("/api/action", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ id, action, type: "app" }),
+			});
+			fetchData();
+		} catch (e) {
+			console.error("App action failed:", e);
 		}
 	};
 
@@ -337,6 +353,45 @@ export function HomePage() {
 								</AccordionItem>
 							))}
 						</Accordion>
+					</div>
+					
+					{/* APPLICATIONS DOCK IN LEFT PANE */}
+					<div className="h-10 border-y border-zinc-200 dark:border-zinc-800 retro:border-fuchsia-500/20 flex items-center px-4 bg-zinc-50/50 dark:bg-zinc-900/50 retro:bg-black/40">
+						<span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 retro:text-fuchsia-400/80 uppercase tracking-widest flex-1">Quick Apps</span>
+						<AddAppModal>
+							<Button variant="ghost" size="icon" className="h-6 w-6 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-500 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-300">
+								<Plus className="w-3.5 h-3.5" />
+							</Button>
+						</AddAppModal>
+					</div>
+					<div className="p-2 space-y-1 bg-white/30 dark:bg-zinc-950/30 retro:bg-black/20">
+						{apps.length === 0 && (
+							<div className="text-xs text-center p-2 text-zinc-400 italic">No apps configured</div>
+						)}
+						{apps.map(app => (
+							<div key={app.id} className="group flex items-center justify-between h-10 px-3 rounded-md bg-transparent border border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-900 retro:hover:bg-cyan-950/10 retro:hover:border-cyan-500/20 transition-colors">
+								<div className="flex items-center gap-2">
+									<div className={`w-2 h-2 rounded-full ${getStatusColor(app.status)}`} />
+									<span className="font-medium text-sm retro:text-cyan-300 retro:font-mono">{app.name}</span>
+								</div>
+								<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+									{(app.status === "stopped" || app.status === "error") ? (
+										<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-500 retro:text-cyan-500 retro:hover:bg-emerald-500/20 retro:hover:text-emerald-400" onClick={() => handleAppAction(app.id, "start")}>
+											<Play className="w-3 h-3" />
+										</Button>
+									) : (
+										<>
+											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-blue-500 retro:text-cyan-500 retro:hover:bg-blue-500/20 retro:hover:text-blue-400" onClick={() => window.open(app.url, '_blank')}>
+												<Activity className="w-3 h-3" />
+											</Button>
+											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-500 retro:text-cyan-500 retro:hover:bg-rose-500/20 retro:hover:text-rose-400" onClick={() => handleAppAction(app.id, "stop")}>
+												<Square className="w-3 h-3" />
+											</Button>
+										</>
+									)}
+								</div>
+							</div>
+						))}
 					</div>
 				</div>
 
