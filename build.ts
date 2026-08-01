@@ -1,5 +1,5 @@
 import tailwind from "bun-plugin-tailwind";
-import { rm } from "node:fs/promises";
+import { rm, cp } from "node:fs/promises";
 import path from "node:path";
 
 const outdir = path.join(process.cwd(), "dist");
@@ -24,3 +24,6 @@ for (const output of result.outputs) {
 		` ${path.relative(process.cwd(), output.path)}  ${(output.size / 1024).toFixed(1)} KB`,
 	);
 }
+
+// Copy public directory to dist
+await cp(path.join(process.cwd(), "public"), outdir, { recursive: true, force: true });
