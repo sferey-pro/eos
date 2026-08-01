@@ -60,61 +60,70 @@ export function startHealthcheckEngine() {
 		}
 	}, 5000);
 
-	// Docker Sync Loop (every 5 seconds) to catch implicitly started/stopped services (depends_on)
+	// Docker Sync Loop (every 5 seconds) using a single global `docker ps`
 	setInterval(async () => {
 		const projects = getProjects().filter(p => p.type === "docker");
-		const paths = [...new Set(projects.map(p => p.path))];
+		if (projects.length === 0) return;
 
-		for (const path of paths) {
-			try {
-				const proc = Bun.spawn(["docker", "compose", "ps", "--format", "json"], { cwd: path });
-				const output = await new Response(proc.stdout).text();
-				
-				const runningServices = new Set<string>();
-				if (output.trim()) {
-					try {
-						const parsed = output.trim().startsWith("[") 
-							? JSON.parse(output) 
-							: output.split('\n').filter(Boolean).map(l => JSON.parse(l));
-						
-						const items = Array.isArray(parsed) ? parsed : [parsed];
-						for (const item of items) {
-							if (item && item.Service && (item.State === "running" || item.Status?.includes("Up"))) {
-								runningServices.add(item.Service);
-							}
+		try {
+			const proc = Bun.spawn(["docker", "ps", "-a", "--format", "{{json .}}"]);
+			const output = await new Response(proc.stdout).text();
+			
+			const lines = output.split('\n').filter(Boolean);
+			const runningServicesMap = new Map<string, Set<string>>();
+
+			for (const line of lines) {
+				try {
+					const data = JSON.parse(line);
+					const isRunning = data.State === "running" || data.Status?.includes("Up");
+					
+					const labelsStr = data.Labels || "";
+					let workingDir = "";
+					let service = "";
+					
+					for (const label of labelsStr.split(",")) {
+						if (label.startsWith("com.docker.compose.project.working_dir=")) {
+							workingDir = label.split("=")[1];
+						} else if (label.startsWith("com.docker.compose.service=")) {
+							service = label.split("=")[1];
 						}
-					} catch (e) {
-						console.error("[Healthcheck] Failed to parse docker compose ps json", e);
 					}
-				}
 
-				const pathProjects = projects.filter(p => p.path === path);
-				for (const p of pathProjects) {
-					const parts = p.command.split(" ");
-					const serviceName = parts[parts.length - 1]; // e.g. "docker compose up -d php" -> "php"
-					if (!serviceName) continue;
-
-					const isRunningInDocker = runningServices.has(serviceName);
-
-					// Auto-detect implicitly started services (e.g. via depends_on)
-					if (isRunningInDocker && p.status === "stopped") {
-						console.log(`[Healthcheck] Docker Sync: Auto-detected ${p.name} as running`);
-						p.status = "running";
-						updateProject(p);
-						ensureLogStream(p.id);
-					} 
-					// Auto-detect services stopped outside of EOS
-					else if (!isRunningInDocker && (p.status === "running" || p.status === "starting")) {
-						console.log(`[Healthcheck] Docker Sync: Auto-detected ${p.name} as stopped`);
-						p.status = "stopped";
-						updateProject(p);
-					} else if (isRunningInDocker && p.status === "running") {
-						ensureLogStream(p.id); // Just in case it was restarted or dropped
+					if (workingDir && service) {
+						if (!runningServicesMap.has(workingDir)) {
+							runningServicesMap.set(workingDir, new Set());
+						}
+						if (isRunning) {
+							runningServicesMap.get(workingDir)!.add(service);
+						}
 					}
+				} catch (e) {
+					// Ignore parsing errors for individual lines
 				}
-			} catch (error) {
-				console.error("[Healthcheck] Error syncing docker state for", path, error);
 			}
+
+			for (const p of projects) {
+				const parts = p.command.split(" ");
+				const serviceName = parts[parts.length - 1];
+				if (!serviceName) continue;
+
+				const isRunningInDocker = runningServicesMap.get(p.path)?.has(serviceName) || false;
+
+				if (isRunningInDocker && p.status === "stopped") {
+					console.log(`[Healthcheck] Docker Sync: Auto-detected ${p.name} as running`);
+					p.status = "running";
+					updateProject(p);
+					ensureLogStream(p.id);
+				} else if (!isRunningInDocker && (p.status === "running" || p.status === "starting")) {
+					console.log(`[Healthcheck] Docker Sync: Auto-detected ${p.name} as stopped`);
+					p.status = "stopped";
+					updateProject(p);
+				} else if (isRunningInDocker && p.status === "running") {
+					ensureLogStream(p.id);
+				}
+			}
+		} catch (error) {
+			console.error("[Healthcheck] Error syncing global docker state", error);
 		}
 	}, 5000);
 }
