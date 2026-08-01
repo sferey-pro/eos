@@ -167,19 +167,10 @@ export function HomePage() {
 				</div>
 
 				<div className="relative z-10 w-full max-w-2xl flex flex-col items-center justify-center text-center space-y-10 p-10 bg-black/40 backdrop-blur-md border border-fuchsia-500/30 rounded-3xl shadow-[0_0_50px_rgba(217,70,239,0.2)]">
-					<div className="relative w-40 h-40">
+					<div className="relative w-64 h-64 mb-4">
 						<div className="absolute -inset-4 rounded-full bg-cyan-500/20 blur-2xl animate-pulse" />
 						<img src="/eos-logo.jpg" alt="EOS Logo" className="relative w-full h-full rounded-full object-cover border-2 border-zinc-200 dark:border-zinc-800 retro:hidden" />
 						<img src="/eos-logo-retro.jpg" alt="EOS Logo Retro" className="relative hidden retro:block w-full h-full rounded-full object-cover border-2 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.5)]" />
-					</div>
-					
-					<div className="space-y-4">
-						<h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 font-mono tracking-tighter drop-shadow-[0_0_15px_rgba(255,0,255,0.6)] uppercase italic">
-							EOS
-						</h1>
-						<h2 className="text-xl text-cyan-300 font-mono uppercase tracking-[0.3em] font-medium drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]">
-							Environment Operating System
-						</h2>
 					</div>
 					
 					<p className="text-lg text-fuchsia-300/80 max-w-lg mx-auto font-medium">
