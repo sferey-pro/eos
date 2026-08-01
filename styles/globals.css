@@ -157,3 +157,40 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ring);
+}
+
+/* Xterm Scrollbar Customization */
+.xterm-viewport::-webkit-scrollbar {
+  width: 10px;
+}
+.xterm-viewport::-webkit-scrollbar-thumb {
+  background: #52525b; /* zinc-600 */
+}
+.dark .xterm-viewport::-webkit-scrollbar-thumb {
+  background: #3f3f46; /* zinc-700 */
+}
+.retro .xterm-viewport::-webkit-scrollbar-thumb {
+  background: #06b6d4; /* cyan-500 */
+  border-radius: 0;
+  border: 1px solid #0891b2; /* cyan-600 */
+}
+.retro ::-webkit-scrollbar-thumb {
+  background: #d946ef; /* fuchsia-500 */
+  border-radius: 0;
+}
+

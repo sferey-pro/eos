@@ -21,12 +21,31 @@ import {
 	stopApp,
 	getProjectLogs,
 	getProjectMetrics,
+	subscribeToLogs,
+	unsubscribeFromLogs
 } from "./lib/engine";
 
 startHealthcheckEngine();
 
-const server = serve({
+type WebSocketData = {
+	projectId: string | null;
+};
+
+const server = serve<WebSocketData>({
 	port: process.env.PORT || 5173,
+	fetch(req, server) {
+		const url = new URL(req.url);
+		if (url.pathname === "/ws/logs") {
+			const id = url.searchParams.get("id");
+			if (server.upgrade(req, { data: { projectId: id } })) {
+				return; // Upgrade successful
+			}
+			return new Response("Upgrade failed", { status: 500 });
+		}
+		
+		// Let the fallback routes handle everything else
+		return; 
+	},
 	routes: {
 		"/eos-logo.jpg": Bun.file("./public/eos-logo.jpg"),
 		"/eos-logo-retro.jpg": Bun.file("./public/eos-logo-retro.jpg"),
@@ -34,7 +53,7 @@ const server = serve({
 		"/*": index,
 
 		"/api/scan": {
-			async POST(req) {
+			async POST(req: Request) {
 				try {
 					const body = await req.json();
 					if (!body.targetPath) {
@@ -86,7 +105,7 @@ const server = serve({
 				}));
 				return Response.json({ projects });
 			},
-			async POST(req) {
+			async POST(req: Request) {
 				try {
 					const body = await req.json();
 					const projects = Array.isArray(body) ? body : [body];
@@ -107,7 +126,7 @@ const server = serve({
 				const apps = getApps();
 				return Response.json({ apps });
 			},
-			async POST(req) {
+			async POST(req: Request) {
 				try {
 					const body = await req.json();
 					const app = AppSchema.parse(body);
@@ -124,7 +143,7 @@ const server = serve({
 				const presets = getPresets();
 				return Response.json({ presets });
 			},
-			async POST(req) {
+			async POST(req: Request) {
 				try {
 					const body = await req.json();
 					const preset = PresetSchema.parse(body);
@@ -134,7 +153,7 @@ const server = serve({
 					return new Response(String(e), { status: 400 });
 				}
 			},
-			async PUT(req) {
+			async PUT(req: Request) {
 				try {
 					const body = await req.json();
 					if (!body.id) return new Response("Missing id", { status: 400 });
@@ -144,7 +163,7 @@ const server = serve({
 					return new Response(String(e), { status: 400 });
 				}
 			},
-			async DELETE(req) {
+			async DELETE(req: Request) {
 				try {
 					const body = await req.json();
 					if (!body.id) return new Response("Missing id", { status: 400 });
@@ -170,7 +189,7 @@ const server = serve({
 		},
 
 		"/api/import": {
-			async POST(req) {
+			async POST(req: Request) {
 				try {
 					const data = await req.json();
 					clearAllData();
@@ -204,7 +223,7 @@ const server = serve({
 		},
 
 		"/api/action": {
-			async POST(req) {
+			async POST(req: Request) {
 				try {
 					const { id, action, type = "project" } = await req.json();
 
@@ -226,7 +245,7 @@ const server = serve({
 		},
 
 		"/api/logs": {
-			async GET(req) {
+			async GET(req: Request) {
 				const url = new URL(req.url);
 				const id = url.searchParams.get("id");
 				if (!id) return new Response("Missing id", { status: 400 });
@@ -237,7 +256,7 @@ const server = serve({
 		},
 
 		"/api/metrics": {
-			async GET(req) {
+			async GET(req: Request) {
 				const url = new URL(req.url);
 				const id = url.searchParams.get("id");
 				if (!id) return new Response("Missing id", { status: 400 });
@@ -245,6 +264,22 @@ const server = serve({
 				const metrics = await getProjectMetrics(id);
 				return Response.json(metrics);
 			},
+		},
+	},
+
+	websocket: {
+		message() {}, // Client shouldn't send anything
+		open(ws) {
+			const projectId = ws.data.projectId;
+			if (projectId) {
+				subscribeToLogs(projectId, ws);
+			}
+		},
+		close(ws) {
+			const projectId = ws.data.projectId;
+			if (projectId) {
+				unsubscribeFromLogs(projectId, ws);
+			}
 		},
 	},
 

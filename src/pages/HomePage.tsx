@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle } from "lucide-react";
 import { AddProjectModal } from "@/components/AddProjectModal";
+import { TerminalComponent } from "@/components/TerminalComponent";
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +11,10 @@ export function HomePage() {
 	const { theme } = useTheme();
 	const [projects, setProjects] = useState<Project[]>([]);
 	const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-	const [activeLogs, setActiveLogs] = useState<string>("");
 	const [metrics, setMetrics] = useState<{ cpu: string, ram: string }>({ cpu: "0%", ram: "0%" });
+	const [metricHistory, setMetricHistory] = useState<{ cpu: number, ram: number }[]>([]);
+
+	const maxGraphPoints = 20;
 
 	const fetchData = async () => {
 		try {
@@ -34,37 +37,35 @@ export function HomePage() {
 		return () => clearInterval(interval);
 	}, []);
 
+	// Reset metric history when changing project
+	useEffect(() => {
+		setMetricHistory([]);
+	}, [selectedProjectId]);
+
 	useEffect(() => {
 		if (!selectedProjectId) return;
-		const fetchLogs = async () => {
-			try {
-				const res = await fetch(`/api/logs?id=${selectedProjectId}`);
-				if (res.ok) {
-					const data = await res.json();
-					setActiveLogs(data.logs || "");
-				}
-			} catch (e) {
-				console.error(e);
-			}
-		};
 		const fetchMetrics = async () => {
 			try {
 				const res = await fetch(`/api/metrics?id=${selectedProjectId}`);
 				if (res.ok) {
 					const data = await res.json();
 					setMetrics(data);
+					const cpuVal = parseFloat(data.cpu) || 0;
+					const ramVal = parseFloat(data.ram) || 0;
+					setMetricHistory(prev => {
+						const next = [...prev, { cpu: cpuVal, ram: ramVal }];
+						if (next.length > maxGraphPoints) return next.slice(next.length - maxGraphPoints);
+						return next;
+					});
 				}
 			} catch (e) {
 				console.error(e);
 			}
 		};
 
-		fetchLogs();
 		fetchMetrics();
-		const logInterval = setInterval(fetchLogs, 1000);
 		const metricsInterval = setInterval(fetchMetrics, 3000);
 		return () => {
-			clearInterval(logInterval);
 			clearInterval(metricsInterval);
 		};
 	}, [selectedProjectId]);
@@ -122,6 +123,21 @@ export function HomePage() {
 	const getStatusLabel = (status: string) => {
 		if (status === "starting" || status === "waiting") return "Building...";
 		return status.charAt(0).toUpperCase() + status.slice(1);
+	};
+
+	const buildSvgPath = (values: number[], maxVal: number) => {
+		const padded = [...Array(Math.max(0, maxGraphPoints - values.length)).fill(0), ...values];
+		const step = 100 / (maxGraphPoints - 1);
+		
+		let path = `M0 40 `;
+		padded.forEach((val, i) => {
+			const x = i * step;
+			const scaledVal = (val / maxVal) * 40;
+			const y = 40 - scaledVal;
+			path += `L${x.toFixed(1)} ${y.toFixed(1)} `;
+		});
+		path += `L100 40 Z`;
+		return path;
 	};
 
 	if (projects.length === 0) {
@@ -274,17 +290,23 @@ export function HomePage() {
 									</Button>
 								</div>
 
-								{/* Mock Mini-Utilization Graphs */}
+								{/* Real Mini-Utilization Graphs */}
 								<div className="grid grid-cols-2 gap-8 h-24">
 									<div className="flex flex-col gap-1 relative">
 										<div className="flex items-center justify-between text-xs font-semibold text-zinc-500 retro:text-cyan-500/80 uppercase tracking-widest font-mono mb-2">
 											<span className="flex items-center gap-1.5"><Cpu className="w-3.5 h-3.5" /> CPU Utilization</span>
 											<span className="text-zinc-900 dark:text-zinc-300 retro:text-cyan-300">{metrics.cpu}</span>
 										</div>
-										<div className="absolute bottom-0 left-0 right-0 h-12 flex items-end justify-between gap-1 opacity-50 retro:opacity-100">
-											{/* SVG Mock Graph */}
-											<svg className="w-full h-full text-blue-500 retro:text-cyan-400" viewBox="0 0 100 40" preserveAspectRatio="none">
-												<path d="M0 40 L0 35 L10 32 L20 38 L30 25 L40 30 L50 10 L60 35 L70 15 L80 20 L90 5 L100 25 L100 40 Z" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="1.5" className="retro:drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]" />
+										<div className="absolute bottom-0 left-0 right-0 h-12 flex items-end justify-between gap-1 opacity-50 retro:opacity-100 transition-all duration-300">
+											<svg className="w-full h-full text-blue-500 retro:text-cyan-400 drop-shadow-sm retro:drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]" viewBox="0 0 100 40" preserveAspectRatio="none">
+												<path 
+													d={buildSvgPath(metricHistory.map(m => m.cpu), Math.max(100, ...metricHistory.map(m => m.cpu)))} 
+													fill="currentColor" 
+													fillOpacity="0.15" 
+													stroke="currentColor" 
+													strokeWidth="1.5" 
+													className="transition-all duration-500 ease-linear"
+												/>
 											</svg>
 										</div>
 										<div className="absolute left-0 bottom-0 top-6 border-l border-dashed border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/30"></div>
@@ -295,10 +317,16 @@ export function HomePage() {
 											<span className="flex items-center gap-1.5"><MemoryStick className="w-3.5 h-3.5" /> RAM Usage</span>
 											<span className="text-zinc-900 dark:text-zinc-300 retro:text-fuchsia-300">{metrics.ram}</span>
 										</div>
-										<div className="absolute bottom-0 left-0 right-0 h-12 flex items-end justify-between gap-1 opacity-50 retro:opacity-100">
-											{/* SVG Mock Graph */}
-											<svg className="w-full h-full text-purple-500 retro:text-fuchsia-400" viewBox="0 0 100 40" preserveAspectRatio="none">
-												<path d="M0 40 L0 25 L10 24 L20 26 L30 25 L40 24 L50 25 L60 26 L70 24 L80 25 L90 24 L100 25 L100 40 Z" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="1.5" className="retro:drop-shadow-[0_0_5px_rgba(217,70,239,0.8)]" />
+										<div className="absolute bottom-0 left-0 right-0 h-12 flex items-end justify-between gap-1 opacity-50 retro:opacity-100 transition-all duration-300">
+											<svg className="w-full h-full text-purple-500 retro:text-fuchsia-400 drop-shadow-sm retro:drop-shadow-[0_0_5px_rgba(217,70,239,0.8)]" viewBox="0 0 100 40" preserveAspectRatio="none">
+												<path 
+													d={buildSvgPath(metricHistory.map(m => m.ram), 100)} 
+													fill="currentColor" 
+													fillOpacity="0.15" 
+													stroke="currentColor" 
+													strokeWidth="1.5" 
+													className="transition-all duration-500 ease-linear"
+												/>
 											</svg>
 										</div>
 										<div className="absolute left-0 bottom-0 top-6 border-l border-dashed border-zinc-200 dark:border-zinc-800 retro:border-fuchsia-500/30"></div>
@@ -315,29 +343,9 @@ export function HomePage() {
 										Logs / {selectedProject.name}
 									</span>
 								</div>
-								<div className="flex-1 relative bg-[#0a0a0b] dark:bg-black retro:bg-black/80 rounded-md border border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/40 shadow-inner overflow-hidden flex flex-col retro:shadow-[inset_0_0_20px_rgba(34,211,238,0.1)]">
-									<div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-										<pre className="font-mono text-[13px] leading-relaxed text-zinc-300 retro:text-cyan-400/90 whitespace-pre-wrap break-words">
-											{activeLogs ? (
-												// Basic syntax coloring mock for logs
-												activeLogs.split('\n').map((line, i) => {
-													let className = "";
-													if (line.includes("ERROR") || line.includes("failed")) className = "text-rose-400 retro:text-rose-400 retro:drop-shadow-[0_0_5px_rgba(244,63,94,0.8)] font-bold";
-													else if (line.includes("WARN")) className = "text-amber-400 retro:text-amber-400";
-													else if (line.includes("INFO")) className = "text-blue-300 retro:text-cyan-300";
-													else if (line.match(/\[.*?\]/)) className = "text-zinc-400 retro:text-fuchsia-400/80";
-													
-													return <div key={i} className={className}>{line || ' '}</div>;
-												})
-											) : (
-												<span className="text-zinc-500 retro:text-cyan-800 animate-pulse">Waiting for logs stream...</span>
-											)}
-										</pre>
-									</div>
-									<div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-										<Button size="sm" className="bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/10 retro:bg-black/80 retro:border-cyan-500/50 retro:text-cyan-400 retro:hover:bg-cyan-950/80 retro:hover:border-cyan-400 retro:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono uppercase tracking-wider text-xs">
-											Auto-scroll
-										</Button>
+								<div className="flex-1 relative bg-[#0a0a0b] dark:bg-black retro:bg-black/80 rounded-md border border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/40 shadow-inner overflow-hidden flex flex-col retro:shadow-[inset_0_0_20px_rgba(34,211,238,0.1)] p-4">
+									<div className="flex-1 w-full h-full relative">
+										<TerminalComponent projectId={selectedProjectId} />
 									</div>
 								</div>
 							</div>

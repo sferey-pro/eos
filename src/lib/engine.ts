@@ -1,8 +1,44 @@
-import type { Subprocess } from "bun";
+import type { Subprocess, ServerWebSocket } from "bun";
 import { getProjectById, updateProject, getAppById, updateApp } from "./db";
 
 const processes = new Map<string, Subprocess>();
+const logProcesses = new Map<string, Subprocess>(); // For docker logs -f
 const projectLogs = new Map<string, string[]>();
+const wsSubscribers = new Map<string, Set<ServerWebSocket<any>>>();
+
+export function subscribeToLogs(projectId: string, ws: ServerWebSocket<any>) {
+	if (!wsSubscribers.has(projectId)) wsSubscribers.set(projectId, new Set());
+	wsSubscribers.get(projectId)!.add(ws);
+	
+	// Send existing history
+	const logs = projectLogs.get(projectId) || ["[EOS Engine] No logs available.\r\n"];
+	ws.send(logs.join(""));
+}
+
+export function unsubscribeFromLogs(projectId: string, ws: ServerWebSocket<any>) {
+	const subs = wsSubscribers.get(projectId);
+	if (subs) {
+		subs.delete(ws);
+		if (subs.size === 0) wsSubscribers.delete(projectId);
+	}
+}
+
+function broadcastLog(projectId: string, text: string) {
+	let logs = projectLogs.get(projectId);
+	if (!logs) {
+		logs = [];
+		projectLogs.set(projectId, logs);
+	}
+	logs.push(text);
+	if (logs.length > 1000) logs.splice(0, logs.length - 1000);
+
+	const subs = wsSubscribers.get(projectId);
+	if (subs) {
+		for (const ws of subs) {
+			ws.send(text);
+		}
+	}
+}
 
 export function startProject(projectId: string) {
 	const project = getProjectById(projectId);
@@ -40,9 +76,11 @@ export function startProject(projectId: string) {
 	processes.set(projectId, proc);
 
 	const logs = [
-		`[EOS Engine] Starting ${project.name}...\n> ${project.command}\n\n`,
+		`\r\n\x1b[36m[EOS Engine]\x1b[0m Starting ${project.name}...\r\n> ${project.command}\r\n\r\n`,
 	];
 	projectLogs.set(projectId, logs);
+	// Broadcast initial log
+	broadcastLog(projectId, logs[0] as string);
 
 	const readStream = async (stream: ReadableStream, prefix: string) => {
 		const reader = stream.getReader();
@@ -52,11 +90,9 @@ export function startProject(projectId: string) {
 				const { done, value } = await reader.read();
 				if (done) break;
 				const text = decoder.decode(value);
-				logs.push(`[${prefix}] ${text}`);
-				if (logs.length > 1000) {
-					// Keep memory in check, retain last 1000 lines/chunks
-					logs.splice(0, logs.length - 1000);
-				}
+				// Replace newlines with \r\n for xterm and add prefix color
+				const formattedText = text.replace(/\n/g, "\r\n");
+				broadcastLog(projectId, `\x1b[33m[${prefix}]\x1b[0m ${formattedText}`);
 			}
 		} catch (e) {
 			console.error(`[Engine] Error reading stream for ${projectId}`, e);
@@ -65,6 +101,34 @@ export function startProject(projectId: string) {
 
 	if (proc.stdout) readStream(proc.stdout, "OUT");
 	if (proc.stderr) readStream(proc.stderr, "ERR");
+
+	// For Docker projects, the 'up -d' command detaches and exits immediately.
+	// We need to spawn a separate process to tail the logs.
+	if (project.type === "docker") {
+		const logCmd = ["docker", "compose", "logs", "-f", "--tail=100"];
+		const logProc = Bun.spawn(logCmd, {
+			cwd: project.path,
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		logProcesses.set(projectId, logProc);
+		
+		const readLogStream = async (stream: ReadableStream) => {
+			const reader = stream.getReader();
+			const decoder = new TextDecoder();
+			try {
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) break;
+					const text = decoder.decode(value);
+					// Raw docker compose logs, just format newlines for xterm
+					broadcastLog(projectId, text.replace(/\n/g, "\r\n"));
+				}
+			} catch (e) {}
+		};
+		if (logProc.stdout) readLogStream(logProc.stdout);
+		if (logProc.stderr) readLogStream(logProc.stderr);
+	}
 
 	if (project.healthcheck?.type === "none") {
 		// If no healthcheck is configured, we assume it's immediately running
@@ -78,6 +142,11 @@ export function stopProject(projectId: string) {
 	if (proc) {
 		proc.kill();
 		processes.delete(projectId);
+	}
+	const logProc = logProcesses.get(projectId);
+	if (logProc) {
+		logProc.kill();
+		logProcesses.delete(projectId);
 	}
 	const project = getProjectById(projectId);
 	if (project) {
@@ -116,9 +185,10 @@ export function startApp(appId: string) {
 	processes.set(appId, proc);
 
 	const logs = [
-		`[EOS Engine] Starting App ${app.name}...\n> ${app.command}\n\n`,
+		`\r\n\x1b[36m[EOS Engine]\x1b[0m Starting App ${app.name}...\r\n> ${app.command}\r\n\r\n`,
 	];
 	projectLogs.set(appId, logs);
+	broadcastLog(appId, logs[0] as string);
 
 	const readStream = async (stream: ReadableStream, prefix: string) => {
 		const reader = stream.getReader();
@@ -128,10 +198,7 @@ export function startApp(appId: string) {
 				const { done, value } = await reader.read();
 				if (done) break;
 				const text = decoder.decode(value);
-				logs.push(`[${prefix}] ${text}`);
-				if (logs.length > 1000) {
-					logs.splice(0, logs.length - 1000);
-				}
+				broadcastLog(appId, `\x1b[33m[${prefix}]\x1b[0m ${text.replace(/\n/g, "\r\n")}`);
 			}
 		} catch (e) {
 			console.error(`[Engine] Error reading stream for ${appId}`, e);
