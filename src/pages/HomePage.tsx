@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle } from "lucide-react";
 import { AddProjectModal } from "@/components/AddProjectModal";
+import { PresetManagerModal } from "@/components/PresetManagerModal";
 import { TerminalComponent } from "@/components/TerminalComponent";
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
@@ -207,6 +208,11 @@ export function HomePage() {
 					</div>
 				</div>
 				<div className="flex items-center gap-3">
+					<PresetManagerModal trigger={
+						<Button variant="outline" size="sm" className="h-8 border-dashed retro:border-cyan-500/50 retro:text-cyan-400 retro:hover:bg-cyan-500/20 retro:hover:shadow-[0_0_10px_rgba(34,211,238,0.3)]">
+							Manage Presets
+						</Button>
+					} />
 					<AddProjectModal trigger={
 						<Button variant="outline" size="sm" className="h-8 border-dashed retro:border-fuchsia-500/50 retro:text-fuchsia-400 retro:hover:bg-fuchsia-500/20 retro:hover:shadow-[0_0_10px_rgba(217,70,239,0.3)]">
 							+ Add Service
@@ -258,11 +264,17 @@ export function HomePage() {
 
 									{/* HOVER ACTIONS */}
 									<div className={`flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ${selectedProjectId === project.id ? 'opacity-100' : ''}`}>
+										{(project.status === "stopped" || project.status === "error") ? (
+											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-500 retro:text-cyan-500 retro:hover:bg-emerald-500/20 retro:hover:text-emerald-400" onClick={(e) => { e.stopPropagation(); handleAction(project.id, "start"); }} title="Start">
+												<Play className="w-3 h-3" />
+											</Button>
+										) : (
+											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-500 retro:text-cyan-500 retro:hover:bg-rose-500/20 retro:hover:text-rose-400" onClick={(e) => { e.stopPropagation(); handleAction(project.id, "stop"); }} title="Stop">
+												<Square className="w-3 h-3" />
+											</Button>
+										)}
 										<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-500 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-300" onClick={(e) => { e.stopPropagation(); handleAction(project.id, "restart"); }} title="Restart">
 											<RefreshCw className="w-3 h-3" />
-										</Button>
-										<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-500 retro:text-cyan-500 retro:hover:bg-rose-500/20 retro:hover:text-rose-400" onClick={(e) => { e.stopPropagation(); handleAction(project.id, "stop"); }} title="Stop">
-											<Square className="w-3 h-3" />
 										</Button>
 									</div>
 								</div>
