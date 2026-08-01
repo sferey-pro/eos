@@ -1,14 +1,9 @@
 import { Database } from "bun:sqlite";
-import type { Project } from "./schemas";
+import type { Healthcheck, Preset, Project } from "./schemas";
 
-// Initialise la connexion SQLite.
-// Le fichier eos.sqlite sera créé à la racine du projet s'il n'existe pas.
 const db = new Database("eos.sqlite", { create: true });
-
-// Activer le mode WAL (Write-Ahead Logging) pour de meilleures performances
 db.run("PRAGMA journal_mode = WAL;");
 
-// Création de la table 'projects' si elle n'existe pas
 db.run(`
   CREATE TABLE IF NOT EXISTS projects (
     id TEXT PRIMARY KEY,
@@ -17,21 +12,36 @@ db.run(`
     subFolder TEXT,
     type TEXT NOT NULL,
     command TEXT NOT NULL,
-    status TEXT DEFAULT 'stopped'
+    status TEXT DEFAULT 'stopped',
+    dependsOn TEXT DEFAULT '[]',
+    healthcheck TEXT DEFAULT '{"type":"none"}'
   );
 `);
 
+db.run(`
+  CREATE TABLE IF NOT EXISTS presets (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    projectIds TEXT NOT NULL
+  );
+`);
+
+// --- PROJETS ---
 export function getProjects(): Project[] {
 	const query = db.query("SELECT * FROM projects");
-	return query.all() as Project[];
+	const rows = query.all() as any[];
+	return rows.map((row) => ({
+		...row,
+		dependsOn: JSON.parse(row.dependsOn),
+		healthcheck: JSON.parse(row.healthcheck) as Healthcheck,
+	}));
 }
 
 export function insertProject(project: Project): void {
 	const query = db.query(`
-    INSERT INTO projects (id, name, path, subFolder, type, command, status)
-    VALUES ($id, $name, $path, $subFolder, $type, $command, $status)
+    INSERT INTO projects (id, name, path, subFolder, type, command, status, dependsOn, healthcheck)
+    VALUES ($id, $name, $path, $subFolder, $type, $command, $status, $dependsOn, $healthcheck)
   `);
-
 	query.run({
 		$id: project.id,
 		$name: project.name,
@@ -40,17 +50,31 @@ export function insertProject(project: Project): void {
 		$type: project.type,
 		$command: project.command,
 		$status: project.status,
+		$dependsOn: JSON.stringify(project.dependsOn),
+		$healthcheck: JSON.stringify(project.healthcheck),
 	});
 }
 
-export function updateProjectStatus(id: string, status: string): void {
-	const query = db.query("UPDATE projects SET status = $status WHERE id = $id");
-	query.run({ $id: id, $status: status });
+// --- PRESETS ---
+export function getPresets(): Preset[] {
+	const query = db.query("SELECT * FROM presets");
+	const rows = query.all() as any[];
+	return rows.map((row) => ({
+		...row,
+		projectIds: JSON.parse(row.projectIds),
+	}));
 }
 
-export function deleteProject(id: string): void {
-	const query = db.query("DELETE FROM projects WHERE id = $id");
-	query.run({ $id: id });
+export function insertPreset(preset: Preset): void {
+	const query = db.query(`
+    INSERT INTO presets (id, name, projectIds)
+    VALUES ($id, $name, $projectIds)
+  `);
+	query.run({
+		$id: preset.id,
+		$name: preset.name,
+		$projectIds: JSON.stringify(preset.projectIds),
+	});
 }
 
 export default db;

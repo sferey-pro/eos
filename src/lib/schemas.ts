@@ -1,35 +1,52 @@
 import { z } from "zod";
 
-// Enum pour le statut visuel du projet
+// Enum pour le statut visuel et technique du projet
 export const ProjectStatusSchema = z.enum([
 	"stopped",
 	"starting",
 	"running",
+	"healthy",
 	"error",
 ]);
 export type ProjectStatus = z.infer<typeof ProjectStatusSchema>;
 
-// Enum pour le type de projet détecté par le scanner
-export const ProjectTypeSchema = z.enum(["npm", "bun", "docker", "unknown"]);
+// Enum pour le type de projet
+export const ProjectTypeSchema = z.enum([
+	"npm",
+	"bun",
+	"docker",
+	"make",
+	"unknown",
+]);
 export type ProjectType = z.infer<typeof ProjectTypeSchema>;
+
+// Schéma pour le Healthcheck d'un service
+export const HealthcheckSchema = z.object({
+	type: z.enum(["none", "http", "tcp"]),
+	target: z.string().optional(), // ex: "http://localhost:3000/health" (http) ou "5432" (tcp)
+});
+export type Healthcheck = z.infer<typeof HealthcheckSchema>;
 
 // Schéma complet d'un Projet EOS
 export const ProjectSchema = z.object({
 	id: z.string().uuid(),
 	name: z.string().min(1, "Le nom du projet est requis"),
 	path: z.string().min(1, "Le chemin du projet est requis"),
-	subFolder: z.string().optional(), // Si la configuration est dans un sous-dossier
-	type: ProjectTypeSchema, // Le type technique détecté (ex: npm, docker)
-	command: z.string(), // La commande complète pour le lancer (ex: "npm run dev")
+	subFolder: z.string().optional(),
+	type: ProjectTypeSchema,
+	command: z.string(),
 	status: ProjectStatusSchema.default("stopped"),
+	dependsOn: z.array(z.string()).default([]), // IDs des projets dont il dépend
+	healthcheck: HealthcheckSchema.default({ type: "none" }),
 });
-
 export type Project = z.infer<typeof ProjectSchema>;
 
-// Schéma pour le fichier de sauvegarde local (eos-projects.json)
-export const EosConfigSchema = z.object({
-	version: z.number().default(1),
-	projects: z.array(ProjectSchema),
+// Schéma d'un Preset (Profil de lancement)
+export const PresetSchema = z.object({
+	id: z.string().uuid(),
+	name: z.string().min(1, "Le nom du preset est requis"),
+	projectIds: z
+		.array(z.string())
+		.min(1, "Un preset doit contenir au moins un projet"),
 });
-
-export type EosConfig = z.infer<typeof EosConfigSchema>;
+export type Preset = z.infer<typeof PresetSchema>;
