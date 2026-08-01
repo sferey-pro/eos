@@ -1,4 +1,4 @@
-import { Settings, PanelLeft, Box, Grid2x2 } from "lucide-react";
+import { Settings, PanelLeft, Box, Grid2x2, LayoutDashboard, FolderSearch } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,6 +14,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import type { Project, Preset } from "@/lib/schemas";
+import { AddProjectModal } from "./AddProjectModal";
 
 export function AppSidebar() {
   const navigate = useNavigate();
@@ -65,6 +66,44 @@ export function AppSidebar() {
       <SidebarContent className="scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500">
+            Navigation Globale
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => navigate("/")}
+                  className="hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl flex items-center gap-3 w-full"
+                >
+                  <LayoutDashboard className="w-4 h-4 text-zinc-500 retro:text-cyan-400 shrink-0" />
+                  <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono flex-1 text-left">Tableau de bord</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => navigate("/settings")}
+                  className="hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl flex items-center gap-3 w-full"
+                >
+                  <Settings className="w-4 h-4 text-zinc-500 retro:text-cyan-400 shrink-0" />
+                  <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono flex-1 text-left">Configuration</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <AddProjectModal trigger={
+                  <SidebarMenuButton 
+                    className="hover:bg-zinc-100 dark:hover:bg-zinc-800 retro:hover:bg-fuchsia-950/30 transition-colors group retro:hover:border-cyan-400/50 border border-transparent rounded-xl flex items-center gap-3 w-full cursor-pointer"
+                  >
+                    <FolderSearch className="w-4 h-4 text-zinc-500 retro:text-cyan-400 shrink-0" />
+                    <span className="font-medium text-sm truncate retro:text-cyan-300 retro:font-mono flex-1 text-left">Dépôts & Scans</span>
+                  </SidebarMenuButton>
+                } />
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500 mt-2">
             Presets de lancement
           </SidebarGroupLabel>
           <SidebarGroupContent>

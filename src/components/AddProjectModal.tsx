@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import type { ProjectProposal } from "../lib/scanner";
 
-export function AddProjectModal() {
+export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 	const [open, setOpen] = useState(false);
 	const [path, setPath] = useState("");
 	const [isScanning, setIsScanning] = useState(false);
@@ -80,14 +80,16 @@ export function AddProjectModal() {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button
-					variant="outline"
-					size="sm"
-					className="hidden sm:flex transition-all hover:scale-105 active:scale-95 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-				>
-					<Plus className="w-4 h-4 mr-2" />
-					Ajouter
-				</Button>
+				{trigger || (
+					<Button
+						variant="outline"
+						size="sm"
+						className="hidden sm:flex transition-all hover:scale-105 active:scale-95 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+					>
+						<Plus className="w-4 h-4 mr-2" />
+						Ajouter
+					</Button>
+				)}
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-[600px] bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl overflow-hidden transition-all duration-300">
 				<DialogHeader>
