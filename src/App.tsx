@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { HomePage } from "@/pages/HomePage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { PlaceholderPage } from "@/pages/PlaceholderPage";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -17,6 +18,9 @@ export function App() {
 							<Routes>
 								<Route path="/" element={<HomePage />} />
 								<Route path="/settings" element={<SettingsPage />} />
+								<Route path="/containers" element={<PlaceholderPage />} />
+								<Route path="/volumes" element={<PlaceholderPage />} />
+								<Route path="/networks" element={<PlaceholderPage />} />
 							</Routes>
 						</main>
 					</div>
