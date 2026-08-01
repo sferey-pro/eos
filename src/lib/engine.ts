@@ -105,7 +105,9 @@ export function startProject(projectId: string) {
 	// For Docker projects, the 'up -d' command detaches and exits immediately.
 	// We need to spawn a separate process to tail the logs.
 	if (project.type === "docker") {
-		const logCmd = ["docker", "compose", "logs", "-f", "--tail=100"];
+		const parts = project.command.split(" ");
+		const serviceName = parts[parts.length - 1];
+		const logCmd = serviceName ? ["docker", "compose", "logs", "-f", "--tail=100", serviceName] : ["docker", "compose", "logs", "-f", "--tail=100"];
 		const logProc = Bun.spawn(logCmd, {
 			cwd: project.path,
 			stdout: "pipe",
@@ -272,4 +274,40 @@ export async function getProjectMetrics(projectId: string): Promise<{ cpu: strin
 	
 	// Placeholder for non-docker projects (Node/Bun/Make) using PID later
 	return { cpu: "N/A", ram: "N/A" };
+}
+
+export function ensureLogStream(projectId: string) {
+	if (logProcesses.has(projectId)) return; // Already streaming
+	
+	const project = getProjectById(projectId);
+	if (!project || project.type !== "docker" || project.status === "stopped" || project.status === "error") return;
+
+	const parts = project.command.split(" ");
+	const serviceName = parts[parts.length - 1];
+	if (!serviceName) return;
+
+	const logCmd = ["docker", "compose", "logs", "-f", "--tail=100", serviceName];
+	const logProc = Bun.spawn(logCmd, {
+		cwd: project.path,
+		stdout: "pipe",
+		stderr: "pipe",
+	});
+	
+	logProcesses.set(projectId, logProc);
+	
+	const readLogStream = async (stream: ReadableStream) => {
+		const reader = stream.getReader();
+		const decoder = new TextDecoder();
+		try {
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+				const text = decoder.decode(value);
+				broadcastLog(projectId, text.replace(/\n/g, "\r\n"));
+			}
+		} catch (e) {}
+	};
+	
+	if (logProc.stdout) readLogStream(logProc.stdout);
+	if (logProc.stderr) readLogStream(logProc.stderr);
 }
