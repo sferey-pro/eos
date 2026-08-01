@@ -4,10 +4,7 @@ import {
 	Square,
 	Terminal,
 	ExternalLink,
-	Box,
-	Grid2x2,
-	Plus,
-} from "lucide-react";
+import { Play, RefreshCw, Square, Terminal, ExternalLink, Box, Grid2x2, Plus, PanelLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
@@ -168,22 +165,64 @@ export function HomePage() {
 				<header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
 					<div className="w-full px-6 h-16 flex items-center justify-between">
 						{/* Logo & Title */}
-						<div className="flex items-center gap-3 group cursor-pointer">
-							<div className="relative">
-								<div className="absolute -inset-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 opacity-0 group-hover:opacity-40 blur transition-opacity duration-500" />
-								<img
-									src="/eos-logo.jpg"
-									alt="EOS Logo"
-									className="relative w-9 h-9 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform duration-300"
-								/>
-							</div>
-							<div className="flex flex-col">
-								<h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 leading-none">
-									EOS
-								</h1>
-								<span className="text-[10px] text-zinc-500 font-medium tracking-wider uppercase mt-1">
-									Environment Orchestration System
-								</span>
+						<div className="flex items-center gap-4">
+							<Sheet>
+								<SheetTrigger asChild>
+									<Button variant="ghost" size="icon" className="text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+										<PanelLeft className="w-5 h-5" />
+									</Button>
+								</SheetTrigger>
+								<SheetContent side="left" className="w-[300px] p-0 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-r border-zinc-200/50 dark:border-zinc-800/50 flex flex-col">
+									<div className="p-6 pb-4 border-b border-zinc-200/50 dark:border-zinc-800/50">
+										<SheetTitle className="flex items-center gap-2">
+											<Square className="w-5 h-5 text-indigo-500" />
+											Tous les Projets
+										</SheetTitle>
+									</div>
+									<div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
+										{projects.length === 0 && (
+											<div className="text-sm text-zinc-500 italic p-4 text-center">Aucun projet enregistré.</div>
+										)}
+										{projects.map((project) => (
+											<div key={project.id} className="flex flex-col p-3 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+												<div className="flex items-center justify-between mb-3">
+													<span className="font-medium text-sm text-zinc-900 dark:text-zinc-100 truncate pr-2">{project.name}</span>
+													<div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${project.status === "running" ? "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" : project.status === "error" ? "bg-rose-500" : project.status === "healthy" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" : "bg-zinc-300 dark:bg-zinc-700"}`} />
+												</div>
+												<div className="flex items-center justify-between gap-2">
+													<Button size="sm" variant="outline" className="flex-1 h-8 bg-white dark:bg-zinc-950 hover:text-emerald-500 hover:border-emerald-500/50" onClick={() => handleAction(project.id, "start")} disabled={project.status !== "stopped" && project.status !== "error"}>
+														<Play className="w-3 h-3" />
+													</Button>
+													<Button size="sm" variant="outline" className="flex-1 h-8 bg-white dark:bg-zinc-950 hover:text-amber-500 hover:border-amber-500/50" onClick={() => { handleAction(project.id, "stop"); setTimeout(() => handleAction(project.id, "start"), 500); }} disabled={project.status === "stopped"}>
+														<RefreshCw className="w-3 h-3" />
+													</Button>
+													<Button size="sm" variant="outline" className="flex-1 h-8 bg-white dark:bg-zinc-950 hover:text-rose-500 hover:border-rose-500/50" onClick={() => handleAction(project.id, "stop")} disabled={project.status === "stopped"}>
+														<Square className="w-3 h-3" />
+													</Button>
+												</div>
+											</div>
+										))}
+									</div>
+								</SheetContent>
+							</Sheet>
+
+							<div className="flex items-center gap-3 group cursor-pointer">
+								<div className="relative">
+									<div className="absolute -inset-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 opacity-0 group-hover:opacity-40 blur transition-opacity duration-500" />
+									<img
+										src="/eos-logo.jpg"
+										alt="EOS Logo"
+										className="relative w-9 h-9 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform duration-300"
+									/>
+								</div>
+								<div className="flex flex-col">
+									<h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400 tracking-tight">
+										EOS
+									</h1>
+									<span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider -mt-1">
+										Environment Operating System
+									</span>
+								</div>
 							</div>
 						</div>
 
@@ -355,7 +394,7 @@ export function HomePage() {
 					)}
 
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-						{projects.map((project, index) => (
+						{activeProjects.map((project, index) => (
 							<Card
 								key={project.id}
 								style={{
@@ -370,7 +409,9 @@ export function HomePage() {
 									</CardTitle>
 									<Badge
 										variant="outline"
-										className={`${getStatusColor(project.status)} transition-colors duration-300`}
+										className={`shadow-sm bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 capitalize ${getStatusColor(
+											project.status,
+										)}`}
 									>
 										{project.status.charAt(0).toUpperCase() +
 											project.status.slice(1)}
