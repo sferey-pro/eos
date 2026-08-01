@@ -1,7 +1,8 @@
 import { Database } from "bun:sqlite";
 import type { Healthcheck, Preset, Project } from "./schemas";
 
-const db = new Database("eos.sqlite", { create: true });
+const dbPath = process.env.NODE_ENV === "test" ? ":memory:" : "eos.sqlite";
+const db = new Database(dbPath, { create: true });
 db.run("PRAGMA journal_mode = WAL;");
 
 db.run(`
@@ -35,6 +36,26 @@ export function getProjects(): Project[] {
 		dependsOn: JSON.parse(row.dependsOn),
 		healthcheck: JSON.parse(row.healthcheck) as Healthcheck,
 	}));
+}
+
+export function updateProject(project: Project): void {
+	const query = db.query(`
+    UPDATE projects
+    SET name = $name, path = $path, subFolder = $subFolder, type = $type,
+        command = $command, status = $status, dependsOn = $dependsOn, healthcheck = $healthcheck
+    WHERE id = $id
+  `);
+	query.run({
+		$id: project.id,
+		$name: project.name,
+		$path: project.path,
+		$subFolder: project.subFolder ?? null,
+		$type: project.type,
+		$command: project.command,
+		$status: project.status,
+		$dependsOn: JSON.stringify(project.dependsOn),
+		$healthcheck: JSON.stringify(project.healthcheck),
+	});
 }
 
 export function insertProject(project: Project): void {

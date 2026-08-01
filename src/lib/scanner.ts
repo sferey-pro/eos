@@ -100,5 +100,26 @@ export async function scanDirectory(
 		}
 	}
 
+	// 3. SCAN PACKAGE.JSON
+	const packageJson = Bun.file(join(targetPath, "package.json"));
+	if (await packageJson.exists()) {
+		try {
+			const packageContent = await packageJson.json();
+			if (packageContent.scripts) {
+				for (const scriptName of Object.keys(packageContent.scripts)) {
+					proposals.push({
+						name: `[Bun] ${scriptName}`,
+						path: targetPath,
+						type: "bun",
+						command: `bun run ${scriptName}`,
+						healthcheck: { type: "none" },
+					});
+				}
+			}
+		} catch (error) {
+			console.error("Erreur lors de l'analyse du package.json:", error);
+		}
+	}
+
 	return proposals;
 }
