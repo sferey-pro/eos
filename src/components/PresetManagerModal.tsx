@@ -30,12 +30,35 @@ export function PresetManagerModal({ trigger }: PresetManagerModalProps) {
 				const data = await res.json();
 				setPresets(data.presets || []);
 				setProjects(data.projects || []);
-				if (!selectedPresetId && data.presets?.length > 0) {
-					setSelectedPresetId(data.presets[0].id);
+				// Only auto-select if nothing is selected or if the currently selected one was deleted
+				if (!selectedPresetId || !(data.presets || []).find((p: Preset) => p.id === selectedPresetId)) {
+					if (data.presets?.length > 0) {
+						setSelectedPresetId(data.presets[0].id);
+					}
 				}
 			}
 		} catch (e) {
 			console.error("Failed to fetch presets:", e);
+		}
+	};
+
+	const handleNewPreset = async () => {
+		const newId = crypto.randomUUID();
+		const newPreset: Preset = {
+			id: newId,
+			name: "New Preset",
+			projectIds: projects.map(p => p.id),
+		};
+		try {
+			await fetch("/api/presets", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(newPreset),
+			});
+			setSelectedPresetId(newId);
+			await fetchData();
+		} catch (e) {
+			console.error(e);
 		}
 	};
 
@@ -99,7 +122,7 @@ export function PresetManagerModal({ trigger }: PresetManagerModalProps) {
 						</div>
 						
 						<div className="p-3 border-t border-zinc-800 retro:border-fuchsia-500/30">
-							<Button variant="ghost" className="w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-[#1a1a1e] retro:text-fuchsia-400 retro:hover:bg-fuchsia-500/20 retro:hover:text-fuchsia-300 h-9">
+							<Button onClick={handleNewPreset} variant="ghost" className="w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-[#1a1a1e] retro:text-fuchsia-400 retro:hover:bg-fuchsia-500/20 retro:hover:text-fuchsia-300 h-9">
 								<Plus className="w-4 h-4 mr-2" />
 								New Preset
 							</Button>
