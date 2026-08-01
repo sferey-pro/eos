@@ -48,42 +48,7 @@ const server = serve({
 
 		"/api/projects": {
 			async GET() {
-				if (process.env.DEMO_MODE === "true") {
-					return Response.json({
-						projects: [
-							{
-								id: "demo-1",
-								name: "api-gateway",
-								path: "./services/api-gateway",
-								type: "docker",
-								command: "docker compose up -d api",
-								status: "healthy",
-								dependsOn: [],
-								healthcheck: { type: "tcp", target: "3000" },
-							},
-							{
-								id: "demo-2",
-								name: "postgres-db",
-								path: "./docker/infra",
-								type: "make",
-								command: "make start-db",
-								status: "starting",
-								dependsOn: [],
-								healthcheck: { type: "tcp", target: "5432" },
-							},
-							{
-								id: "demo-3",
-								name: "worker-queue",
-								path: "./services/worker",
-								type: "bun",
-								command: "bun run start",
-								status: "stopped",
-								dependsOn: ["demo-1", "demo-2"],
-								healthcheck: { type: "none" },
-							},
-						],
-					});
-				}
+
 				const projects = getProjects().map(p => ({
 					...p,
 					gitStatus: gitStatusCache.get(p.id) || null
