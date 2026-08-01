@@ -17,6 +17,7 @@ export function AddAppModal({ children }: { children?: ReactNode }) {
 	const [path, setPath] = useState("");
 	const [command, setCommand] = useState("");
 	const [url, setUrl] = useState("http://localhost:3000");
+	const [icon, setIcon] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
 
 	const handleSave = async () => {
@@ -28,7 +29,7 @@ export function AddAppModal({ children }: { children?: ReactNode }) {
 			path,
 			command,
 			url,
-			icon: "Box", // future extension: allow selecting an icon
+			icon: icon || undefined,
 			status: "stopped",
 		};
 
@@ -43,6 +44,7 @@ export function AddAppModal({ children }: { children?: ReactNode }) {
 			setPath("");
 			setCommand("");
 			setUrl("http://localhost:3000");
+			setIcon("");
 		} catch (e) {
 			console.error(e);
 		} finally {
@@ -122,6 +124,17 @@ export function AddAppModal({ children }: { children?: ReactNode }) {
 							C'est l'URL qui s'ouvrira dans l'interface EOS quand l'app sera
 							lancée.
 						</p>
+					</div>
+					<div className="space-y-2">
+						<label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 retro:text-fuchsia-400 retro:font-mono">
+							Lien du logo (URL) <span className="text-zinc-400 text-xs font-normal">(optionnel)</span>
+						</label>
+						<Input
+							placeholder="https://example.com/logo.png"
+							value={icon}
+							onChange={(e) => setIcon(e.target.value)}
+							className="font-mono text-sm retro:bg-black/50 retro:border-cyan-500/50 retro:text-cyan-300 retro:focus-visible:ring-cyan-500/50"
+						/>
 					</div>
 					<div className="pt-4 flex justify-end">
 						<Button

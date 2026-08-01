@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle, Plus, Settings2, Download, Upload, Trash2 } from "lucide-react";
+import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle, Plus, Settings2, Download, Upload, Trash2, Box } from "lucide-react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
 import { PresetManagerModal } from "@/components/PresetManagerModal";
@@ -445,8 +445,17 @@ export function HomePage() {
 						)}
 						{apps.map(app => (
 							<div key={app.id} className="group flex items-center justify-between h-10 px-3 rounded-md bg-transparent border border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-900 retro:hover:bg-cyan-950/10 retro:hover:border-cyan-500/20 transition-colors">
-								<div className="flex items-center gap-2">
-									<div className={`w-2 h-2 rounded-full ${getStatusColor(app.status)}`} />
+								<div className="flex items-center gap-3">
+									<div className="relative">
+										{app.icon && app.icon !== "Box" ? (
+											<img src={app.icon} alt={app.name} className="w-6 h-6 rounded-sm object-contain bg-white/10" />
+										) : (
+											<div className="w-6 h-6 rounded-sm bg-zinc-200 dark:bg-zinc-800 retro:bg-cyan-900/50 flex items-center justify-center">
+												<Box className="w-3.5 h-3.5 text-zinc-500 retro:text-cyan-400" />
+											</div>
+										)}
+										<div className={`absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-full border border-white dark:border-zinc-950 retro:border-[#0c0c0e] ${getStatusColor(app.status)}`} />
+									</div>
 									<span className="font-medium text-sm retro:text-cyan-300 retro:font-mono">{app.name}</span>
 								</div>
 								<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
