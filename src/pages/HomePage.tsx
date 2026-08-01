@@ -76,240 +76,303 @@ export function HomePage() {
 	};
 
 	const activeProjects = projects.filter((p) => p.status !== "stopped");
+	const totalProjects = projects.length;
+	const healthyProjects = projects.filter(
+		(p) => p.status === "healthy" || p.status === "running",
+	).length;
+	const errorProjects = projects.filter((p) => p.status === "error").length;
 
 	return (
-		<div className="min-h-screen bg-zinc-50/50 dark:bg-zinc-950/50 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.1),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] transition-colors duration-500 pb-20">
-			{/* HEADER */}
-			<header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
-				<div className="w-full px-6 h-16 flex items-center justify-between">
-					{/* Logo & Title */}
-					<div className="flex items-center gap-3 group cursor-pointer">
-						<div className="relative">
-							<div className="absolute -inset-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 opacity-0 group-hover:opacity-40 blur transition-opacity duration-500" />
-							<img
-								src="/eos-logo.jpg"
-								alt="EOS Logo"
-								className="relative w-8 h-8 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform duration-300"
-							/>
-						</div>
-						<h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-							EOS
-						</h1>
-					</div>
+		<div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors duration-500 pb-20 overflow-hidden">
+			{/* BACKGROUND PATTERN */}
+			<div className="absolute inset-0 z-0 pointer-events-none bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+			<div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.2),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.25),rgba(255,255,255,0))]"></div>
 
-					{/* Center: Presets */}
-					<div className="hidden md:flex items-center gap-2">
-						<Select defaultValue="all">
-							<SelectTrigger className="w-[200px]">
-								<SelectValue placeholder="Choisir un preset..." />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="all">Tout lancer (Défaut)</SelectItem>
-								<SelectItem value="backend">Backend Uniquement</SelectItem>
-								<SelectItem value="frontend">Frontend + Storybook</SelectItem>
-							</SelectContent>
-						</Select>
-						<Button
-							className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 group"
-							title="Démarrer l'environnement"
-						>
-							<Play className="w-4 h-4 mr-2 group-hover:animate-pulse" />
-							Aurore
-						</Button>
-					</div>
-
-					{/* Right: Actions */}
-					<div className="flex items-center gap-2">
-						<AddProjectModal />
-						<ThemeToggle />
-					</div>
-				</div>
-			</header>
-
-			{/* MAIN CONTENT */}
-			<main className="w-full px-6 py-8">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-					{projects.map((project, index) => (
-						<Card
-							key={project.id}
-							style={{
-								animationDelay: `${index * 50}ms`,
-								animationFillMode: "both",
-							}}
-							className={`group relative overflow-hidden bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md border-zinc-200/50 dark:border-zinc-800/50 hover:border-zinc-300/80 dark:hover:border-zinc-700/80 hover:shadow-xl dark:hover:shadow-zinc-900/50 hover:-translate-y-1 transition-all duration-300 ease-out animate-in fade-in zoom-in-95 slide-in-from-bottom-4 ${project.status === "stopped" ? "opacity-70 grayscale-[20%]" : ""}`}
-						>
-							<CardHeader className="pb-3 flex flex-row items-center justify-between">
-								<CardTitle className="text-lg font-medium">
-									{project.name}
-								</CardTitle>
-								<Badge
-									variant="outline"
-									className={`${getStatusColor(project.status)} transition-colors duration-300`}
-								>
-									{project.status.charAt(0).toUpperCase() +
-										project.status.slice(1)}
-								</Badge>
-							</CardHeader>
-							<CardContent>
-								<p className="text-sm text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors">
-									{project.path}
-								</p>
-								<p
-									className="text-xs text-zinc-400 dark:text-zinc-500 mt-2 font-mono line-clamp-1 bg-zinc-100/50 dark:bg-zinc-950/50 p-1.5 rounded-md"
-									title={project.command}
-								>
-									{project.command}
-								</p>
-							</CardContent>
-							<CardFooter className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex justify-between bg-zinc-50/30 dark:bg-zinc-900/30">
-								<div className="flex gap-1">
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-8 w-8 text-zinc-400 hover:text-emerald-500 hover:bg-emerald-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
-										disabled={
-											project.status !== "stopped" && project.status !== "error"
-										}
-									>
-										<Play className="h-4 w-4" />
-									</Button>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-8 w-8 text-zinc-400 hover:text-amber-500 hover:bg-amber-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
-										disabled={project.status === "stopped"}
-									>
-										<RefreshCw className="h-4 w-4" />
-									</Button>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-8 w-8 text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
-										disabled={project.status === "stopped"}
-									>
-										<Square className="h-4 w-4" />
-									</Button>
-								</div>
-
-								<Button
-									variant="ghost"
-									size="sm"
-									className="text-zinc-500 h-8 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
-									disabled={project.status === "stopped"}
-									onClick={() => {
-										setActiveLogId(project.id);
-										setIsLogsOpen(true);
-									}}
-								>
-									<Terminal className="h-4 w-4 mr-2" />
-									Logs
-								</Button>
-							</CardFooter>
-						</Card>
-					))}
-
-					{projects.length === 0 && (
-						<div className="col-span-full py-24 text-center flex flex-col items-center justify-center border-2 border-dashed border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/20 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
-							<div className="w-16 h-16 mb-4 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shadow-sm border border-zinc-100 dark:border-zinc-800">
-								<Square className="w-8 h-8 text-zinc-400" />
+			<div className="relative z-10 flex flex-col h-full">
+				{/* HEADER */}
+				<header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
+					<div className="w-full px-6 h-16 flex items-center justify-between">
+						{/* Logo & Title */}
+						<div className="flex items-center gap-3 group cursor-pointer">
+							<div className="relative">
+								<div className="absolute -inset-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 opacity-0 group-hover:opacity-40 blur transition-opacity duration-500" />
+								<img
+									src="/eos-logo.jpg"
+									alt="EOS Logo"
+									className="relative w-8 h-8 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform duration-300"
+								/>
 							</div>
-							<h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2">
-								Aucun projet configuré
-							</h3>
-							<p className="text-zinc-500 dark:text-zinc-400 max-w-sm mb-6">
-								Commencez par scanner un dossier pour détecter vos conteneurs
-								Docker ou vos cibles Makefile.
-							</p>
+							<h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+								EOS
+							</h1>
+						</div>
+
+						{/* Center: Presets */}
+						<div className="hidden md:flex items-center gap-2">
+							<Select defaultValue="all">
+								<SelectTrigger className="w-[200px]">
+									<SelectValue placeholder="Choisir un preset..." />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="all">Tout lancer (Défaut)</SelectItem>
+									<SelectItem value="backend">Backend Uniquement</SelectItem>
+									<SelectItem value="frontend">Frontend + Storybook</SelectItem>
+								</SelectContent>
+							</Select>
+							<Button
+								className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 group"
+								title="Démarrer l'environnement"
+							>
+								<Play className="w-4 h-4 mr-2 group-hover:animate-pulse" />
+								Aurore
+							</Button>
+						</div>
+
+						{/* Right: Actions */}
+						<div className="flex items-center gap-2">
 							<AddProjectModal />
+							<ThemeToggle />
+						</div>
+					</div>
+				</header>
+
+				{/* MAIN CONTENT */}
+				<main className="w-full max-w-screen-2xl mx-auto px-6 py-8 flex flex-col gap-8">
+					{/* KPI DASHBOARD */}
+					{projects.length > 0 && (
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+							<Card className="bg-white/40 dark:bg-zinc-900/40 border-zinc-200/50 dark:border-zinc-800/50 backdrop-blur-xl shadow-sm">
+								<CardContent className="p-6 flex items-center justify-between">
+									<div>
+										<p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+											Total Services
+										</p>
+										<h3 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+											{totalProjects}
+										</h3>
+									</div>
+									<div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800/80 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
+										<Square className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+									</div>
+								</CardContent>
+							</Card>
+							<Card className="bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/20 backdrop-blur-xl shadow-sm">
+								<CardContent className="p-6 flex items-center justify-between">
+									<div>
+										<p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+											Services Actifs
+										</p>
+										<h3 className="text-3xl font-bold text-emerald-700 dark:text-emerald-300">
+											{healthyProjects}
+										</h3>
+									</div>
+									<div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center border border-emerald-200 dark:border-emerald-800/50">
+										<Play className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+									</div>
+								</CardContent>
+							</Card>
+							<Card className="bg-rose-50/40 dark:bg-rose-950/20 border-rose-500/20 backdrop-blur-xl shadow-sm">
+								<CardContent className="p-6 flex items-center justify-between">
+									<div>
+										<p className="text-sm font-medium text-rose-600 dark:text-rose-400">
+											En Erreur
+										</p>
+										<h3 className="text-3xl font-bold text-rose-700 dark:text-rose-300">
+											{errorProjects}
+										</h3>
+									</div>
+									<div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center border border-rose-200 dark:border-rose-800/50">
+										<Terminal className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+									</div>
+								</CardContent>
+							</Card>
 						</div>
 					)}
-				</div>
-			</main>
 
-			{/* GLOBAL LOGS TERMINAL */}
-			<Sheet open={isLogsOpen} onOpenChange={setIsLogsOpen}>
-				<SheetContent
-					side="bottom"
-					className="h-[50vh] sm:h-[60vh] bg-zinc-950 text-zinc-100 border-t border-zinc-800 flex flex-col p-0"
-				>
-					<div className="flex flex-col h-full">
-						<SheetHeader className="p-4 border-b border-zinc-800 bg-zinc-900">
-							<SheetTitle className="text-zinc-300 font-mono text-sm flex items-center">
-								<Terminal className="w-4 h-4 mr-2" />
-								Terminal de Logs
-							</SheetTitle>
-						</SheetHeader>
-
-						{activeProjects.length > 0 ? (
-							<Tabs
-								value={activeLogId || activeProjects[0]?.id || ""}
-								onValueChange={setActiveLogId}
-								className="flex-1 flex flex-col overflow-hidden"
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+						{projects.map((project, index) => (
+							<Card
+								key={project.id}
+								style={{
+									animationDelay: `${index * 50}ms`,
+									animationFillMode: "both",
+								}}
+								className={`group relative overflow-hidden bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md border-zinc-200/50 dark:border-zinc-800/50 hover:border-zinc-300/80 dark:hover:border-zinc-700/80 hover:shadow-xl dark:hover:shadow-zinc-900/50 hover:-translate-y-1 transition-all duration-300 ease-out animate-in fade-in zoom-in-95 slide-in-from-bottom-4 ${project.status === "stopped" ? "opacity-70 grayscale-[20%]" : ""}`}
 							>
-								<div className="bg-zinc-900 border-b border-zinc-800 px-4 pt-2">
-									<TabsList className="bg-zinc-950 border border-zinc-800">
-										{activeProjects.map((p) => (
-											<TabsTrigger
-												key={p.id}
-												value={p.id}
-												className="data-[state=active]:bg-zinc-800 data-[state=active]:text-zinc-100 text-zinc-400"
-											>
-												<span
-													className={`w-2 h-2 rounded-full mr-2 ${
-														p.status === "error"
-															? "bg-rose-500"
-															: p.status === "healthy"
-																? "bg-emerald-500"
-																: p.status === "waiting"
-																	? "bg-purple-500"
-																	: "bg-blue-500"
-													}`}
-												/>
-												{p.name}
-											</TabsTrigger>
-										))}
-									</TabsList>
-								</div>
-
-								<div className="flex-1 bg-black p-4 overflow-hidden">
-									{activeProjects.map((p) => (
-										<TabsContent
-											key={p.id}
-											value={p.id}
-											className="h-full m-0 data-[state=active]:flex flex-col"
+								<CardHeader className="pb-3 flex flex-row items-center justify-between">
+									<CardTitle className="text-lg font-medium">
+										{project.name}
+									</CardTitle>
+									<Badge
+										variant="outline"
+										className={`${getStatusColor(project.status)} transition-colors duration-300`}
+									>
+										{project.status.charAt(0).toUpperCase() +
+											project.status.slice(1)}
+									</Badge>
+								</CardHeader>
+								<CardContent>
+									<p className="text-sm text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors">
+										{project.path}
+									</p>
+									<p
+										className="text-xs text-zinc-400 dark:text-zinc-500 mt-2 font-mono line-clamp-1 bg-zinc-100/50 dark:bg-zinc-950/50 p-1.5 rounded-md"
+										title={project.command}
+									>
+										{project.command}
+									</p>
+								</CardContent>
+								<CardFooter className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex justify-between bg-zinc-50/30 dark:bg-zinc-900/30">
+									<div className="flex gap-1">
+										<Button
+											variant="ghost"
+											size="icon"
+											className="h-8 w-8 text-zinc-400 hover:text-emerald-500 hover:bg-emerald-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
+											disabled={
+												project.status !== "stopped" &&
+												project.status !== "error"
+											}
 										>
-											<ScrollArea className="h-full pr-4">
-												<pre className="text-xs font-mono text-zinc-400 leading-relaxed">
-													[INFO] Starting {p.name}...{"\n"}
-													{p.status === "healthy" && (
-														<span className="text-emerald-400">
-															[OK] Healthcheck passed.
-														</span>
-													)}
-													{p.status === "error" && (
-														<span className="text-rose-400">
-															[ERROR] Process exited with code 1.
-														</span>
-													)}
-													{p.status === "waiting" && (
-														<span className="text-purple-400">
-															[WAIT] Waiting for dependencies...
-														</span>
-													)}
-												</pre>
-											</ScrollArea>
-										</TabsContent>
-									))}
+											<Play className="h-4 w-4" />
+										</Button>
+										<Button
+											variant="ghost"
+											size="icon"
+											className="h-8 w-8 text-zinc-400 hover:text-amber-500 hover:bg-amber-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
+											disabled={project.status === "stopped"}
+										>
+											<RefreshCw className="h-4 w-4" />
+										</Button>
+										<Button
+											variant="ghost"
+											size="icon"
+											className="h-8 w-8 text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 hover:scale-110 active:scale-95 transition-all duration-200"
+											disabled={project.status === "stopped"}
+										>
+											<Square className="h-4 w-4" />
+										</Button>
+									</div>
+
+									<Button
+										variant="ghost"
+										size="sm"
+										className="text-zinc-500 h-8 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+										disabled={project.status === "stopped"}
+										onClick={() => {
+											setActiveLogId(project.id);
+											setIsLogsOpen(true);
+										}}
+									>
+										<Terminal className="h-4 w-4 mr-2" />
+										Logs
+									</Button>
+								</CardFooter>
+							</Card>
+						))}
+
+						{projects.length === 0 && (
+							<div className="col-span-full py-24 text-center flex flex-col items-center justify-center border-2 border-dashed border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/20 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+								<div className="w-16 h-16 mb-4 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shadow-sm border border-zinc-100 dark:border-zinc-800">
+									<Square className="w-8 h-8 text-zinc-400" />
 								</div>
-							</Tabs>
-						) : (
-							<div className="flex-1 flex items-center justify-center text-zinc-500 font-mono text-sm">
-								Aucun service en cours d'exécution.
+								<h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2">
+									Aucun projet configuré
+								</h3>
+								<p className="text-zinc-500 dark:text-zinc-400 max-w-sm mb-6">
+									Commencez par scanner un dossier pour détecter vos conteneurs
+									Docker ou vos cibles Makefile.
+								</p>
+								<AddProjectModal />
 							</div>
 						)}
 					</div>
-				</SheetContent>
-			</Sheet>
+				</main>
+
+				{/* GLOBAL LOGS TERMINAL */}
+				<Sheet open={isLogsOpen} onOpenChange={setIsLogsOpen}>
+					<SheetContent
+						side="bottom"
+						className="h-[50vh] sm:h-[60vh] bg-zinc-950 text-zinc-100 border-t border-zinc-800 flex flex-col p-0"
+					>
+						<div className="flex flex-col h-full">
+							<SheetHeader className="p-4 border-b border-zinc-800 bg-zinc-900">
+								<SheetTitle className="text-zinc-300 font-mono text-sm flex items-center">
+									<Terminal className="w-4 h-4 mr-2" />
+									Terminal de Logs
+								</SheetTitle>
+							</SheetHeader>
+
+							{activeProjects.length > 0 ? (
+								<Tabs
+									value={activeLogId || activeProjects[0]?.id || ""}
+									onValueChange={setActiveLogId}
+									className="flex-1 flex flex-col overflow-hidden"
+								>
+									<div className="bg-zinc-900 border-b border-zinc-800 px-4 pt-2">
+										<TabsList className="bg-zinc-950 border border-zinc-800">
+											{activeProjects.map((p) => (
+												<TabsTrigger
+													key={p.id}
+													value={p.id}
+													className="data-[state=active]:bg-zinc-800 data-[state=active]:text-zinc-100 text-zinc-400"
+												>
+													<span
+														className={`w-2 h-2 rounded-full mr-2 ${
+															p.status === "error"
+																? "bg-rose-500"
+																: p.status === "healthy"
+																	? "bg-emerald-500"
+																	: p.status === "waiting"
+																		? "bg-purple-500"
+																		: "bg-blue-500"
+														}`}
+													/>
+													{p.name}
+												</TabsTrigger>
+											))}
+										</TabsList>
+									</div>
+
+									<div className="flex-1 bg-black p-4 overflow-hidden">
+										{activeProjects.map((p) => (
+											<TabsContent
+												key={p.id}
+												value={p.id}
+												className="h-full m-0 data-[state=active]:flex flex-col"
+											>
+												<ScrollArea className="h-full pr-4">
+													<pre className="text-xs font-mono text-zinc-400 leading-relaxed">
+														[INFO] Starting {p.name}...{"\n"}
+														{p.status === "healthy" && (
+															<span className="text-emerald-400">
+																[OK] Healthcheck passed.
+															</span>
+														)}
+														{p.status === "error" && (
+															<span className="text-rose-400">
+																[ERROR] Process exited with code 1.
+															</span>
+														)}
+														{p.status === "waiting" && (
+															<span className="text-purple-400">
+																[WAIT] Waiting for dependencies...
+															</span>
+														)}
+													</pre>
+												</ScrollArea>
+											</TabsContent>
+										))}
+									</div>
+								</Tabs>
+							) : (
+								<div className="flex-1 flex items-center justify-center text-zinc-500 font-mono text-sm">
+									Aucun service en cours d'exécution.
+								</div>
+							)}
+						</div>
+					</SheetContent>
+				</Sheet>
+			</div>
 		</div>
 	);
 }
