@@ -7,11 +7,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Project } from "@/lib/schemas";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { Project, Preset } from "@/lib/schemas";
 
 export function HomePage() {
 	const { theme } = useTheme();
 	const [projects, setProjects] = useState<Project[]>([]);
+	const [presets, setPresets] = useState<Preset[]>([]);
+	const [activePresetId, setActivePresetId] = useState<string | null>(null);
 	const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 	const [metrics, setMetrics] = useState<{ cpu: string, ram: string }>({ cpu: "0%", ram: "0%" });
 	const [metricHistory, setMetricHistory] = useState<{ cpu: number, ram: number }[]>([]);
@@ -20,12 +23,16 @@ export function HomePage() {
 
 	const fetchData = async () => {
 		try {
-			const res = await fetch("/api/projects");
+			const res = await fetch("/api/export");
 			if (res.ok) {
 				const data = await res.json();
 				setProjects(data.projects || []);
+				setPresets(data.presets || []);
 				if (!selectedProjectId && data.projects?.length > 0) {
 					setSelectedProjectId(data.projects[0].id);
+				}
+				if (!activePresetId && data.presets?.length > 0) {
+					setActivePresetId(data.presets[0].id);
 				}
 			}
 		} catch (error) {
@@ -221,14 +228,35 @@ export function HomePage() {
 							+ Add Service
 						</Button>
 					} />
-					<Button 
-						size="sm" 
-						className="h-8 bg-emerald-600 hover:bg-emerald-500 text-white dark:bg-emerald-600 dark:hover:bg-emerald-500 retro:bg-transparent retro:border retro:border-emerald-500 retro:text-emerald-400 retro:hover:bg-emerald-500/20 retro:shadow-[0_0_10px_rgba(16,185,129,0.3)] retro:font-mono uppercase tracking-wider text-xs font-bold"
-						onClick={() => projects.forEach(p => handleAction(p.id, "start"))}
-					>
-						<Play className="w-3.5 h-3.5 mr-1.5 retro:animate-pulse" />
-						Start All ({projects.length})
-					</Button>
+					<div className="flex items-center gap-2 mr-2">
+						<Select value={activePresetId || ""} onValueChange={setActivePresetId}>
+							<SelectTrigger className="w-[180px] h-8 bg-zinc-100 dark:bg-zinc-900 border-transparent focus-visible:ring-1 focus-visible:ring-zinc-400 retro:bg-black/60 retro:border-cyan-500/50 retro:text-cyan-300">
+								<SelectValue placeholder="Select a preset..." />
+							</SelectTrigger>
+							<SelectContent className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 retro:bg-black/90 retro:border-cyan-500/50 retro:text-cyan-400">
+								{presets.length === 0 && <SelectItem value="none" disabled>No presets found</SelectItem>}
+								{presets.map(preset => (
+									<SelectItem key={preset.id} value={preset.id} className="retro:focus:bg-cyan-900/50">
+										{preset.name}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<Button 
+							size="sm" 
+							className="h-8 bg-emerald-600 hover:bg-emerald-500 text-white dark:bg-emerald-600 dark:hover:bg-emerald-500 retro:bg-transparent retro:border retro:border-emerald-500 retro:text-emerald-400 retro:hover:bg-emerald-500/20 retro:shadow-[0_0_10px_rgba(16,185,129,0.3)] retro:font-mono uppercase tracking-wider text-xs font-bold"
+							disabled={!activePresetId}
+							onClick={() => {
+								const preset = presets.find(p => p.id === activePresetId);
+								if (preset) {
+									preset.projectIds.forEach(id => handleAction(id, "start"));
+								}
+							}}
+						>
+							<Play className="w-3.5 h-3.5 mr-1.5 retro:animate-pulse" />
+							Start Preset
+						</Button>
+					</div>
 				</div>
 			</header>
 
