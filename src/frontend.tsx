@@ -21,8 +21,9 @@ const app = (
 	</StrictMode>
 );
 
-// https://bun.com/docs/bundler/hot-reloading#import-meta-hot-data
-if (!import.meta.hot.data.root) {
-	import.meta.hot.data.root = createRoot(elem);
+let root = (window as any).__REACT_ROOT__;
+if (!root) {
+	root = createRoot(elem);
+	(window as any).__REACT_ROOT__ = root;
 }
-import.meta.hot.data.root.render(app);
+root.render(app);
