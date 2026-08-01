@@ -6,6 +6,7 @@ import { CleanPage } from "@/pages/CleanPage";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSidebar } from "@/components/AppSidebar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import "../styles/globals.css";
 
 export function App() {
@@ -29,6 +30,9 @@ export function App() {
 								<Route path="/theme" element={<PlaceholderPage />} />
 								<Route path="/notifications" element={<PlaceholderPage />} />
 							</Routes>
+							<div className="fixed bottom-6 right-6 z-50">
+								<ThemeToggle />
+							</div>
 						</main>
 					</div>
 				</SidebarProvider>

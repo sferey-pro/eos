@@ -2,7 +2,6 @@ import { Play, RefreshCw, Square, Terminal, ExternalLink, Box, Grid2x2, Plus, Pa
 import { useEffect, useState } from "react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import {
 	Popover,
 	PopoverContent,
@@ -332,7 +331,6 @@ export function HomePage() {
 								</PopoverContent>
 							</Popover>
 							<AddProjectModal />
-							<ThemeToggle />
 						</div>
 					</div>
 				</header>
