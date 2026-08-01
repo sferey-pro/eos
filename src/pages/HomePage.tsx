@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle, Plus, Settings2, Download, Upload, Trash2, Box } from "lucide-react";
+import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity, Cpu, MemoryStick, AlertTriangle, Plus, Settings2, Download, Upload, Trash2, Box, Monitor } from "lucide-react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
 import { PresetManagerModal } from "@/components/PresetManagerModal";
@@ -19,6 +19,7 @@ export function HomePage() {
 	const [apps, setApps] = useState<App[]>([]);
 	const [activePresetId, setActivePresetId] = useState<string | null>(null);
 	const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+	const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
 	const [metrics, setMetrics] = useState<{ cpu: string, ram: string }>({ cpu: "0%", ram: "0%" });
 	const [metricHistory, setMetricHistory] = useState<{ cpu: number, ram: number }[]>([]);
 
@@ -386,7 +387,7 @@ export function HomePage() {
 										{projectGroup.map((project) => (
 											<div 
 												key={project.id}
-												onClick={() => setSelectedProjectId(project.id)}
+												onClick={() => { setSelectedProjectId(project.id); setSelectedAppId(null); }}
 												className={`group flex items-center h-9 px-2 rounded-sm cursor-pointer transition-colors border ${
 													selectedProjectId === project.id 
 														? 'bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 retro:bg-cyan-950/30 retro:border-cyan-500/50 retro:shadow-[inset_0_0_15px_rgba(34,211,238,0.15)]' 
@@ -444,7 +445,15 @@ export function HomePage() {
 							<div className="text-xs text-center p-2 text-zinc-400 italic">No apps configured</div>
 						)}
 						{apps.map(app => (
-							<div key={app.id} className="group flex items-center justify-between h-10 px-3 rounded-md bg-transparent border border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-900 retro:hover:bg-cyan-950/10 retro:hover:border-cyan-500/20 transition-colors">
+							<div 
+								key={app.id} 
+								onClick={() => { setSelectedAppId(app.id); setSelectedProjectId(null); }}
+								className={`group flex items-center justify-between h-10 px-3 rounded-md cursor-pointer transition-colors border ${
+									selectedAppId === app.id
+										? 'bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 retro:bg-cyan-950/30 retro:border-cyan-500/50 retro:shadow-[inset_0_0_15px_rgba(34,211,238,0.15)]' 
+										: 'bg-transparent border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-900 retro:hover:bg-cyan-950/10 retro:hover:border-cyan-500/20'
+								}`}
+							>
 								<div className="flex items-center gap-3">
 									<div className="relative">
 										{app.icon && app.icon !== "Box" ? (
@@ -462,25 +471,25 @@ export function HomePage() {
 									{(app.status === "stopped" || app.status === "error") ? (
 										<>
 											<AddAppModal app={app} onSuccess={fetchData}>
-												<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-500 retro:text-cyan-500 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-400">
+												<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-500 retro:text-cyan-500 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-400" onClick={(e) => e.stopPropagation()}>
 													<Settings2 className="w-3 h-3" />
 												</Button>
 											</AddAppModal>
-											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-500 retro:text-cyan-500 retro:hover:bg-emerald-500/20 retro:hover:text-emerald-400" onClick={() => handleAppAction(app.id, "start")}>
+											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-500 retro:text-cyan-500 retro:hover:bg-emerald-500/20 retro:hover:text-emerald-400" onClick={(e) => { e.stopPropagation(); handleAppAction(app.id, "start"); }}>
 												<Play className="w-3 h-3" />
 											</Button>
 										</>
 									) : (
 										<>
 											<AddAppModal app={app} onSuccess={fetchData}>
-												<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-500 retro:text-cyan-500 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-400">
+												<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-500 retro:text-cyan-500 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-400" onClick={(e) => e.stopPropagation()}>
 													<Settings2 className="w-3 h-3" />
 												</Button>
 											</AddAppModal>
-											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-blue-500 retro:text-cyan-500 retro:hover:bg-blue-500/20 retro:hover:text-blue-400" onClick={() => window.open(app.url, '_blank')}>
+											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-blue-500 retro:text-cyan-500 retro:hover:bg-blue-500/20 retro:hover:text-blue-400" onClick={(e) => { e.stopPropagation(); window.open(app.url, '_blank'); }}>
 												<Activity className="w-3 h-3" />
 											</Button>
-											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-500 retro:text-cyan-500 retro:hover:bg-rose-500/20 retro:hover:text-rose-400" onClick={() => handleAppAction(app.id, "stop")}>
+											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-500 retro:text-cyan-500 retro:hover:bg-rose-500/20 retro:hover:text-rose-400" onClick={(e) => { e.stopPropagation(); handleAppAction(app.id, "stop"); }}>
 												<Square className="w-3 h-3" />
 											</Button>
 										</>
@@ -491,9 +500,39 @@ export function HomePage() {
 					</div>
 				</div>
 
-				{/* RIGHT PANE: DETAILS & LOGS */}
+				{/* RIGHT PANE: DETAILS & LOGS & IFRAME */}
 				<div className="flex-1 flex flex-col min-w-0 bg-white/30 dark:bg-zinc-950/30 retro:bg-transparent">
-					{selectedProject ? (
+					{selectedAppId && apps.find(a => a.id === selectedAppId) ? (
+						<div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+							<div className="flex-none p-4 border-b border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/20 bg-white/50 dark:bg-zinc-950/50 retro:bg-black/50 flex items-center justify-between shadow-sm">
+								<h1 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 retro:text-cyan-300 font-mono flex items-center gap-3">
+									<Monitor className="w-5 h-5 text-indigo-500 retro:text-cyan-500" />
+									{apps.find(a => a.id === selectedAppId)?.name}
+								</h1>
+								<div className="flex items-center gap-2">
+									<Button size="sm" variant="outline" className="retro:border-cyan-500/50 retro:text-cyan-400 retro:hover:bg-cyan-500/20" onClick={() => window.open(apps.find(a => a.id === selectedAppId)?.url, '_blank')}>
+										<Activity className="w-4 h-4 mr-2" />
+										Open in New Tab
+									</Button>
+									<Button size="sm" variant="ghost" className="text-zinc-500 hover:text-zinc-900 retro:text-zinc-500 retro:hover:text-cyan-400" onClick={() => setSelectedAppId(null)}>
+										Fermer
+									</Button>
+								</div>
+							</div>
+							<div className="flex-1 w-full bg-white dark:bg-black relative">
+								{(apps.find(a => a.id === selectedAppId)?.status === "stopped" || apps.find(a => a.id === selectedAppId)?.status === "error") ? (
+									<div className="absolute inset-0 flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 retro:bg-black/80 flex-col gap-4">
+										<Monitor className="w-12 h-12 text-zinc-300 dark:text-zinc-700 retro:text-cyan-900/50" />
+										<span className="text-zinc-500 font-mono text-sm uppercase retro:text-cyan-600/80 tracking-widest">
+											L'application est arrêtée
+										</span>
+									</div>
+								) : (
+									<iframe src={apps.find(a => a.id === selectedAppId)?.url} className="w-full h-full border-none bg-white" sandbox="allow-same-origin allow-scripts allow-forms" />
+								)}
+							</div>
+						</div>
+					) : selectedProject ? (
 						<>
 							{/* Details Header & Mini Graphs */}
 							<div className="flex-none p-6 pb-4 border-b border-zinc-200 dark:border-zinc-800 retro:border-fuchsia-500/20">
