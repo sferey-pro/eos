@@ -65,7 +65,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent className="scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500">
+          <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500 group-data-[collapsible=icon]:hidden">
             Navigation Globale
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -103,7 +103,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500 mt-2">
+          <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500 mt-2 group-data-[collapsible=icon]:hidden">
             Infrastructure & Conteneurs
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -140,12 +140,12 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500 mt-2">
+          <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500 mt-2 group-data-[collapsible=icon]:hidden">
             Presets de lancement
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {presets.length === 0 && <span className="text-sm text-zinc-400 italic px-2">Aucun preset</span>}
+              {presets.length === 0 && <span className="text-sm text-zinc-400 italic px-2 group-data-[collapsible=icon]:hidden">Aucun preset</span>}
               {presets.map((preset) => (
                 <SidebarMenuItem key={preset.id}>
                   <SidebarMenuButton 
@@ -163,12 +163,12 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500 mt-4">
+          <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider retro:text-fuchsia-500 mt-4 group-data-[collapsible=icon]:hidden">
             Projets détectés
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {projects.length === 0 && <span className="text-sm text-zinc-400 italic px-2">Aucun projet</span>}
+              {projects.length === 0 && <span className="text-sm text-zinc-400 italic px-2 group-data-[collapsible=icon]:hidden">Aucun projet</span>}
               {projects.map((project) => (
                 <SidebarMenuItem key={project.id}>
                   <SidebarMenuButton 
