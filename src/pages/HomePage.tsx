@@ -174,29 +174,32 @@ export function HomePage() {
 						Tous les Projets
 					</h2>
 				</div>
-				<div className={`flex-1 overflow-y-auto p-4 flex flex-col gap-2 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800 transition-opacity duration-300 w-[320px] ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-					{projects.length === 0 && (
-						<div className="text-sm text-zinc-500 italic p-4 text-center w-full">Aucun projet enregistré.</div>
-					)}
-					{projects.map((project) => (
-						<div key={project.id} className="flex flex-col p-3 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors retro:bg-fuchsia-950/20 retro:border-fuchsia-500/30 retro:hover:border-cyan-400/50 w-[288px]">
-							<div className="flex items-center justify-between mb-3">
-								<span className="font-medium text-sm text-zinc-900 dark:text-zinc-100 truncate pr-2 retro:text-cyan-300 retro:font-mono">{project.name}</span>
-								<div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${project.status === "running" ? "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] retro:bg-cyan-400 retro:shadow-[0_0_10px_cyan]" : project.status === "error" ? "bg-rose-500 retro:bg-rose-500 retro:shadow-[0_0_10px_#f43f5e]" : project.status === "healthy" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] retro:bg-fuchsia-500 retro:shadow-[0_0_10px_#d946ef]" : "bg-zinc-300 dark:bg-zinc-700 retro:bg-zinc-800"}`} />
-							</div>
-							<div className="flex items-center justify-between gap-2">
-								<Button size="sm" variant="outline" className="flex-1 h-8" onClick={() => handleAction(project.id, "start")} disabled={project.status !== "stopped" && project.status !== "error"}>
-									<Play className="w-3 h-3" />
-								</Button>
-								<Button size="sm" variant="outline" className="flex-1 h-8" onClick={() => { handleAction(project.id, "stop"); setTimeout(() => handleAction(project.id, "start"), 500); }} disabled={project.status === "stopped"}>
-									<RefreshCw className="w-3 h-3" />
-								</Button>
-								<Button size="sm" variant="outline" className="flex-1 h-8" onClick={() => handleAction(project.id, "stop")} disabled={project.status === "stopped"}>
-									<Square className="w-3 h-3" />
-								</Button>
-							</div>
+				<div className={`flex-1 overflow-y-auto p-4 flex flex-col gap-6 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800 transition-opacity duration-300 w-[320px] ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+					<div>
+						<h3 className="text-xs font-semibold text-zinc-500 mb-3 uppercase tracking-wider retro:text-fuchsia-500">Presets de lancement</h3>
+						<div className="flex flex-col gap-2">
+							{presets.length === 0 && <span className="text-sm text-zinc-400 italic">Aucun preset</span>}
+							{presets.map((preset) => (
+								<div key={preset.id} onClick={() => navigate("/settings")} className="group flex items-center justify-between p-3 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors retro:bg-fuchsia-950/20 retro:border-fuchsia-500/30 retro:hover:border-cyan-400/50 cursor-pointer w-[288px]">
+									<span className="font-medium text-sm text-zinc-900 dark:text-zinc-100 truncate pr-2 retro:text-cyan-300 retro:font-mono">{preset.name}</span>
+									<Settings className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 retro:text-fuchsia-400 retro:group-hover:text-cyan-400 transition-colors" />
+								</div>
+							))}
 						</div>
-					))}
+					</div>
+
+					<div>
+						<h3 className="text-xs font-semibold text-zinc-500 mb-3 uppercase tracking-wider retro:text-fuchsia-500">Projets détectés</h3>
+						<div className="flex flex-col gap-2">
+							{projects.length === 0 && <span className="text-sm text-zinc-400 italic">Aucun projet</span>}
+							{projects.map((project) => (
+								<div key={project.id} onClick={() => navigate("/settings")} className="group flex items-center justify-between p-3 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors retro:bg-fuchsia-950/20 retro:border-fuchsia-500/30 retro:hover:border-cyan-400/50 cursor-pointer w-[288px]">
+									<span className="font-medium text-sm text-zinc-900 dark:text-zinc-100 truncate pr-2 retro:text-cyan-300 retro:font-mono">{project.name}</span>
+									<Settings className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 retro:text-fuchsia-400 retro:group-hover:text-cyan-400 transition-colors" />
+								</div>
+							))}
+						</div>
+					</div>
 				</div>
 			</aside>
 			{/* RETRO OVERLAYS */}
