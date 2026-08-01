@@ -3,6 +3,7 @@ import { FolderSearch, Play, Square, TerminalSquare, RefreshCw, Search, Activity
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { PresetManagerModal } from "@/components/PresetManagerModal";
 import { TerminalComponent } from "@/components/TerminalComponent";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -238,48 +239,74 @@ export function HomePage() {
 						<span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 retro:text-fuchsia-400/80 uppercase tracking-widest flex-1">Services</span>
 						<span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 retro:text-cyan-500/60 uppercase tracking-widest w-24 text-right">States</span>
 					</div>
-					<div className="flex-1 overflow-y-auto p-2 space-y-0.5 custom-scrollbar">
-						{projects.map((project) => (
-							<div 
-								key={project.id}
-								onClick={() => setSelectedProjectId(project.id)}
-								className={`group flex items-center h-10 px-3 rounded-md cursor-pointer transition-colors border ${
-									selectedProjectId === project.id 
-										? 'bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 retro:bg-cyan-950/30 retro:border-cyan-500/50 retro:shadow-[inset_0_0_15px_rgba(34,211,238,0.15)]' 
-										: 'bg-transparent border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-900 retro:hover:bg-cyan-950/10 retro:hover:border-cyan-500/20'
-								}`}
-							>
-								<div className="flex-1 min-w-0 truncate font-medium text-sm retro:font-mono retro:tracking-wide">
-									{project.name}
-								</div>
-								
-								<div className="flex items-center gap-3 shrink-0">
-									<div className="flex items-center gap-2 w-24 justify-end">
-										{project.status === "error" && <AlertTriangle className="w-3.5 h-3.5 text-rose-500 retro:text-rose-400 shrink-0" />}
-										<span className={`text-xs font-medium retro:font-mono retro:uppercase tracking-wider ${getStatusTextColor(project.status)}`}>
-											{getStatusLabel(project.status)}
-										</span>
-										<div className={`w-2 h-2 rounded-full shrink-0 ${getStatusColor(project.status)}`} />
-									</div>
+					<div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+						<Accordion type="multiple" defaultValue={Object.keys(projects.reduce((acc, project) => {
+							const projectName = project.path.split('/').pop() || project.path;
+							if (!acc[projectName]) acc[projectName] = [];
+							acc[projectName].push(project);
+							return acc;
+						}, {} as Record<string, Project[]>))} className="space-y-2">
+							{Object.entries(
+								projects.reduce((acc, project) => {
+									const projectName = project.path.split('/').pop() || project.path;
+									if (!acc[projectName]) acc[projectName] = [];
+									acc[projectName].push(project);
+									return acc;
+								}, {} as Record<string, Project[]>)
+							).map(([projectName, projectGroup]) => (
+								<AccordionItem key={projectName} value={projectName} className="border border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/30 rounded-md overflow-hidden bg-white/40 dark:bg-zinc-900/40 retro:bg-black/40">
+									<AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-zinc-100 dark:hover:bg-zinc-800/50 retro:hover:bg-cyan-950/30 transition-colors">
+										<div className="flex items-center gap-2">
+											<span className="font-semibold text-sm text-zinc-700 dark:text-zinc-300 retro:text-cyan-300 tracking-wide uppercase">{projectName}</span>
+											<span className="text-[10px] bg-zinc-200 dark:bg-zinc-800 retro:bg-cyan-900/50 text-zinc-500 dark:text-zinc-400 retro:text-cyan-400 px-1.5 py-0.5 rounded-full font-mono">{projectGroup.length} services</span>
+										</div>
+									</AccordionTrigger>
+									<AccordionContent className="p-1 space-y-0.5 border-t border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/20 bg-zinc-50/30 dark:bg-zinc-950/30 retro:bg-black/20">
+										{projectGroup.map((project) => (
+											<div 
+												key={project.id}
+												onClick={() => setSelectedProjectId(project.id)}
+												className={`group flex items-center h-9 px-2 rounded-sm cursor-pointer transition-colors border ${
+													selectedProjectId === project.id 
+														? 'bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 retro:bg-cyan-950/30 retro:border-cyan-500/50 retro:shadow-[inset_0_0_15px_rgba(34,211,238,0.15)]' 
+														: 'bg-transparent border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-900 retro:hover:bg-cyan-950/10 retro:hover:border-cyan-500/20'
+												}`}
+											>
+												<div className="flex-1 min-w-0 truncate font-medium text-[13px] retro:font-mono retro:tracking-wide ml-1">
+													{project.name.replace(/^\[.*?\]\s*/, '')}
+												</div>
+												
+												<div className="flex items-center gap-2 shrink-0">
+													<div className="flex items-center gap-1.5 w-20 justify-end">
+														{project.status === "error" && <AlertTriangle className="w-3 h-3 text-rose-500 retro:text-rose-400 shrink-0" />}
+														<span className={`text-[10px] font-medium retro:font-mono retro:uppercase tracking-wider ${getStatusTextColor(project.status)}`}>
+															{getStatusLabel(project.status)}
+														</span>
+														<div className={`w-1.5 h-1.5 rounded-full shrink-0 ${getStatusColor(project.status)}`} />
+													</div>
 
-									{/* HOVER ACTIONS */}
-									<div className={`flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ${selectedProjectId === project.id ? 'opacity-100' : ''}`}>
-										{(project.status === "stopped" || project.status === "error") ? (
-											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-500 retro:text-cyan-500 retro:hover:bg-emerald-500/20 retro:hover:text-emerald-400" onClick={(e) => { e.stopPropagation(); handleAction(project.id, "start"); }} title="Start">
-												<Play className="w-3 h-3" />
-											</Button>
-										) : (
-											<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-500 retro:text-cyan-500 retro:hover:bg-rose-500/20 retro:hover:text-rose-400" onClick={(e) => { e.stopPropagation(); handleAction(project.id, "stop"); }} title="Stop">
-												<Square className="w-3 h-3" />
-											</Button>
-										)}
-										<Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-500 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-300" onClick={(e) => { e.stopPropagation(); handleAction(project.id, "restart"); }} title="Restart">
-											<RefreshCw className="w-3 h-3" />
-										</Button>
-									</div>
-								</div>
-							</div>
-						))}
+													{/* HOVER ACTIONS */}
+													<div className={`flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ${selectedProjectId === project.id ? 'opacity-100' : ''}`}>
+														{(project.status === "stopped" || project.status === "error") ? (
+															<Button size="icon" variant="ghost" className="h-5 w-5 text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-500 retro:text-cyan-500 retro:hover:bg-emerald-500/20 retro:hover:text-emerald-400" onClick={(e) => { e.stopPropagation(); handleAction(project.id, "start"); }} title="Start">
+																<Play className="w-2.5 h-2.5" />
+															</Button>
+														) : (
+															<Button size="icon" variant="ghost" className="h-5 w-5 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-500 retro:text-cyan-500 retro:hover:bg-rose-500/20 retro:hover:text-rose-400" onClick={(e) => { e.stopPropagation(); handleAction(project.id, "stop"); }} title="Stop">
+																<Square className="w-2.5 h-2.5" />
+															</Button>
+														)}
+														<Button size="icon" variant="ghost" className="h-5 w-5 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-500 retro:hover:bg-cyan-500/20 retro:hover:text-cyan-300" onClick={(e) => { e.stopPropagation(); handleAction(project.id, "restart"); }} title="Restart">
+															<RefreshCw className="w-2.5 h-2.5" />
+														</Button>
+													</div>
+												</div>
+											</div>
+										))}
+									</AccordionContent>
+								</AccordionItem>
+							))}
+						</Accordion>
 					</div>
 				</div>
 
