@@ -1,4 +1,4 @@
-import { Play, RefreshCw, Square, Terminal, ExternalLink, Box, Grid2x2, Plus, PanelLeft } from "lucide-react";
+import { Play, RefreshCw, Square, Terminal, ExternalLink, Box, Grid2x2, Plus, PanelLeft, Server } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AddProjectModal } from "@/components/AddProjectModal";
 import { AddAppModal } from "@/components/AddAppModal";
@@ -233,19 +233,19 @@ export function HomePage() {
 
 						{/* Center: Presets */}
 						<div className="hidden md:flex items-center gap-2">
-							<div className="flex items-center bg-zinc-100 dark:bg-zinc-900 rounded-md p-1">
+							<div className="flex items-center bg-zinc-100 dark:bg-zinc-900 rounded-md p-1 retro:bg-black/60 retro:border retro:border-fuchsia-500/50 retro:shadow-[0_0_10px_rgba(217,70,239,0.3)]">
 								<Select value={selectedPresetId} onValueChange={setSelectedPresetId}>
-									<SelectTrigger className="w-[200px] border-none bg-transparent shadow-none h-8 focus:ring-0">
+									<SelectTrigger className="w-[200px] border-none bg-transparent shadow-none h-8 focus:ring-0 retro:text-cyan-400 retro:font-mono retro:uppercase retro:tracking-wider">
 										<SelectValue placeholder="Choisir un preset..." />
 									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="all">Tout lancer (Défaut)</SelectItem>
+									<SelectContent className="retro:bg-black/95 retro:border-fuchsia-500/50 retro:shadow-[0_0_15px_rgba(217,70,239,0.5)] retro:backdrop-blur-md">
+										<SelectItem value="all" className="retro:text-cyan-400 retro:focus:bg-fuchsia-500/20 retro:focus:text-cyan-300 retro:font-mono retro:uppercase retro:tracking-wider cursor-pointer">Tout lancer (Défaut)</SelectItem>
 										{presets.map(p => (
-											<SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+											<SelectItem key={p.id} value={p.id} className="retro:text-cyan-400 retro:focus:bg-fuchsia-500/20 retro:focus:text-cyan-300 retro:font-mono retro:uppercase retro:tracking-wider cursor-pointer">{p.name}</SelectItem>
 										))}
 									</SelectContent>
 								</Select>
-								<div className="w-px h-4 bg-zinc-300 dark:bg-zinc-700 mx-1"></div>
+								<div className="w-px h-4 bg-zinc-300 dark:bg-zinc-700 mx-1 retro:bg-fuchsia-500/50 retro:shadow-[0_0_5px_rgba(217,70,239,0.8)]"></div>
 								<PresetManagerModal projects={projects} onPresetsChange={fetchData} />
 							</div>
 							<Button
@@ -355,7 +355,7 @@ export function HomePage() {
 					{projects.length > 0 && (
 						<div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-500 delay-100">
 							<h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2 retro:text-cyan-400 retro:font-mono retro:uppercase retro:tracking-widest retro:drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
-								<Square className="w-5 h-5 text-zinc-500 retro:text-cyan-400" />
+								<Server className="w-5 h-5 text-zinc-500 retro:text-cyan-400" />
 								Infrastructure / Projets
 							</h2>
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
