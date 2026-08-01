@@ -1,9 +1,3 @@
-import {
-	Play,
-	RefreshCw,
-	Square,
-	Terminal,
-	ExternalLink,
 import { Play, RefreshCw, Square, Terminal, ExternalLink, Box, Grid2x2, Plus, PanelLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AddProjectModal } from "@/components/AddProjectModal";
@@ -36,6 +30,7 @@ import {
 	SheetContent,
 	SheetHeader,
 	SheetTitle,
+	SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Project, App } from "@/lib/schemas";

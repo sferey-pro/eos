@@ -30,7 +30,7 @@ describe("db", () => {
 
 		const projects = getProjects();
 		expect(projects).toHaveLength(1);
-		expect(projects[0]).toEqual({ ...project, subFolder: null });
+		expect(projects[0]).toEqual({ ...project, subFolder: undefined });
 	});
 
 	test("updates an existing project", () => {
@@ -52,7 +52,7 @@ describe("db", () => {
 
 		const projects = getProjects();
 		expect(projects).toHaveLength(1);
-		expect(projects[0].status).toBe("running");
+		expect(projects[0]?.status).toBe("running");
 	});
 
 	test("inserts and retrieves a preset", () => {

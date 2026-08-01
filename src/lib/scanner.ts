@@ -51,7 +51,6 @@ export async function scanDirectory(
 						if (typeof firstPortDef === "string") {
 							const parts = firstPortDef.split(":");
 							if (parts.length > 0) {
-								// @ts-expect-error Zod enums validation is flexible enough
 								healthcheck = { type: "tcp", target: parts[0] };
 							}
 						}

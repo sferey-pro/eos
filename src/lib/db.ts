@@ -45,6 +45,7 @@ export function getProjects(): Project[] {
 	const rows = query.all() as any[];
 	return rows.map((row) => ({
 		...row,
+		subFolder: row.subFolder === null ? undefined : row.subFolder,
 		dependsOn: JSON.parse(row.dependsOn),
 		healthcheck: JSON.parse(row.healthcheck) as Healthcheck,
 	}));
@@ -56,6 +57,7 @@ export function getProjectById(id: string): Project | undefined {
 	if (!row) return undefined;
 	return {
 		...row,
+		subFolder: row.subFolder === null ? undefined : row.subFolder,
 		dependsOn: JSON.parse(row.dependsOn),
 		healthcheck: JSON.parse(row.healthcheck) as Healthcheck,
 	};

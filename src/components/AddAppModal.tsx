@@ -9,8 +9,9 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import type { ReactNode } from "react";
 
-export function AddAppModal({ children }: { children?: React.ReactNode }) {
+export function AddAppModal({ children }: { children?: ReactNode }) {
 	const [open, setOpen] = useState(false);
 	const [name, setName] = useState("");
 	const [path, setPath] = useState("");

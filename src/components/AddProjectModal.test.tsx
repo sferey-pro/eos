@@ -39,7 +39,7 @@ const originalFetch = globalThis.fetch;
 
 describe("AddProjectModal", () => {
 	beforeEach(() => {
-		globalThis.fetch = mock();
+		globalThis.fetch = mock() as any;
 	});
 
 	afterEach(() => {
@@ -48,7 +48,7 @@ describe("AddProjectModal", () => {
 	});
 
 	test("scans and displays proposals", async () => {
-		const mockFetch = globalThis.fetch as ReturnType<typeof mock>;
+		const mockFetch = globalThis.fetch as any;
 		mockFetch.mockResolvedValueOnce(
 			new Response(
 				JSON.stringify({
@@ -77,7 +77,7 @@ describe("AddProjectModal", () => {
 	});
 
 	test("saves selected proposals", async () => {
-		const mockFetch = globalThis.fetch as ReturnType<typeof mock>;
+		const mockFetch = globalThis.fetch as any;
 		mockFetch.mockResolvedValueOnce(
 			new Response(
 				JSON.stringify({
@@ -118,9 +118,8 @@ describe("AddProjectModal", () => {
 		fireEvent.click(saveButton);
 
 		await waitFor(() => {
-			expect(mockFetch).toHaveBeenCalledTimes(2);
+			expect(mockFetch.mock.calls[1]?.[0]).toBe("/api/projects");
+			expect(mockFetch.mock.calls[1]?.[1]?.method).toBe("POST");
 		});
-
-		expect(mockFetch.mock.calls[1][0]).toBe("/api/projects");
 	});
 });

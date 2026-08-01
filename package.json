@@ -6,7 +6,10 @@
 	"scripts": {
 		"dev": "bun --hot src/index.ts",
 		"start": "NODE_ENV=production bun src/index.ts",
-		"build": "bun run build.ts",
+		"typecheck": "tsc --noEmit",
+		"test": "bun test",
+		"test:strict": "bun run typecheck && bun test",
+		"build": "bun run typecheck && bun run build.ts",
 		"lint": "biome check .",
 		"format": "biome format --write .",
 		"prepare": "husky"
@@ -40,7 +43,8 @@
 		"happy-dom": "^20.11.1",
 		"husky": "^9.1.7",
 		"lint-staged": "^15.4.3",
-		"tailwindcss": "^4.1.11"
+		"tailwindcss": "^4.1.11",
+		"typescript": "^7.0.2"
 	},
 	"lint-staged": {
 		"*.{js,ts,jsx,tsx}": [
