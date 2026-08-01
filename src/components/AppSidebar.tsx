@@ -54,7 +54,8 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" onClick={() => navigate("/")} className="hover:bg-transparent">
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-900 retro:bg-black/50 border border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/50 retro:shadow-[0_0_10px_rgba(34,211,238,0.5)]">
-                <img src="/eos-logo.jpg" alt="EOS Logo" className="w-5 h-5 rounded-sm object-cover" />
+                <img src="/eos-logo.jpg" alt="EOS Logo" className="w-5 h-5 rounded-sm object-cover retro:hidden" />
+                <img src="/eos-logo-retro.jpg" alt="EOS Logo Retro" className="hidden retro:block w-5 h-5 rounded-sm object-cover" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden truncate">
                 <span className="font-black retro:text-transparent retro:bg-clip-text retro:bg-gradient-to-r retro:from-cyan-400 retro:to-fuchsia-500 retro:font-mono retro:uppercase tracking-widest text-xl retro:drop-shadow-[0_0_5px_rgba(217,70,239,0.8)]">
