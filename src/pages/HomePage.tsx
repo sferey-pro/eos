@@ -235,7 +235,7 @@ export function HomePage() {
 						<div className="hidden md:flex items-center gap-2">
 							<div className="flex items-center bg-zinc-100 dark:bg-zinc-900 rounded-md p-1 retro:bg-black/60 retro:border retro:border-fuchsia-500/50 retro:shadow-[0_0_10px_rgba(217,70,239,0.3)]">
 								<Select value={selectedPresetId} onValueChange={setSelectedPresetId}>
-									<SelectTrigger className="w-[200px] border-none bg-transparent shadow-none h-8 focus:ring-0 retro:text-cyan-400 retro:font-mono retro:uppercase retro:tracking-wider">
+									<SelectTrigger className="w-[280px] border-none bg-transparent shadow-none h-8 focus:ring-0 retro:text-cyan-400 retro:font-mono retro:uppercase retro:tracking-wider">
 										<SelectValue placeholder="Choisir un preset..." />
 									</SelectTrigger>
 									<SelectContent className="retro:bg-black/95 retro:border-fuchsia-500/50 retro:shadow-[0_0_15px_rgba(217,70,239,0.5)] retro:backdrop-blur-md">
