@@ -175,9 +175,7 @@ export function HomePage() {
 					<div className="w-full px-6 h-16 flex items-center justify-between">
 						{/* Logo & Title */}
 						<div className="flex items-center gap-4">
-							<div className="md:hidden">
-								<SidebarTrigger className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-400" />
-							</div>
+							<SidebarTrigger className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 retro:text-cyan-400" />
 							<div className="flex items-center gap-3 group cursor-pointer">
 								<div className="relative">
 									<div className="absolute -inset-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 opacity-0 group-hover:opacity-40 blur transition-opacity duration-500" />
