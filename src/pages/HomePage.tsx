@@ -483,14 +483,14 @@ export function HomePage() {
 						))}
 
 						{projects.length === 0 && (
-							<div className="col-span-full py-24 text-center flex flex-col items-center justify-center border-2 border-dashed border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/20 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
-								<div className="w-16 h-16 mb-4 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shadow-sm border border-zinc-100 dark:border-zinc-800">
-									<Square className="w-8 h-8 text-zinc-400" />
+							<div className="col-span-full py-24 text-center flex flex-col items-center justify-center border-2 border-dashed border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/20 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all retro:border-cyan-400/50 retro:bg-black/60 retro:hover:border-fuchsia-500 retro:shadow-[0_0_15px_rgba(34,211,238,0.2)] retro:hover:shadow-[0_0_30px_rgba(217,70,239,0.5)]">
+								<div className="w-16 h-16 mb-4 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shadow-sm border border-zinc-100 dark:border-zinc-800 retro:bg-cyan-500/10 retro:border-cyan-400/50 retro:shadow-[inset_0_0_15px_rgba(34,211,238,0.4)]">
+									<Square className="w-8 h-8 text-zinc-400 retro:text-cyan-400" />
 								</div>
-								<h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2">
+								<h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2 retro:text-fuchsia-400 retro:font-mono retro:uppercase retro:tracking-widest retro:drop-shadow-[0_0_8px_rgba(217,70,239,0.8)]">
 									Aucun projet configuré
 								</h3>
-								<p className="text-zinc-500 dark:text-zinc-400 max-w-sm mb-6">
+								<p className="text-zinc-500 dark:text-zinc-400 max-w-sm mb-6 retro:text-cyan-300">
 									Commencez par scanner un dossier pour détecter vos conteneurs
 									Docker ou vos cibles Makefile.
 								</p>
