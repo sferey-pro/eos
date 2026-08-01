@@ -44,8 +44,15 @@ export function HomePage() {
 	const [selectedPresetId, setSelectedPresetId] = useState<string>("all");
 	const [isLogsOpen, setIsLogsOpen] = useState(false);
 	const [activeLogId, setActiveLogId] = useState<string | null>(null);
-	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+	const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+		const saved = localStorage.getItem("eos_sidebar_open");
+		return saved ? JSON.parse(saved) : false;
+	});
 	const [activeLogs, setActiveLogs] = useState<string>("");
+
+	useEffect(() => {
+		localStorage.setItem("eos_sidebar_open", JSON.stringify(isSidebarOpen));
+	}, [isSidebarOpen]);
 
 	useEffect(() => {
 		if (!isLogsOpen || !activeLogId) return;
