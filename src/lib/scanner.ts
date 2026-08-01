@@ -1,11 +1,11 @@
-import { join } from "path";
+import { join } from "node:path";
 import { parse } from "yaml";
 import type { Healthcheck, Project } from "./schemas";
 
 export type ProjectProposal = Omit<Project, "id" | "status" | "dependsOn">;
 
 /**
- * Scan un répertoire à la recherche de fichiers docker-compose
+ * Scan un répertoire à la recherche de fichiers docker-compose et Makefile
  * et propose une liste de configurations de "Projets" EOS.
  */
 export async function scanDirectory(
@@ -13,8 +13,8 @@ export async function scanDirectory(
 ): Promise<ProjectProposal[]> {
 	const proposals: ProjectProposal[] = [];
 
-	// Chercher docker-compose.yml ou docker-compose.yaml
-	const possibleFiles = [
+	// 1. SCAN DOCKER COMPOSE
+	const composeFiles = [
 		"docker-compose.yml",
 		"docker-compose.yaml",
 		"compose.yml",
@@ -22,7 +22,7 @@ export async function scanDirectory(
 	];
 	let composeContent = "";
 
-	for (const filename of possibleFiles) {
+	for (const filename of composeFiles) {
 		const file = Bun.file(join(targetPath, filename));
 		if (await file.exists()) {
 			composeContent = await file.text();
@@ -30,50 +30,74 @@ export async function scanDirectory(
 		}
 	}
 
-	if (!composeContent) {
-		// Si ce n'est pas un projet Docker, on pourrait scanner package.json plus tard.
-		return proposals;
-	}
+	if (composeContent) {
+		try {
+			const parsed = parse(composeContent) as {
+				services?: Record<string, { ports?: unknown[] }>;
+			};
+			if (parsed?.services) {
+				// Parcourir chaque service défini dans le docker-compose
+				for (const [serviceName, serviceDef] of Object.entries(
+					parsed.services,
+				)) {
+					let healthcheck: Healthcheck = { type: "none" };
 
-	try {
-		const parsed = parse(composeContent);
-		if (!parsed || !parsed.services) {
-			return proposals;
-		}
-
-		// Parcourir chaque service défini dans le docker-compose
-		for (const [serviceName, serviceDef] of Object.entries<any>(
-			parsed.services,
-		)) {
-			// Essayer de deviner un healthcheck TCP si des ports sont exposés
-			let healthcheck: Healthcheck = { type: "none" };
-
-			if (
-				serviceDef.ports &&
-				Array.isArray(serviceDef.ports) &&
-				serviceDef.ports.length > 0
-			) {
-				// Ex: "5432:5432" ou "8080:80"
-				const firstPortDef = serviceDef.ports[0];
-				if (typeof firstPortDef === "string") {
-					const parts = firstPortDef.split(":");
-					if (parts.length > 0) {
-						healthcheck = { type: "tcp", target: parts[0] }; // On ping le port local (host)
+					if (
+						serviceDef.ports &&
+						Array.isArray(serviceDef.ports) &&
+						serviceDef.ports.length > 0
+					) {
+						const firstPortDef = serviceDef.ports[0];
+						if (typeof firstPortDef === "string") {
+							const parts = firstPortDef.split(":");
+							if (parts.length > 0) {
+								// @ts-expect-error Zod enums validation is flexible enough
+								healthcheck = { type: "tcp", target: parts[0] };
+							}
+						}
 					}
+
+					proposals.push({
+						name: `[Docker] ${serviceName}`,
+						path: targetPath,
+						type: "docker",
+						command: `docker compose up -d ${serviceName}`,
+						healthcheck: healthcheck,
+					});
 				}
 			}
-
-			proposals.push({
-				name: serviceName,
-				path: targetPath,
-				type: "docker",
-				// La commande standard sans interactivité pour démarrer juste ce service
-				command: `docker compose up -d ${serviceName}`,
-				healthcheck: healthcheck,
-			});
+		} catch (error) {
+			console.error("Erreur lors de l'analyse du fichier yaml:", error);
 		}
-	} catch (error) {
-		console.error("Erreur lors de l'analyse du fichier yaml:", error);
+	}
+
+	// 2. SCAN MAKEFILE
+	const makefile = Bun.file(join(targetPath, "Makefile"));
+	if (await makefile.exists()) {
+		try {
+			const makefileContent = await makefile.text();
+
+			// Regex pour trouver les cibles Makefile (ex: "start:", "up:", "build-worker:")
+			const targetRegex = /^([a-zA-Z0-9_-]+):/gm;
+			let match: RegExpExecArray | null;
+
+			match = targetRegex.exec(makefileContent);
+			while (match !== null) {
+				const targetName = match[1];
+				if (targetName) {
+					proposals.push({
+						name: `[Make] ${targetName}`,
+						path: targetPath,
+						type: "make",
+						command: `make ${targetName}`,
+						healthcheck: { type: "none" },
+					});
+				}
+				match = targetRegex.exec(makefileContent);
+			}
+		} catch (error) {
+			console.error("Erreur lors de l'analyse du Makefile:", error);
+		}
 	}
 
 	return proposals;
