@@ -20,6 +20,7 @@ import {
 	startApp,
 	stopApp,
 	getProjectLogs,
+	getProjectMetrics,
 } from "./lib/engine";
 
 startHealthcheckEngine();
@@ -232,6 +233,17 @@ const server = serve({
 
 				const logs = getProjectLogs(id);
 				return Response.json({ logs });
+			},
+		},
+
+		"/api/metrics": {
+			async GET(req) {
+				const url = new URL(req.url);
+				const id = url.searchParams.get("id");
+				if (!id) return new Response("Missing id", { status: 400 });
+
+				const metrics = await getProjectMetrics(id);
+				return Response.json(metrics);
 			},
 		},
 	},

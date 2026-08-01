@@ -11,6 +11,7 @@ export function HomePage() {
 	const [projects, setProjects] = useState<Project[]>([]);
 	const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 	const [activeLogs, setActiveLogs] = useState<string>("");
+	const [metrics, setMetrics] = useState<{ cpu: string, ram: string }>({ cpu: "0%", ram: "0%" });
 
 	const fetchData = async () => {
 		try {
@@ -46,9 +47,26 @@ export function HomePage() {
 				console.error(e);
 			}
 		};
+		const fetchMetrics = async () => {
+			try {
+				const res = await fetch(`/api/metrics?id=${selectedProjectId}`);
+				if (res.ok) {
+					const data = await res.json();
+					setMetrics(data);
+				}
+			} catch (e) {
+				console.error(e);
+			}
+		};
+
 		fetchLogs();
-		const interval = setInterval(fetchLogs, 1000);
-		return () => clearInterval(interval);
+		fetchMetrics();
+		const logInterval = setInterval(fetchLogs, 1000);
+		const metricsInterval = setInterval(fetchMetrics, 3000);
+		return () => {
+			clearInterval(logInterval);
+			clearInterval(metricsInterval);
+		};
 	}, [selectedProjectId]);
 
 	const handleAction = async (id: string, action: "start" | "stop" | "restart") => {
@@ -261,7 +279,7 @@ export function HomePage() {
 									<div className="flex flex-col gap-1 relative">
 										<div className="flex items-center justify-between text-xs font-semibold text-zinc-500 retro:text-cyan-500/80 uppercase tracking-widest font-mono mb-2">
 											<span className="flex items-center gap-1.5"><Cpu className="w-3.5 h-3.5" /> CPU Utilization</span>
-											<span className="text-zinc-900 dark:text-zinc-300 retro:text-cyan-300">12%</span>
+											<span className="text-zinc-900 dark:text-zinc-300 retro:text-cyan-300">{metrics.cpu}</span>
 										</div>
 										<div className="absolute bottom-0 left-0 right-0 h-12 flex items-end justify-between gap-1 opacity-50 retro:opacity-100">
 											{/* SVG Mock Graph */}
@@ -275,7 +293,7 @@ export function HomePage() {
 									<div className="flex flex-col gap-1 relative">
 										<div className="flex items-center justify-between text-xs font-semibold text-zinc-500 retro:text-fuchsia-500/80 uppercase tracking-widest font-mono mb-2">
 											<span className="flex items-center gap-1.5"><MemoryStick className="w-3.5 h-3.5" /> RAM Usage</span>
-											<span className="text-zinc-900 dark:text-zinc-300 retro:text-fuchsia-300">45%</span>
+											<span className="text-zinc-900 dark:text-zinc-300 retro:text-fuchsia-300">{metrics.ram}</span>
 										</div>
 										<div className="absolute bottom-0 left-0 right-0 h-12 flex items-end justify-between gap-1 opacity-50 retro:opacity-100">
 											{/* SVG Mock Graph */}
