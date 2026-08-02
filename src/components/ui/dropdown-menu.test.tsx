@@ -1,6 +1,21 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { cleanup, render, screen, fireEvent } from "@testing-library/react";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuGroup, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuRadioGroup } from "./dropdown-menu";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
+	DropdownMenuSeparator,
+	DropdownMenuShortcut,
+	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
+	DropdownMenuTrigger,
+} from "./dropdown-menu";
 
 describe("DropdownMenu", () => {
 	afterEach(() => {
@@ -20,7 +35,7 @@ describe("DropdownMenu", () => {
 						<DropdownMenuRadioItem value="1">Item 3</DropdownMenuRadioItem>
 					</DropdownMenuRadioGroup>
 				</DropdownMenuContent>
-			</DropdownMenu>
+			</DropdownMenu>,
 		);
 
 		// Just check if trigger is rendered

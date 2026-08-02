@@ -1,5 +1,11 @@
-import type { Subprocess, ServerWebSocket } from "bun";
-import { getProjects, getProjectById, updateProject, getAppById, updateApp } from "./db";
+import type { ServerWebSocket, Subprocess } from "bun";
+import {
+	getAppById,
+	getProjectById,
+	getProjects,
+	updateApp,
+	updateProject,
+} from "./db";
 
 const processes = new Map<string, Subprocess>();
 const logProcesses = new Map<string, Subprocess>(); // For docker logs -f
@@ -9,13 +15,18 @@ const wsSubscribers = new Map<string, Set<ServerWebSocket<any>>>();
 export function subscribeToLogs(projectId: string, ws: ServerWebSocket<any>) {
 	if (!wsSubscribers.has(projectId)) wsSubscribers.set(projectId, new Set());
 	wsSubscribers.get(projectId)!.add(ws);
-	
+
 	// Send existing history
-	const logs = projectLogs.get(projectId) || ["[EOS Engine] No logs available.\r\n"];
+	const logs = projectLogs.get(projectId) || [
+		"[EOS Engine] No logs available.\r\n",
+	];
 	ws.send(logs.join(""));
 }
 
-export function unsubscribeFromLogs(projectId: string, ws: ServerWebSocket<any>) {
+export function unsubscribeFromLogs(
+	projectId: string,
+	ws: ServerWebSocket<any>,
+) {
 	const subs = wsSubscribers.get(projectId);
 	if (subs) {
 		subs.delete(ws);
@@ -30,8 +41,8 @@ function broadcastLog(projectId: string, text: string) {
 		projectLogs.set(projectId, logs);
 	}
 	logs.push(text);
-	while (logs.length > 1000) {
-		logs.shift();
+	if (logs.length > 1000) {
+		logs.splice(0, logs.length - 1000);
 	}
 
 	const subs = wsSubscribers.get(projectId);
@@ -133,7 +144,7 @@ export function stopProject(projectId: string) {
 		if (lastPart && !lastPart.startsWith("-") && lastPart !== "up") {
 			serviceName = lastPart;
 		}
-		
+
 		const stopCmd = ["docker", "compose", "stop"];
 		if (serviceName) stopCmd.push(serviceName);
 
@@ -201,7 +212,10 @@ export function startApp(appId: string) {
 				const { done, value } = await reader.read();
 				if (done) break;
 				const text = decoder.decode(value);
-				broadcastLog(appId, `\x1b[33m[${prefix}]\x1b[0m ${text.replace(/\n/g, "\r\n")}`);
+				broadcastLog(
+					appId,
+					`\x1b[33m[${prefix}]\x1b[0m ${text.replace(/\n/g, "\r\n")}`,
+				);
 			}
 		} catch (e) {
 			console.error(`[Engine] Error reading stream for ${appId}`, e);
@@ -234,7 +248,9 @@ export function getProjectLogs(projectId: string): string {
 	return logs.join("");
 }
 
-export async function getProjectMetrics(projectId: string): Promise<{ cpu: string, ram: string }> {
+export async function getProjectMetrics(
+	projectId: string,
+): Promise<{ cpu: string; ram: string }> {
 	const project = getProjectById(projectId);
 	if (!project || project.status === "stopped" || project.status === "error") {
 		return { cpu: "0%", ram: "0%" };
@@ -243,45 +259,63 @@ export async function getProjectMetrics(projectId: string): Promise<{ cpu: strin
 	if (project.type === "docker") {
 		try {
 			// Obtenir les IDs des conteneurs via docker compose
-			const psProc = Bun.spawn(["docker", "compose", "ps", "-q"], { cwd: project.path });
+			const psProc = Bun.spawn(["docker", "compose", "ps", "-q"], {
+				cwd: project.path,
+			});
 			const idsText = await new Response(psProc.stdout).text();
-			const ids = idsText.split('\n').map(id => id.trim()).filter(Boolean);
-			
+			const ids = idsText
+				.split("\n")
+				.map((id) => id.trim())
+				.filter(Boolean);
+
 			if (ids.length === 0) return { cpu: "0%", ram: "0%" };
 
 			// Obtenir les stats pour ces IDs
-			const statsProc = Bun.spawn(["docker", "stats", "--no-stream", "--format", "{{.CPUPerc}}::{{.MemPerc}}", ...ids]);
+			const statsProc = Bun.spawn([
+				"docker",
+				"stats",
+				"--no-stream",
+				"--format",
+				"{{.CPUPerc}}::{{.MemPerc}}",
+				...ids,
+			]);
 			const statsText = await new Response(statsProc.stdout).text();
-			
-			const lines = statsText.split('\n').filter(Boolean);
+
+			const lines = statsText.split("\n").filter(Boolean);
 			let totalCpu = 0;
 			let totalRam = 0;
-			
+
 			for (const line of lines) {
 				const [cpu, ram] = line.split("::");
-				if (cpu) totalCpu += parseFloat(cpu.replace('%', '')) || 0;
-				if (ram) totalRam += parseFloat(ram.replace('%', '')) || 0;
+				if (cpu) totalCpu += parseFloat(cpu.replace("%", "")) || 0;
+				if (ram) totalRam += parseFloat(ram.replace("%", "")) || 0;
 			}
-			
-			return { 
-				cpu: totalCpu.toFixed(1) + "%", 
-				ram: totalRam.toFixed(1) + "%" 
+
+			return {
+				cpu: totalCpu.toFixed(1) + "%",
+				ram: totalRam.toFixed(1) + "%",
 			};
 		} catch (e) {
 			console.error("[Engine] Error getting docker metrics for", projectId, e);
 			return { cpu: "N/A", ram: "N/A" };
 		}
 	}
-	
+
 	// Placeholder for non-docker projects (Node/Bun/Make) using PID later
 	return { cpu: "N/A", ram: "N/A" };
 }
 
 export function ensureLogStream(projectId: string) {
 	if (logProcesses.has(projectId)) return; // Already streaming
-	
+
 	const project = getProjectById(projectId);
-	if (!project || project.type !== "docker" || project.status === "stopped" || project.status === "error") return;
+	if (
+		!project ||
+		project.type !== "docker" ||
+		project.status === "stopped" ||
+		project.status === "error"
+	)
+		return;
 
 	const parts = project.command.split(" ");
 	const lastPart = parts[parts.length - 1];
@@ -299,11 +333,11 @@ export function ensureLogStream(projectId: string) {
 		stderr: "pipe",
 		onExit: () => {
 			logProcesses.delete(projectId);
-		}
+		},
 	});
-	
+
 	logProcesses.set(projectId, logProc);
-	
+
 	const readLogStream = async (stream: ReadableStream) => {
 		const reader = stream.getReader();
 		const decoder = new TextDecoder();
@@ -316,14 +350,16 @@ export function ensureLogStream(projectId: string) {
 			}
 		} catch (e) {}
 	};
-	
+
 	if (logProc.stdout) readLogStream(logProc.stdout);
 	if (logProc.stderr) readLogStream(logProc.stderr);
 }
 
 export function startProjectGroup(groupPath: string) {
 	const allProjects = getProjects();
-	const groupProjects = allProjects.filter(p => p.path === groupPath && p.type === "docker");
+	const groupProjects = allProjects.filter(
+		(p) => p.path === groupPath && p.type === "docker",
+	);
 	if (groupProjects.length === 0) return;
 
 	for (const p of groupProjects) {
@@ -352,7 +388,7 @@ export function startProjectGroup(groupPath: string) {
 					}
 				}
 			}
-		}
+		},
 	});
 	processes.set(groupPath, proc);
 
@@ -363,7 +399,9 @@ export function startProjectGroup(groupPath: string) {
 
 export function stopProjectGroup(groupPath: string) {
 	const allProjects = getProjects();
-	const groupProjects = allProjects.filter(p => p.path === groupPath && p.type === "docker");
+	const groupProjects = allProjects.filter(
+		(p) => p.path === groupPath && p.type === "docker",
+	);
 	if (groupProjects.length === 0) return;
 
 	console.log(`[Engine] Stopping project group: ${groupPath}`);
@@ -392,4 +430,16 @@ export function stopProjectGroup(groupPath: string) {
 		p.status = "stopped";
 		updateProject(p);
 	}
+}
+
+export function stopAll() {
+	for (const [id, proc] of processes.entries()) {
+		console.log(`[Engine] Killing process for ${id}`);
+		proc.kill();
+	}
+	for (const [id, proc] of logProcesses.entries()) {
+		proc.kill();
+	}
+	processes.clear();
+	logProcesses.clear();
 }

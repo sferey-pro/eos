@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { AddAppModal } from "./AddAppModal";
 
 // Polyfills needed for Radix UI with happy-dom
@@ -48,7 +54,9 @@ describe("AddAppModal", () => {
 		const nameInput = await screen.findByPlaceholderText("ex: Aegis");
 		fireEvent.change(nameInput, { target: { value: "My New App" } });
 
-		const pathInput = await screen.findByPlaceholderText("/absolute/path/to/app");
+		const pathInput = await screen.findByPlaceholderText(
+			"/absolute/path/to/app",
+		);
 		fireEvent.change(pathInput, { target: { value: "/home/app" } });
 
 		const commandInput = await screen.findByPlaceholderText("ex: bun run dev");

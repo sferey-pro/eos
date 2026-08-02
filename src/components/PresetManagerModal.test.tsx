@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { PresetManagerModal } from "./PresetManagerModal";
 
 const originalFetch = globalThis.fetch;
@@ -49,7 +55,7 @@ describe("PresetManagerModal", () => {
 			new Response(
 				JSON.stringify({
 					presets: [{ id: "1", name: "Local Preset", projectIds: [] }],
-					projects: []
+					projects: [],
 				}),
 				{
 					headers: { "Content-Type": "application/json" },
@@ -72,21 +78,23 @@ describe("PresetManagerModal", () => {
 			new Response(
 				JSON.stringify({
 					presets: [],
-					projects: []
+					projects: [],
 				}),
 				{ headers: { "Content-Type": "application/json" } },
 			),
 		);
 		// fetch POST new preset
 		mockFetch.mockResolvedValueOnce(
-			new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } })
+			new Response(JSON.stringify({ success: true }), {
+				headers: { "Content-Type": "application/json" },
+			}),
 		);
 		// fetch GET refetch
 		mockFetch.mockResolvedValueOnce(
 			new Response(
 				JSON.stringify({
 					presets: [{ id: "2", name: "New Preset", projectIds: [] }],
-					projects: []
+					projects: [],
 				}),
 				{ headers: { "Content-Type": "application/json" } },
 			),
@@ -95,7 +103,7 @@ describe("PresetManagerModal", () => {
 		render(<PresetManagerModal />);
 
 		fireEvent.click(screen.getByRole("button", { name: /manage presets/i }));
-		
+
 		await screen.findByText("No presets found.");
 
 		fireEvent.click(screen.getByRole("button", { name: /new preset/i }));

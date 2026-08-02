@@ -11,14 +11,14 @@ mock.module("xterm", () => {
 			write() {}
 			clear() {}
 			dispose() {}
-		}
+		},
 	};
 });
 mock.module("xterm-addon-fit", () => {
 	return {
 		FitAddon: class {
 			fit() {}
-		}
+		},
 	};
 });
 

@@ -1,5 +1,6 @@
-import { Loader2, Plus, Box } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { Box, Loader2, Plus } from "lucide-react";
+import type { ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -9,10 +10,17 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import type { ReactNode } from "react";
 import type { App } from "@/lib/schemas";
 
-export function AddAppModal({ children, app, onSuccess }: { children?: ReactNode, app?: App, onSuccess?: () => void }) {
+export function AddAppModal({
+	children,
+	app,
+	onSuccess,
+}: {
+	children?: ReactNode;
+	app?: App;
+	onSuccess?: () => void;
+}) {
 	const [open, setOpen] = useState(false);
 	const [name, setName] = useState(app?.name || "");
 	const [path, setPath] = useState(app?.path || "");
@@ -29,7 +37,7 @@ export function AddAppModal({ children, app, onSuccess }: { children?: ReactNode
 			setCommand(app?.command || "");
 			setUrl(app?.url || "http://localhost:3000");
 			// If the icon is "Box" (default), show it as empty in the input so the user can easily change it
-			setIcon(app?.icon === "Box" ? "" : (app?.icon || ""));
+			setIcon(app?.icon === "Box" ? "" : app?.icon || "");
 		}
 	}, [open, app?.name, app?.path, app?.command, app?.url, app?.icon]);
 
@@ -80,14 +88,20 @@ export function AddAppModal({ children, app, onSuccess }: { children?: ReactNode
 			<DialogContent className="sm:max-w-[425px] bg-white/90 dark:bg-zinc-950/90 retro:bg-black/90 backdrop-blur-xl border-zinc-200/50 dark:border-zinc-800/50 retro:border-cyan-500/50 shadow-2xl retro:shadow-[0_0_30px_rgba(34,211,238,0.3)]">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 retro:text-cyan-400 retro:font-mono uppercase tracking-widest">
-						<Box aria-hidden="true" className="w-5 h-5 retro:text-fuchsia-500" />
+						<Box
+							aria-hidden="true"
+							className="w-5 h-5 retro:text-fuchsia-500"
+						/>
 						{app ? "Modifier l'Application" : "Ajouter une Application"}
 					</DialogTitle>
 				</DialogHeader>
 
 				<div className="flex flex-col gap-4 py-4">
 					<div className="space-y-2">
-						<label htmlFor="app-name" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 retro:text-fuchsia-400 retro:font-mono">
+						<label
+							htmlFor="app-name"
+							className="text-sm font-medium text-zinc-700 dark:text-zinc-300 retro:text-fuchsia-400 retro:font-mono"
+						>
 							Nom de l'Application
 						</label>
 						<Input
@@ -99,7 +113,10 @@ export function AddAppModal({ children, app, onSuccess }: { children?: ReactNode
 						/>
 					</div>
 					<div className="space-y-2">
-						<label htmlFor="app-path" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 retro:text-fuchsia-400 retro:font-mono">
+						<label
+							htmlFor="app-path"
+							className="text-sm font-medium text-zinc-700 dark:text-zinc-300 retro:text-fuchsia-400 retro:font-mono"
+						>
 							Chemin du dossier
 						</label>
 						<Input
@@ -111,7 +128,10 @@ export function AddAppModal({ children, app, onSuccess }: { children?: ReactNode
 						/>
 					</div>
 					<div className="space-y-2">
-						<label htmlFor="app-command" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 retro:text-fuchsia-400 retro:font-mono">
+						<label
+							htmlFor="app-command"
+							className="text-sm font-medium text-zinc-700 dark:text-zinc-300 retro:text-fuchsia-400 retro:font-mono"
+						>
 							Commande de démarrage
 						</label>
 						<Input
@@ -123,7 +143,10 @@ export function AddAppModal({ children, app, onSuccess }: { children?: ReactNode
 						/>
 					</div>
 					<div className="space-y-2">
-						<label htmlFor="app-url" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 retro:text-fuchsia-400 retro:font-mono">
+						<label
+							htmlFor="app-url"
+							className="text-sm font-medium text-zinc-700 dark:text-zinc-300 retro:text-fuchsia-400 retro:font-mono"
+						>
 							URL d'accès locale
 						</label>
 						<Input
@@ -139,8 +162,14 @@ export function AddAppModal({ children, app, onSuccess }: { children?: ReactNode
 						</p>
 					</div>
 					<div className="space-y-2">
-						<label htmlFor="app-icon" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 retro:text-fuchsia-400 retro:font-mono">
-							Lien du logo (URL) <span className="text-zinc-400 text-xs font-normal">(optionnel)</span>
+						<label
+							htmlFor="app-icon"
+							className="text-sm font-medium text-zinc-700 dark:text-zinc-300 retro:text-fuchsia-400 retro:font-mono"
+						>
+							Lien du logo (URL){" "}
+							<span className="text-zinc-400 text-xs font-normal">
+								(optionnel)
+							</span>
 						</label>
 						<Input
 							id="app-icon"
@@ -161,7 +190,7 @@ export function AddAppModal({ children, app, onSuccess }: { children?: ReactNode
 							) : (
 								<Plus aria-hidden="true" className="w-4 h-4 mr-2" />
 							)}
-							Ajouter l'App
+							{app ? "Enregistrer" : "Ajouter l'App"}
 						</Button>
 					</div>
 				</div>

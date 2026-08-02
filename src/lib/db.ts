@@ -1,10 +1,12 @@
 import { Database } from "bun:sqlite";
-import type { Healthcheck, Preset, Project, App } from "./schemas";
+import type { App, Healthcheck, Preset, Project } from "./schemas";
 
 const dbPath = process.env.NODE_ENV === "test" ? ":memory:" : "eos.sqlite";
 const db = new Database(dbPath, { create: true });
 db.run("PRAGMA journal_mode = WAL;");
-
+db.run("PRAGMA synchronous = NORMAL;");
+db.run("PRAGMA temp_store = MEMORY;");
+db.run("PRAGMA mmap_size = 3000000000;");
 db.run(`
   CREATE TABLE IF NOT EXISTS projects (
     id TEXT PRIMARY KEY,
@@ -130,7 +132,10 @@ export function insertPreset(preset: Preset): void {
 	});
 }
 
-export function updatePreset(id: string, updates: Partial<Omit<Preset, "id">>): void {
+export function updatePreset(
+	id: string,
+	updates: Partial<Omit<Preset, "id">>,
+): void {
 	const current = getPresets().find((p) => p.id === id);
 	if (!current) return;
 	const updated = { ...current, ...updates };
@@ -193,6 +198,10 @@ export function insertApp(app: App): void {
 		$icon: app.icon,
 		$status: app.status,
 	});
+}
+
+export function closeDatabase(): void {
+	db.close();
 }
 
 export default db;

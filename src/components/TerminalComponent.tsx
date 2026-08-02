@@ -54,12 +54,12 @@ export function TerminalComponent({ projectId }: TerminalComponentProps) {
 
 		fitAddon.current = new FitAddon();
 		termInstance.current.loadAddon(fitAddon.current);
-		
+
 		// Use ResizeObserver to only open and fit when container has dimensions
 		const resizeObserver = new ResizeObserver(() => {
 			if (isDisposed || !terminalRef.current) return;
 			const { clientWidth, clientHeight } = terminalRef.current;
-			
+
 			if (clientWidth > 0 && clientHeight > 0) {
 				try {
 					if (!termInstance.current?.element) {
@@ -74,7 +74,7 @@ export function TerminalComponent({ projectId }: TerminalComponentProps) {
 				}
 			}
 		});
-		
+
 		resizeObserver.observe(terminalRef.current);
 
 		return () => {
@@ -88,19 +88,23 @@ export function TerminalComponent({ projectId }: TerminalComponentProps) {
 		if (!projectId || !termInstance.current) return;
 
 		termInstance.current.clear();
-		termInstance.current.write(`\x1b[36mConnecting to logs for project ${projectId}...\x1b[0m\r\n`);
+		termInstance.current.write(
+			`\x1b[36mConnecting to logs for project ${projectId}...\x1b[0m\r\n`,
+		);
 
 		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 		const wsUrl = `${protocol}//${window.location.host}/ws/logs?id=${projectId}`;
-		
+
 		ws.current = new WebSocket(wsUrl);
-		
+
 		ws.current.onmessage = (event) => {
 			termInstance.current?.write(event.data);
 		};
 
 		ws.current.onclose = () => {
-			termInstance.current?.write(`\r\n\x1b[31m[Disconnected from log stream]\x1b[0m\r\n`);
+			termInstance.current?.write(
+				`\r\n\x1b[31m[Disconnected from log stream]\x1b[0m\r\n`,
+			);
 		};
 
 		return () => {
@@ -111,6 +115,11 @@ export function TerminalComponent({ projectId }: TerminalComponentProps) {
 	}, [projectId]);
 
 	return (
-		<div role="log" aria-label="Terminal de sortie" className="w-full h-full relative" ref={terminalRef}></div>
+		<div
+			role="log"
+			aria-label="Terminal de sortie"
+			className="w-full h-full relative"
+			ref={terminalRef}
+		></div>
 	);
 }

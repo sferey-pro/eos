@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { cleanup, render, screen, fireEvent } from "@testing-library/react";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "./dialog";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "./dialog";
 
 describe("Dialog", () => {
 	afterEach(() => {
@@ -19,7 +27,7 @@ describe("Dialog", () => {
 					<div>Dialog Content</div>
 					<DialogFooter>Footer</DialogFooter>
 				</DialogContent>
-			</Dialog>
+			</Dialog>,
 		);
 
 		const trigger = screen.getByText("Open Dialog");

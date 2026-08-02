@@ -1,6 +1,15 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { cleanup, render, screen, fireEvent } from "@testing-library/react";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectGroup } from "./select";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectSeparator,
+	SelectTrigger,
+	SelectValue,
+} from "./select";
 
 describe("Select", () => {
 	afterEach(() => {
@@ -21,7 +30,7 @@ describe("Select", () => {
 					</SelectGroup>
 					<SelectSeparator />
 				</SelectContent>
-			</Select>
+			</Select>,
 		);
 
 		fireEvent.click(screen.getByText("Select an option"));

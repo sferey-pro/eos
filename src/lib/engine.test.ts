@@ -1,19 +1,19 @@
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { Database } from "bun:sqlite";
-import db, { getProjectById, insertProject, insertApp, getAppById } from "./db";
-import { 
-	startProject, 
-	stopProject, 
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import db, { getAppById, getProjectById, insertApp, insertProject } from "./db";
+import {
 	getProjectLogs,
+	getProjectMetrics,
 	startApp,
+	startProject,
+	startProjectGroup,
 	stopApp,
+	stopProject,
+	stopProjectGroup,
 	subscribeToLogs,
 	unsubscribeFromLogs,
-	getProjectMetrics,
-	startProjectGroup,
-	stopProjectGroup
 } from "./engine";
-import type { Project, App } from "./schemas";
+import type { App, Project } from "./schemas";
 
 describe("Execution Engine", () => {
 	beforeEach(() => {
@@ -86,7 +86,7 @@ describe("Execution Engine", () => {
 			command: "echo 'app started'",
 			url: "http://localhost",
 			icon: "Box",
-			status: "stopped"
+			status: "stopped",
 		};
 		insertApp(app);
 
@@ -95,7 +95,7 @@ describe("Execution Engine", () => {
 		expect(runningApp?.status).toBe("running");
 
 		await Bun.sleep(100);
-		
+
 		stopApp("test-app-1");
 		const stoppedApp = getAppById("test-app-1");
 		expect(stoppedApp?.status).toBe("stopped");
@@ -123,7 +123,7 @@ describe("Execution Engine", () => {
 			command: "docker compose up",
 			status: "stopped",
 			dependsOn: [],
-			healthcheck: { type: "none" }
+			healthcheck: { type: "none" },
 		};
 		insertProject(project);
 
@@ -138,7 +138,15 @@ describe("Execution Engine", () => {
 	});
 
 	test("should startApp when already running", () => {
-		const app: App = { id: "test-app-2", name: "App 2", path: ".", command: "echo 1", url: "http", icon: "Box", status: "running" };
+		const app: App = {
+			id: "test-app-2",
+			name: "App 2",
+			path: ".",
+			command: "echo 1",
+			url: "http",
+			icon: "Box",
+			status: "running",
+		};
 		insertApp(app);
 		startApp("test-app-2");
 		startApp("test-app-2");
@@ -154,7 +162,7 @@ describe("Execution Engine", () => {
 			command: "docker compose up -d my-service",
 			status: "running",
 			dependsOn: [],
-			healthcheck: { type: "none" }
+			healthcheck: { type: "none" },
 		};
 		insertProject(project);
 		startProject("docker-proj-2");

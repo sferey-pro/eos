@@ -1,5 +1,5 @@
-import { HomePage } from "@/pages/HomePage";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { HomePage } from "@/pages/HomePage";
 import "../styles/globals.css";
 
 export function App() {

@@ -1,33 +1,35 @@
 import { serve } from "bun";
 import index from "./index.html";
 import {
-	getProjects,
-	insertProject,
-	updateProject,
 	getApps,
-	insertApp,
-	updateApp,
 	getPresets,
+	getProjects,
+	insertApp,
 	insertPreset,
+	insertProject,
+	updateApp,
 	updatePreset,
-	deletePreset,
+	updateProject,
 	clearAllData,
+	closeDatabase,
+	deletePreset,
 } from "./lib/db";
-import { scanDirectory } from "./lib/scanner";
-import { startHealthcheckEngine, gitStatusCache } from "./lib/healthcheck";
-import { ProjectSchema, AppSchema, PresetSchema } from "./lib/schemas";
 import {
-	startProject,
-	stopProject,
-	startApp,
-	stopApp,
-	startProjectGroup,
-	stopProjectGroup,
 	getProjectLogs,
 	getProjectMetrics,
+	startApp,
+	startProject,
+	startProjectGroup,
+	stopAll,
+	stopApp,
+	stopProject,
+	stopProjectGroup,
 	subscribeToLogs,
-	unsubscribeFromLogs
+	unsubscribeFromLogs,
 } from "./lib/engine";
+import { gitStatusCache, startHealthcheckEngine } from "./lib/healthcheck";
+import { scanDirectory } from "./lib/scanner";
+import { AppSchema, PresetSchema, ProjectSchema } from "./lib/schemas";
 
 startHealthcheckEngine();
 
@@ -354,3 +356,18 @@ const server = serve<WebSocketData>({
 });
 
 console.log(`🚀 Server running at ${server.url}`);
+
+function gracefulShutdown(signal: string) {
+	console.log(`\n[EOS] Received ${signal}, shutting down gracefully...`);
+	try {
+		stopAll();
+		closeDatabase();
+		server.stop(true);
+	} catch (e) {
+		console.error("[EOS] Error during shutdown:", e);
+	}
+	process.exit(0);
+}
+
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));

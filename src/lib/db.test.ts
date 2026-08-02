@@ -1,19 +1,19 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 import db, {
+	clearAllData,
+	deletePreset,
+	getAppById,
+	getApps,
 	getPresets,
 	getProjects,
+	insertApp,
 	insertPreset,
 	insertProject,
-	updateProject,
-	updatePreset,
-	deletePreset,
-	getApps,
-	getAppById,
-	insertApp,
 	updateApp,
-	clearAllData,
+	updatePreset,
+	updateProject,
 } from "./db";
-import type { Preset, Project, App } from "./schemas";
+import type { App, Preset, Project } from "./schemas";
 
 describe("db", () => {
 	beforeEach(() => {
@@ -93,7 +93,15 @@ describe("db", () => {
 	});
 
 	test("inserts, retrieves and updates apps", () => {
-		const app: App = { id: "a-1", name: "A1", path: "/app1", command: "start", url: "http://app", icon: "Box", status: "stopped" };
+		const app: App = {
+			id: "a-1",
+			name: "A1",
+			path: "/app1",
+			command: "start",
+			url: "http://app",
+			icon: "Box",
+			status: "stopped",
+		};
 		insertApp(app);
 		expect(getApps()).toHaveLength(1);
 		expect(getAppById("a-1")).toEqual(app);

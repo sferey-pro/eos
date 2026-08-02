@@ -1,5 +1,14 @@
-import { Check, Loader2, Plus, Search, FolderSearch, Terminal, Box, Wrench } from "lucide-react";
-import { useState, useMemo, useCallback } from "react";
+import {
+	Box,
+	Check,
+	FolderSearch,
+	Loader2,
+	Plus,
+	Search,
+	Terminal,
+	Wrench,
+} from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -45,7 +54,7 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 	}, [path]);
 
 	const toggleSelection = useCallback((index: number) => {
-		setSelectedIndices(prev => {
+		setSelectedIndices((prev) => {
 			const newSet = new Set(prev);
 			if (newSet.has(index)) newSet.delete(index);
 			else newSet.add(index);
@@ -54,7 +63,10 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 	}, []);
 
 	const groupedProposals = useMemo(() => {
-		const groups: Record<string, { proposal: ProjectProposal; index: number }[]> = {};
+		const groups: Record<
+			string,
+			{ proposal: ProjectProposal; index: number }[]
+		> = {};
 		proposals.forEach((prop, index) => {
 			if (!groups[prop.type]) groups[prop.type] = [];
 			groups[prop.type]!.push({ proposal: prop, index });
@@ -62,16 +74,19 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 		return groups;
 	}, [proposals]);
 
-	const toggleGroup = useCallback((type: string, isAllSelected: boolean) => {
-		setSelectedIndices(prev => {
-			const newSet = new Set(prev);
-			groupedProposals[type]?.forEach(({ index }) => {
-				if (isAllSelected) newSet.delete(index);
-				else newSet.add(index);
+	const toggleGroup = useCallback(
+		(type: string, isAllSelected: boolean) => {
+			setSelectedIndices((prev) => {
+				const newSet = new Set(prev);
+				groupedProposals[type]?.forEach(({ index }) => {
+					if (isAllSelected) newSet.delete(index);
+					else newSet.add(index);
+				});
+				return newSet;
 			});
-			return newSet;
-		});
-	}, [groupedProposals]);
+		},
+		[groupedProposals],
+	);
 
 	const handleSave = useCallback(async () => {
 		const selectedProposals = proposals.filter((_, i) =>
@@ -123,7 +138,9 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 
 				<div className="flex flex-col gap-5 py-2">
 					<div className="flex gap-2 relative">
-						<label htmlFor="project-path" className="sr-only">Chemin absolu du projet</label>
+						<label htmlFor="project-path" className="sr-only">
+							Chemin absolu du projet
+						</label>
 						<Input
 							id="project-path"
 							placeholder="Chemin absolu (ex: /home/user/my-project)"
@@ -159,12 +176,16 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 									Sélectionnez uniquement ce qui vous est utile
 								</span>
 							</div>
-							
+
 							<div className="overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-700 retro:scrollbar-thumb-cyan-700 space-y-6 flex-1">
 								{Object.entries(groupedProposals).map(([type, items]) => {
-									const isAllSelected = items.every(({ index }) => selectedIndices.has(index));
-									const isSomeSelected = items.some(({ index }) => selectedIndices.has(index)) && !isAllSelected;
-									
+									const isAllSelected = items.every(({ index }) =>
+										selectedIndices.has(index),
+									);
+									const isSomeSelected =
+										items.some(({ index }) => selectedIndices.has(index)) &&
+										!isAllSelected;
+
 									let Icon = Terminal;
 									if (type === "docker") Icon = Box;
 									else if (type === "make") Icon = Wrench;
@@ -175,13 +196,21 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 												<div className="flex items-center gap-2">
 													<Icon className="w-4 h-4 text-zinc-500 retro:text-fuchsia-400" />
 													<span className="text-sm font-bold uppercase tracking-widest text-zinc-800 dark:text-zinc-200 retro:text-cyan-300">
-														{type === "npm" || type === "bun" ? "Scripts Node/Bun" : type === "docker" ? "Conteneurs Docker" : type === "make" ? "Cibles Makefile" : type}
+														{type === "npm" || type === "bun"
+															? "Scripts Node/Bun"
+															: type === "docker"
+																? "Conteneurs Docker"
+																: type === "make"
+																	? "Cibles Makefile"
+																	: type}
 													</span>
-													<span className="text-xs text-zinc-400 retro:text-cyan-600 font-mono">({items.length})</span>
+													<span className="text-xs text-zinc-400 retro:text-cyan-600 font-mono">
+														({items.length})
+													</span>
 												</div>
-												<Button 
-													variant="ghost" 
-													size="sm" 
+												<Button
+													variant="ghost"
+													size="sm"
 													className="h-7 text-xs retro:text-cyan-400 retro:hover:bg-cyan-500/20 retro:font-mono uppercase"
 													onClick={() => toggleGroup(type, isAllSelected)}
 												>
@@ -205,7 +234,10 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 															<span className="text-sm font-semibold leading-none select-none truncate retro:text-cyan-100">
 																{prop.name}
 															</span>
-															<p className="text-xs text-zinc-400 dark:text-zinc-500 retro:text-fuchsia-400/80 font-mono mt-1 bg-zinc-50 dark:bg-zinc-950 retro:bg-fuchsia-950/20 p-1.5 rounded inline-block border border-zinc-100 dark:border-zinc-800/50 retro:border-fuchsia-500/20 truncate" title={prop.command}>
+															<p
+																className="text-xs text-zinc-400 dark:text-zinc-500 retro:text-fuchsia-400/80 font-mono mt-1 bg-zinc-50 dark:bg-zinc-950 retro:bg-fuchsia-950/20 p-1.5 rounded inline-block border border-zinc-100 dark:border-zinc-800/50 retro:border-fuchsia-500/20 truncate"
+																title={prop.command}
+															>
 																{prop.command}
 															</p>
 														</div>

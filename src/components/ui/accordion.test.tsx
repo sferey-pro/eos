@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { cleanup, render, screen, fireEvent } from "@testing-library/react";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "./accordion";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "./accordion";
 
 describe("Accordion", () => {
 	afterEach(() => {
@@ -14,7 +19,7 @@ describe("Accordion", () => {
 					<AccordionTrigger>Trigger 1</AccordionTrigger>
 					<AccordionContent>Content 1</AccordionContent>
 				</AccordionItem>
-			</Accordion>
+			</Accordion>,
 		);
 
 		expect(screen.getByText("Trigger 1")).not.toBeNull();
