@@ -1,5 +1,5 @@
 import { Check, Loader2, Plus, Search, FolderSearch, Terminal, Box, Wrench } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -23,7 +23,7 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 	const [isSaving, setIsSaving] = useState(false);
 	const [hasScanned, setHasScanned] = useState(false);
 
-	const handleScan = async () => {
+	const handleScan = useCallback(async () => {
 		if (!path) return;
 		setIsScanning(true);
 		setHasScanned(false);
@@ -42,14 +42,16 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 		} finally {
 			setIsScanning(false);
 		}
-	};
+	}, [path]);
 
-	const toggleSelection = (index: number) => {
-		const newSet = new Set(selectedIndices);
-		if (newSet.has(index)) newSet.delete(index);
-		else newSet.add(index);
-		setSelectedIndices(newSet);
-	};
+	const toggleSelection = useCallback((index: number) => {
+		setSelectedIndices(prev => {
+			const newSet = new Set(prev);
+			if (newSet.has(index)) newSet.delete(index);
+			else newSet.add(index);
+			return newSet;
+		});
+	}, []);
 
 	const groupedProposals = useMemo(() => {
 		const groups: Record<string, { proposal: ProjectProposal; index: number }[]> = {};
@@ -60,16 +62,18 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 		return groups;
 	}, [proposals]);
 
-	const toggleGroup = (type: string, isAllSelected: boolean) => {
-		const newSet = new Set(selectedIndices);
-		groupedProposals[type]?.forEach(({ index }) => {
-			if (isAllSelected) newSet.delete(index);
-			else newSet.add(index);
+	const toggleGroup = useCallback((type: string, isAllSelected: boolean) => {
+		setSelectedIndices(prev => {
+			const newSet = new Set(prev);
+			groupedProposals[type]?.forEach(({ index }) => {
+				if (isAllSelected) newSet.delete(index);
+				else newSet.add(index);
+			});
+			return newSet;
 		});
-		setSelectedIndices(newSet);
-	};
+	}, [groupedProposals]);
 
-	const handleSave = async () => {
+	const handleSave = useCallback(async () => {
 		const selectedProposals = proposals.filter((_, i) =>
 			selectedIndices.has(i),
 		);
@@ -93,7 +97,7 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 		} finally {
 			setIsSaving(false);
 		}
-	};
+	}, [proposals, selectedIndices]);
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -119,7 +123,9 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 
 				<div className="flex flex-col gap-5 py-2">
 					<div className="flex gap-2 relative">
+						<label htmlFor="project-path" className="sr-only">Chemin absolu du projet</label>
 						<Input
+							id="project-path"
 							placeholder="Chemin absolu (ex: /home/user/my-project)"
 							value={path}
 							onChange={(e) => setPath(e.target.value)}
@@ -127,6 +133,7 @@ export function AddProjectModal({ trigger }: { trigger?: React.ReactNode }) {
 							className="focus-visible:ring-fuchsia-500/30 transition-shadow bg-white/50 dark:bg-zinc-900/50 retro:bg-black/50 retro:border-cyan-500/50 retro:text-cyan-300 retro:font-mono retro:focus-visible:ring-cyan-500/50"
 						/>
 						<Button
+							aria-label="Scanner le dossier"
 							onClick={handleScan}
 							disabled={isScanning || !path}
 							className="transition-all active:scale-95 retro:bg-fuchsia-600 retro:hover:bg-fuchsia-500 retro:text-white retro:shadow-[0_0_15px_rgba(217,70,239,0.4)]"

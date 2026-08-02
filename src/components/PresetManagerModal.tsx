@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,20 +19,13 @@ export function PresetManagerModal({ trigger }: PresetManagerModalProps) {
 	const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
 	const [selectedProjectFilter, setSelectedProjectFilter] = useState<string>("all");
 
-	useEffect(() => {
-		if (isOpen) {
-			fetchData();
-		}
-	}, [isOpen]);
-
-	const fetchData = async () => {
+	const fetchData = useCallback(async () => {
 		try {
 			const res = await fetch("/api/export");
 			if (res.ok) {
 				const data = await res.json();
 				setPresets(data.presets || []);
 				setProjects(data.projects || []);
-				// Only auto-select if nothing is selected or if the currently selected one was deleted
 				if (!selectedPresetId || !(data.presets || []).find((p: Preset) => p.id === selectedPresetId)) {
 					if (data.presets?.length > 0) {
 						setSelectedPresetId(data.presets[0].id);
@@ -42,9 +35,15 @@ export function PresetManagerModal({ trigger }: PresetManagerModalProps) {
 		} catch (e) {
 			console.error("Failed to fetch presets:", e);
 		}
-	};
+	}, [selectedPresetId]);
 
-	const handleNewPreset = async () => {
+	useEffect(() => {
+		if (isOpen) {
+			fetchData();
+		}
+	}, [isOpen, fetchData]);
+
+	const handleNewPreset = useCallback(async () => {
 		const newId = crypto.randomUUID();
 		const newPreset: Preset = {
 			id: newId,
@@ -62,9 +61,10 @@ export function PresetManagerModal({ trigger }: PresetManagerModalProps) {
 		} catch (e) {
 			console.error(e);
 		}
-	};
+	}, [projects, fetchData]);
 
-	const selectedPreset = presets.find(p => p.id === selectedPresetId);
+	const selectedPreset = useMemo(() => presets.find(p => p.id === selectedPresetId), [presets, selectedPresetId]);
+	const filteredProjects = useMemo(() => projects.filter(p => selectedProjectFilter === "all" || p.path === selectedProjectFilter), [projects, selectedProjectFilter]);
 
 	// Mocking environments visually based on names for the design
 	const getIconForPreset = (name: string) => {
@@ -95,6 +95,7 @@ export function PresetManagerModal({ trigger }: PresetManagerModalProps) {
 							<div className="relative">
 								<Search className="absolute left-2.5 top-2 h-4 w-4 text-zinc-500" />
 								<Input 
+									aria-label="Rechercher des presets"
 									placeholder="Search presets..." 
 									className="h-8 pl-9 bg-[#1a1a1e] border-transparent focus-visible:ring-1 focus-visible:ring-zinc-700 retro:bg-cyan-950/20 retro:border-cyan-500/30 retro:text-cyan-300 retro:placeholder:text-cyan-700 text-sm"
 								/>
@@ -155,7 +156,7 @@ export function PresetManagerModal({ trigger }: PresetManagerModalProps) {
 									<div className="flex items-center justify-between mb-4">
 										<h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-widest retro:text-fuchsia-500/80">Micro-services Configurations</h3>
 										<Select value={selectedProjectFilter} onValueChange={setSelectedProjectFilter}>
-											<SelectTrigger className="w-[250px] h-8 bg-[#1a1a1e] border-zinc-700 retro:bg-cyan-950/20 retro:border-cyan-500/30 retro:text-cyan-300">
+											<SelectTrigger aria-label="Filtrer par projet" className="w-[250px] h-8 bg-[#1a1a1e] border-zinc-700 retro:bg-cyan-950/20 retro:border-cyan-500/30 retro:text-cyan-300">
 												<SelectValue placeholder="Select a project" />
 											</SelectTrigger>
 											<SelectContent className="bg-[#1a1a1e] border-zinc-700 text-zinc-300 retro:bg-black/90 retro:border-cyan-500/50 retro:text-cyan-400">
@@ -170,7 +171,7 @@ export function PresetManagerModal({ trigger }: PresetManagerModalProps) {
 									</div>
 									
 									<Accordion type="single" collapsible className="space-y-3">
-										{projects.filter(p => selectedProjectFilter === "all" || p.path === selectedProjectFilter).map((project) => (
+										{filteredProjects.map((project) => (
 											<AccordionItem key={project.id} value={project.id} className="border border-zinc-800 rounded-lg bg-[#121214] overflow-hidden retro:border-cyan-500/30 retro:bg-black/40 px-1">
 												<AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-zinc-800/30 retro:hover:bg-cyan-950/30 transition-colors">
 													<div className="flex items-center gap-3">
@@ -214,14 +215,14 @@ export function PresetManagerModal({ trigger }: PresetManagerModalProps) {
 																</thead>
 																<tbody className="divide-y divide-zinc-800/50 retro:divide-cyan-500/20">
 																	<tr className="bg-[#121214] retro:bg-black/40">
-																		<td className="p-2"><Input defaultValue="PORT" className="h-7 text-xs font-mono bg-zinc-900 border-zinc-700 retro:bg-black retro:border-cyan-500/30 retro:text-cyan-300" /></td>
-																		<td className="p-2"><Input defaultValue="8080" className="h-7 text-xs font-mono bg-zinc-900 border-zinc-700 retro:bg-black retro:border-cyan-500/30 retro:text-cyan-300" /></td>
-																		<td className="p-2 text-center"><Button variant="ghost" size="icon" className="h-6 w-6 text-zinc-500 hover:text-rose-500 retro:text-cyan-700 retro:hover:text-rose-400"><Trash2 className="w-3.5 h-3.5" /></Button></td>
+																		<td className="p-2"><Input aria-label="Clé de variable PORT" defaultValue="PORT" className="h-7 text-xs font-mono bg-zinc-900 border-zinc-700 retro:bg-black retro:border-cyan-500/30 retro:text-cyan-300" /></td>
+																		<td className="p-2"><Input aria-label="Valeur de variable PORT" defaultValue="8080" className="h-7 text-xs font-mono bg-zinc-900 border-zinc-700 retro:bg-black retro:border-cyan-500/30 retro:text-cyan-300" /></td>
+																		<td className="p-2 text-center"><Button aria-label="Supprimer la variable" variant="ghost" size="icon" className="h-6 w-6 text-zinc-500 hover:text-rose-500 retro:text-cyan-700 retro:hover:text-rose-400"><Trash2 aria-hidden="true" className="w-3.5 h-3.5" /></Button></td>
 																	</tr>
 																	<tr className="bg-[#121214] retro:bg-black/40">
-																		<td className="p-2"><Input defaultValue="NODE_ENV" className="h-7 text-xs font-mono bg-zinc-900 border-zinc-700 retro:bg-black retro:border-cyan-500/30 retro:text-cyan-300" /></td>
-																		<td className="p-2"><Input defaultValue="development" className="h-7 text-xs font-mono bg-zinc-900 border-zinc-700 retro:bg-black retro:border-cyan-500/30 retro:text-cyan-300" /></td>
-																		<td className="p-2 text-center"><Button variant="ghost" size="icon" className="h-6 w-6 text-zinc-500 hover:text-rose-500 retro:text-cyan-700 retro:hover:text-rose-400"><Trash2 className="w-3.5 h-3.5" /></Button></td>
+																		<td className="p-2"><Input aria-label="Clé de variable NODE_ENV" defaultValue="NODE_ENV" className="h-7 text-xs font-mono bg-zinc-900 border-zinc-700 retro:bg-black retro:border-cyan-500/30 retro:text-cyan-300" /></td>
+																		<td className="p-2"><Input aria-label="Valeur de variable NODE_ENV" defaultValue="development" className="h-7 text-xs font-mono bg-zinc-900 border-zinc-700 retro:bg-black retro:border-cyan-500/30 retro:text-cyan-300" /></td>
+																		<td className="p-2 text-center"><Button aria-label="Supprimer la variable" variant="ghost" size="icon" className="h-6 w-6 text-zinc-500 hover:text-rose-500 retro:text-cyan-700 retro:hover:text-rose-400"><Trash2 aria-hidden="true" className="w-3.5 h-3.5" /></Button></td>
 																	</tr>
 																</tbody>
 															</table>

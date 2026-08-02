@@ -111,6 +111,6 @@ export function TerminalComponent({ projectId }: TerminalComponentProps) {
 	}, [projectId]);
 
 	return (
-		<div className="w-full h-full relative" ref={terminalRef}></div>
+		<div role="log" aria-label="Terminal de sortie" className="w-full h-full relative" ref={terminalRef}></div>
 	);
 }
