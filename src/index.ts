@@ -184,7 +184,7 @@ const server = serve<WebSocketData>({
 				const resolvedAppPath = path.resolve(app.path);
 				const fullPath = path.resolve(resolvedAppPath, app.icon);
 				
-				if (!fullPath.startsWith(resolvedAppPath)) {
+				if (!fullPath.startsWith(resolvedAppPath + path.sep) && fullPath !== resolvedAppPath) {
 					return new Response("Forbidden access", { status: 403 });
 				}
 

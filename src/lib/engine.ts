@@ -30,7 +30,9 @@ function broadcastLog(projectId: string, text: string) {
 		projectLogs.set(projectId, logs);
 	}
 	logs.push(text);
-	if (logs.length > 1000) logs.splice(0, logs.length - 1000);
+	while (logs.length > 1000) {
+		logs.shift();
+	}
 
 	const subs = wsSubscribers.get(projectId);
 	if (subs) {

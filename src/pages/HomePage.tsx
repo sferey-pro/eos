@@ -12,6 +12,56 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { Project, Preset, App } from "@/lib/schemas";
 
+const maxGraphPoints = 20;
+
+const getStatusColor = (status: string) => {
+	switch (status) {
+		case "healthy":
+		case "running":
+			return "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]";
+		case "starting":
+		case "waiting":
+			return "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)] animate-pulse";
+		case "error":
+			return "bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.8)]";
+		case "stopped":
+		default:
+			return "bg-zinc-400 dark:bg-zinc-600 retro:bg-zinc-700 shadow-none";
+	}
+};
+
+const getStatusTextColor = (status: string) => {
+	switch (status) {
+		case "healthy":
+		case "running": return "text-emerald-600 dark:text-emerald-400 retro:text-emerald-400";
+		case "starting":
+		case "waiting": return "text-amber-600 dark:text-amber-400 retro:text-amber-400";
+		case "error": return "text-rose-600 dark:text-rose-400 retro:text-rose-400";
+		case "stopped":
+		default: return "text-zinc-500 dark:text-zinc-400 retro:text-zinc-500";
+	}
+};
+
+const getStatusLabel = (status: string) => {
+	if (status === "starting" || status === "waiting") return "Building...";
+	return status.charAt(0).toUpperCase() + status.slice(1);
+};
+
+const buildSvgPath = (values: number[], maxVal: number) => {
+	const padded = [...Array(Math.max(0, maxGraphPoints - values.length)).fill(0), ...values];
+	const step = 100 / (maxGraphPoints - 1);
+	
+	let path = `M0 40 `;
+	padded.forEach((val, i) => {
+		const x = i * step;
+		const scaledVal = maxVal > 0 ? (val / maxVal) * 40 : 0;
+		const y = 40 - scaledVal;
+		path += `L${x.toFixed(1)} ${y.toFixed(1)} `;
+	});
+	path += `L100 40 Z`;
+	return path;
+};
+
 export function HomePage() {
 	const { theme } = useTheme();
 	const [projects, setProjects] = useState<Project[]>([]);
@@ -23,8 +73,6 @@ export function HomePage() {
 	const [appViewMode, setAppViewMode] = useState<"web" | "logs">("web");
 	const [metrics, setMetrics] = useState<{ cpu: string, ram: string }>({ cpu: "0%", ram: "0%" });
 	const [metricHistory, setMetricHistory] = useState<{ cpu: number, ram: number }[]>([]);
-
-	const maxGraphPoints = 20;
 
 	const fetchData = async () => {
 		try {
@@ -210,53 +258,6 @@ export function HomePage() {
 		}
 	};
 
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case "healthy":
-			case "running":
-				return "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]";
-			case "starting":
-			case "waiting":
-				return "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)] animate-pulse";
-			case "error":
-				return "bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.8)]";
-			case "stopped":
-			default:
-				return "bg-zinc-400 dark:bg-zinc-600 retro:bg-zinc-700 shadow-none";
-		}
-	};
-
-	const getStatusTextColor = (status: string) => {
-		switch (status) {
-			case "healthy":
-			case "running": return "text-emerald-600 dark:text-emerald-400 retro:text-emerald-400";
-			case "starting":
-			case "waiting": return "text-amber-600 dark:text-amber-400 retro:text-amber-400";
-			case "error": return "text-rose-600 dark:text-rose-400 retro:text-rose-400";
-			case "stopped":
-			default: return "text-zinc-500 dark:text-zinc-400 retro:text-zinc-500";
-		}
-	};
-
-	const getStatusLabel = (status: string) => {
-		if (status === "starting" || status === "waiting") return "Building...";
-		return status.charAt(0).toUpperCase() + status.slice(1);
-	};
-
-	const buildSvgPath = (values: number[], maxVal: number) => {
-		const padded = [...Array(Math.max(0, maxGraphPoints - values.length)).fill(0), ...values];
-		const step = 100 / (maxGraphPoints - 1);
-		
-		let path = `M0 40 `;
-		padded.forEach((val, i) => {
-			const x = i * step;
-			const scaledVal = (val / maxVal) * 40;
-			const y = 40 - scaledVal;
-			path += `L${x.toFixed(1)} ${y.toFixed(1)} `;
-		});
-		path += `L100 40 Z`;
-		return path;
-	};
 
 	const groupedProjects = useMemo(() => {
 		return projects.reduce((acc, project) => {
@@ -310,8 +311,8 @@ export function HomePage() {
 		);
 	}
 
-	const selectedProject = projects.find(p => p.id === selectedProjectId) || projects[0];
-
+	const selectedProject = useMemo(() => projects.find(p => p.id === selectedProjectId) || projects[0], [projects, selectedProjectId]);
+	const selectedApp = useMemo(() => apps.find(a => a.id === selectedAppId), [apps, selectedAppId]);
 	return (
 		<div className="relative flex flex-col h-screen bg-zinc-50 dark:bg-zinc-950 retro:bg-[#050505] transition-all duration-500 overflow-hidden w-full font-sans text-zinc-900 dark:text-zinc-100 retro:text-cyan-400">
 			{/* RETRO OVERLAYS */}
@@ -569,27 +570,27 @@ export function HomePage() {
 
 				{/* RIGHT PANE: DETAILS & LOGS & IFRAME */}
 				<div className="flex-1 flex flex-col min-w-0 bg-white/30 dark:bg-zinc-950/30 retro:bg-transparent">
-					{selectedAppId && apps.find(a => a.id === selectedAppId) ? (
+					{selectedAppId && selectedApp ? (
 						<div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
 							<div className="flex-none p-4 border-b border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/20 bg-white/50 dark:bg-zinc-950/50 retro:bg-black/50 flex items-center justify-between shadow-sm">
 								<h1 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 retro:text-cyan-300 font-mono flex items-center gap-3">
 									<Monitor className="w-5 h-5 text-indigo-500 retro:text-cyan-500" />
-									{apps.find(a => a.id === selectedAppId)?.name}
+									{selectedApp.name}
 								</h1>
 								<div className="flex items-center gap-2">
 									<div className="flex bg-zinc-100 dark:bg-zinc-900 retro:bg-black/50 p-1 rounded-md border border-zinc-200 dark:border-zinc-800 retro:border-cyan-500/30 mr-2">
-										<button onClick={() => setAppViewMode("web")} className={`px-3 py-1 text-xs font-semibold rounded-sm transition-colors ${appViewMode === "web" ? "bg-white dark:bg-zinc-800 retro:bg-cyan-900/50 text-zinc-900 dark:text-white retro:text-cyan-300 shadow-sm" : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 retro:text-cyan-600/50"}`}>
+										<button aria-label="View Web" onClick={() => setAppViewMode("web")} className={`px-3 py-1 text-xs font-semibold rounded-sm transition-colors ${appViewMode === "web" ? "bg-white dark:bg-zinc-800 retro:bg-cyan-900/50 text-zinc-900 dark:text-white retro:text-cyan-300 shadow-sm" : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 retro:text-cyan-600/50"}`}>
 											Web
 										</button>
-										<button onClick={() => setAppViewMode("logs")} className={`px-3 py-1 text-xs font-semibold rounded-sm transition-colors ${appViewMode === "logs" ? "bg-white dark:bg-zinc-800 retro:bg-cyan-900/50 text-zinc-900 dark:text-white retro:text-cyan-300 shadow-sm" : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 retro:text-cyan-600/50"}`}>
+										<button aria-label="View Logs" onClick={() => setAppViewMode("logs")} className={`px-3 py-1 text-xs font-semibold rounded-sm transition-colors ${appViewMode === "logs" ? "bg-white dark:bg-zinc-800 retro:bg-cyan-900/50 text-zinc-900 dark:text-white retro:text-cyan-300 shadow-sm" : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 retro:text-cyan-600/50"}`}>
 											Logs
 										</button>
 									</div>
-									<Button size="sm" variant="outline" className="retro:border-cyan-500/50 retro:text-cyan-400 retro:hover:bg-cyan-500/20" onClick={() => window.open(apps.find(a => a.id === selectedAppId)?.url, '_blank')}>
+									<Button size="sm" variant="outline" aria-label="Open in New Tab" className="retro:border-cyan-500/50 retro:text-cyan-400 retro:hover:bg-cyan-500/20" onClick={() => window.open(selectedApp.url, '_blank')}>
 										<Activity className="w-4 h-4 mr-2" />
 										Open in New Tab
 									</Button>
-									<Button size="sm" variant="ghost" className="text-zinc-500 hover:text-zinc-900 retro:text-zinc-500 retro:hover:text-cyan-400" onClick={() => setSelectedAppId(null)}>
+									<Button size="sm" variant="ghost" aria-label="Close" className="text-zinc-500 hover:text-zinc-900 retro:text-zinc-500 retro:hover:text-cyan-400" onClick={() => setSelectedAppId(null)}>
 										Fermer
 									</Button>
 								</div>
@@ -601,7 +602,7 @@ export function HomePage() {
 											<TerminalComponent projectId={selectedAppId} />
 										</div>
 									</div>
-								) : (apps.find(a => a.id === selectedAppId)?.status === "stopped" || apps.find(a => a.id === selectedAppId)?.status === "error") ? (
+								) : (selectedApp.status === "stopped" || selectedApp.status === "error") ? (
 									<div className="absolute inset-0 flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 retro:bg-black/80 flex-col gap-4">
 										<Monitor className="w-12 h-12 text-zinc-300 dark:text-zinc-700 retro:text-cyan-900/50" />
 										<span className="text-zinc-500 font-mono text-sm uppercase retro:text-cyan-600/80 tracking-widest">
@@ -609,7 +610,7 @@ export function HomePage() {
 										</span>
 									</div>
 								) : (
-									<iframe src={apps.find(a => a.id === selectedAppId)?.url} className="w-full h-full border-none bg-white" sandbox="allow-same-origin allow-scripts allow-forms" />
+									<iframe title={`IFrame for ${selectedApp.name}`} src={selectedApp.url} className="w-full h-full border-none bg-white" sandbox="allow-same-origin allow-scripts allow-forms" />
 								)}
 							</div>
 						</div>

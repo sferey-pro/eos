@@ -61,7 +61,7 @@ export function startHealthcheckEngine() {
 	}, 5000);
 
 	// Docker Sync Loop (every 5 seconds) using a single global `docker ps`
-	setInterval(async () => {
+	const dockerInterval = setInterval(async () => {
 		const projects = getProjects().filter(p => p.type === "docker");
 		if (projects.length === 0) return;
 
@@ -160,18 +160,21 @@ async function ping(type: "http" | "tcp", target: string): Promise<boolean> {
 		if (isNaN(port)) return false;
 
 		try {
-			const socket = await Bun.connect({
-				hostname: host,
-				port: port,
-				socket: {
-					data() {},
-					open(sock) {
-						sock.end();
+			await Promise.race([
+				Bun.connect({
+					hostname: host,
+					port: port,
+					socket: {
+						data() {},
+						open(sock) {
+							sock.end();
+						},
+						error() {},
+						close() {},
 					},
-					error() {},
-					close() {},
-				},
-			});
+				}),
+				new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 2000))
+			]);
 			return true;
 		} catch {
 			return false;
