@@ -4,23 +4,25 @@ Ce document centralise les règles métier, les décisions architecturales et le
 
 ## 1. Philosophie
 - **Ne pas réinventer la roue** : Utilisation exclusive des bibliothèques standards et des fonctionnalités natives.
-- Si un composant UI est nécessaire et existe dans **Shadcn UI**, il doit être utilisé (pas de création sur-mesure inutile).
+- **Interface Centralisée** : L'interface se concentre sur une unique page (`HomePage.tsx`) sans routeur complexe, pour une réactivité immédiate.
+- **Thématique UI** : Un soin tout particulier est accordé à l'interface, incluant un thème clair, sombre, et un thème "Retro" très poussé (style Far Cry Blood Dragon, Synthwave, Néon).
 
 ## 2. Fonctionnement Métier (Le Moteur EOS)
-- **Scan Intelligent (Orienté Docker)** : Lorsqu'un utilisateur renseigne un chemin d'accès, EOS parcourt le dossier en cherchant principalement des fichiers `docker-compose.yml`.
-- **Backend Bun (Super-Orchestrateur)** : Le routage natif de Bun agit comme un proxy local. Il est responsable d'orchestrer les commandes Docker, de resynchroniser son état au redémarrage (via `docker ps`) et de la récupération de la sortie standard.
-- **Healthchecks Actifs** : EOS ne fait pas aveuglément confiance au statut "running" de Docker Compose. Il vérifie activement l'état des services via des pings (HTTP ou TCP) pour s'assurer de leur santé réelle.
-- **Persistance** : La liste des projets configurés doit être sauvegardée localement dans une base de données **SQLite** gérée nativement par Bun (`bun:sqlite`) pour subsister aux redémarrages.
+- **Scan Intelligent** : EOS parcourt les dossiers en cherchant des fichiers de configuration (`docker-compose.yml`, `package.json`, `Makefile`).
+- **Backend Bun (Super-Orchestrateur)** : Le backend gère le cycle de vie via `Bun.spawn`, streame les logs via **WebSockets**, et gère la fermeture propre des enfants (Graceful Shutdown sur SIGTERM/SIGINT).
+- **Healthchecks Actifs & Métriques** : Le système ping les services (HTTP/TCP) pour connaître leur santé, et remonte les métriques (CPU/RAM) des conteneurs.
+- **Entités** : EOS gère des **Projets** (processus backend locaux), des **Apps** (applications web ou liens à afficher via IFrame), et des **Presets** (groupes de projets à démarrer ensemble en 1 clic).
+- **Persistance ultra-rapide** : L'état est stocké dans une base **SQLite** native (`bun:sqlite`), optimisée (mode WAL, Mmap).
 
 ## 3. Conventions de Développement
-- **Nommage React** : Les composants React métiers et les pages utilisent le `PascalCase.tsx`.
-- **Nommage Shadcn** : Les composants générés dans `components/ui/` respectent le format par défaut `kebab-case.tsx`.
-- **Hooks et Utilitaires** : Fichiers en `camelCase.ts`.
-- **Validation** : Toute donnée entrante (chemin fourni par l'utilisateur, configuration JSON, API) **doit** être validée via **Zod**.
-- **Typage** : Mode strict, aucun `any` toléré.
+- **Nommage React** : `PascalCase.tsx` pour composants, `kebab-case.tsx` pour composants UI purs.
+- **Validation** : Toute donnée entrante est validée via **Zod**.
+- **Typage** : TypeScript strict. Aucun `any` toléré.
+- **Optimisation** : Les Hooks React (`useMemo`, `useCallback`) doivent être intelligemment employés pour minimiser les re-rendus. L'accessibilité (a11y) est obligatoire.
+- **Tests** : Le projet est couvert de tests rigoureux utilisant `bun:test` couplé à `happy-dom` et `@testing-library/react`.
 
 ## 4. Architecture Dossiers
-- `/src/pages/` : Vues principales de l'application (routage géré par React Router).
+- `/src/pages/` : Page principale (`HomePage.tsx`).
 - `/src/components/ui/` : Composants purs (Shadcn).
-- `/src/components/` : Composants partagés (complexes, métier).
-- `/src/lib/` : Fonctions utilitaires, fetchers, configuration.
+- `/src/components/` : Composants partagés (Modales, Terminal, ThemeToggle).
+- `/src/lib/` : Moteur d'exécution, scanner, db, healthcheck, schémas.

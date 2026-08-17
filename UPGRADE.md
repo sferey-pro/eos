@@ -5,29 +5,32 @@ Ce document suit l'évolution technique du projet, les étapes à venir, et la d
 ## Phase 1 : Configuration et Architecture de base ✅
 - [x] Initialisation React / Bun / Tailwind v4.
 - [x] Configuration Qualité (Biome, Husky, Lint-staged).
-- [x] Outils métiers (Zod, React Router).
+- [x] Outils métiers (Zod). *Note: React Router a été retiré au profit d'une interface Dashboard unique.*
 - [x] Rédaction du CONTEXT.md, README.md, UPGRADE.md.
 
 ## Phase 2 : Modélisation et Scanner ✅
-- **Modèle de données** : Créer les schémas Zod pour représenter un "Projet" (nom, chemin, commande, statut).
-- **Stockage local** : Mettre en place la base de données **SQLite** (`bun:sqlite`) pour sauvegarder l'état des projets.
-- **Scanner IA/Logique** : Développer l'utilitaire backend (`src/lib/scanner.ts`) capable de lire un dossier pour détecter les `package.json`, `docker-compose.yml`, etc.
+- [x] **Modèle de données** : Schémas Zod pour représenter "Project", "App", et "Preset".
+- [x] **Stockage local** : Base de données **SQLite** (`bun:sqlite`) ultra-optimisée avec PRAGMA (Memory Temp Store, WAL).
+- [x] **Scanner IA/Logique** : Détection intelligente (`package.json`, `docker-compose.yml`, `Makefile`).
 
 ## Phase 3 : Interface Utilisateur (UI) ✅
-- Création du "Dashboard" principal avec les composants Shadcn (Cards, Badges pour le statut, Boutons d'action).
-- Modale ou Page pour ajouter un nouveau projet (Input chemin, scan automatique).
-- Bouton "Aurore" global (Démarrer tout).
-- Améliorations UX (Cognitive Walkthrough) et Terminal global de logs.
+- [x] Dashboard principal unique avec composants Shadcn.
+- [x] Modales avancées : Ajout de projets, Ajout d'Apps, Gestionnaire de Presets.
+- [x] **Thème Retro** : Esthétique "Far Cry Blood Dragon" (Synthwave, néon, scanlines).
+- [x] Accessibilité totale (a11y) et optimisation des rendus (useMemo, useCallback).
 
-## Phase 4 : Le Moteur d'Exécution (Process Spawner)
-- Intégrer `bun:spawn` pour démarrer physiquement les projets.
-- Capturer les logs.
-- (Optionnel/Futur) : Mettre en place des WebSockets pour streamer les logs en direct depuis Bun vers le Frontend React sans recharger la page.
+## Phase 4 : Le Moteur d'Exécution (Process Spawner) ✅
+- [x] Intégration `bun:spawn` pour démarrer physiquement les projets (Docker, Bun, Make).
+- [x] Gestion des logs très performante (buffer en mémoire géré avec `splice`).
+- [x] Streaming en direct via **WebSockets** depuis Bun vers React.
+- [x] Graceful Shutdown (SIGINT/SIGTERM) pour tuer proprement les sous-processus.
 
-## Phase 5 : Période 2 - Lanceur d'applications (App Launcher) 🚀
-- **Objectif** : Faire d'EOS le point central pour démarrer la journée.
-- Intégrer la gestion et le lancement de différentes applications de bureau créées (ex: Aegis).
-- Ajouter une section dédiée dans l'interface pour lister et exécuter ces applications indépendantes depuis le Dashboard.
+## Phase 5 : Période 2 - Lanceur d'applications (App Launcher) ✅
+- [x] Ajout de l'entité "App" (lancement d'applications web tierces).
+- [x] Visualisation intégrée via **IFrame** ou accès par nouvel onglet (Web / Logs).
+- [x] Suivi des métriques CPU/RAM des conteneurs via `docker stats`.
 
-## Dette technique & Points d'attention futurs
-- La gestion des processus orphelins (s'assurer que quand on quitte EOS, les sous-processus sont bien tués ou laissés vivants selon le choix de l'utilisateur).
+## Phase 6 : Evolutions Futures & Dette Technique ⏳
+- [ ] Intégration d'une Command Palette (ex: type `cmd+k` pour naviguer).
+- [ ] Étendre la récupération des métriques (CPU/RAM) aux processus non-Docker.
+- [ ] Gestion des configurations et variables d'environnement (`.env`) directement depuis l'interface.
